@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ETF Steuer Rechner</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; max-width: 900px; line-height: 1.6; }
+        .box { padding: 20px; background: #f9f9f9; margin-top: 15px; border-radius: 8px; border: 1px solid #eee; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; }
+        input[type="number"], input[type="date"], select { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        
+        /* Tabellen-Styling */
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .btn-add { background-color: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; margin-top: 10px; }
+        .btn-delete { background-color: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <h1>ETF Steuer Rechner</h1>
+    
+    <div class="form-group">
+        <label for="eingabe_option">Wie möchten Sie Ihre Daten eingeben?</label>
+        <select id="eingabe_option" onchange="toggleEingabeOptionen()">
+            <option value="manuell">Manuelle Eingabe / CSV Import</option>
+            <option value="suche">ETF Suche</option>
+            <option value="trade">Trade Republic CSV upload</option>
+        </select>
+    </div>
+
+    <div id="bereich_manuell" class="box">
+        <h3>1. Basisdaten</h3>
+        <div class="form-group">
+            <label for="verkaufskurs">Verkaufskurs pro Anteil (€)</label>
+            <input type="number" id="verkaufskurs" value="100.00" step="0.01">
+        </div>
+        <div class="form-group">
+            <label for="freibetrag">Noch verfügbarer Sparerpauschbetrag (€)</label>
+            <input type="number" id="freibetrag" value="1000.00" step="0.01">
+        </div>
+        <div class="form-group">
+            <label for="verlusttopf">Allgemeiner Verlusttopf (€)</label>
+            <input type="number" id="verlusttopf" value="0.00" step="0.01">
+        </div>
+        <div class="form-group">
+            <label for="kirchensteuer">Kirchensteuerpflicht</label>
+            <select id="kirchensteuer">
+                <option value="keine">Keine Kirchensteuer</option>
+                <option value="8">Bayern / Baden-Württemberg (8%)</option>
+                <option value="9">Andere Bundesländer (9%)</option>
+            </select>
+        </div>
+
+        <hr style="margin: 25px 0; border: 0; border-top: 1px solid #ccc;">
+
+        <h3>2. Kaufhistorie</h3>
+        <div class="form-group">
+            <label for="csv_file">Kaufdaten aus CSV-Datei importieren (optional):</label>
+            <input type="file" id="csv_file" accept=".csv" onchange="uploadCSV()">
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Kaufdatum</th>
+                    <th>Anzahl Anteile</th>
+                    <th>Kaufpreis pro Anteil (€)</th>
+                    <th>Aktion</th>
+                </tr>
+            </thead>
+            <tbody id="tabelle_body">
+                </tbody>
+        </table>
+        
+        <button class="btn-add" onclick="fuegeZeileHinzu()">+ Zeile hinzufügen</button>
+
+        <div class="form-group" style="margin-top: 25px;">
+            <label for="bereits_verkauft">Anzahl bereits verkaufter Anteile (für FIFO-Berechnung)</label>
+            <input type="number" id="bereits_verkauft" value="0.00000" step="0.00001" min="0">
+        </div>
+
+        <div class="checkbox-group" style="margin-top: 15px;">
+            <input type="checkbox" id="tagesgenau">
+            <label for="tagesgenau">Tagesgenaue Berechnung der anteiligen Vorabpauschale für das Kaufjahr</label>
+        </div>
+
+        <div id="bereich_vorabpauschale" style="display: none; margin-top: 25px; padding-top: 15px; border-top: 1px dashed #ccc;">
+            <h4>Vorabpauschale manuell eingeben</h4>
+            <p style="font-size: 0.9em; color: #666;">
+                Bitte geben Sie die Vorabpauschale pro Anteil für jedes Jahr ein. Jahre, die älter als 2018 sind, werden ignoriert, da es die Vorabpauschale erst seit 2018 gibt.
+            </p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Jahr</th>
+                        <th>Vorabpauschale pro Anteil (€)</th>
+                    </tr>
+                </thead>
+                <tbody id="vorab_tabelle_body">
+                    </tbody>
+            </table>
+        </div>
+
+        <hr style="margin: 25px 0; border: 0; border-top: 1px solid #ccc;">
+        <h3>3. Berechnungs-Ziel</h3>
+
+        <div class="form-group">
+            <label for="rechen_ziel">Was möchten Sie berechnen?</label>
+            <select id="rechen_ziel" onchange="toggleRechenZielFelder()">
+                <option value="steuerfrei">Steuerfrei verkaufbare Anteile ermitteln</option>
+                <option value="wunschnetto">Anteile für gewünschten Netto-Betrag bestimmen</option>
+                <option value="steuer_berechnen">Steuer beim Verkauf einer bestimmten Anzahl Anteile berechnen</option>
+            </select>
+        </div>
+
+        <div class="form-group" id="feld_wunschnetto" style="display: none;">
+            <label for="wert_wunschnetto">Gewünschter Netto-Auszahlungsbetrag (€)</label>
+            <input type="number" id="wert_wunschnetto" value="1000.00" step="0.01" min="0">
+        </div>
+
+        <div class="form-group" id="feld_anteile" style="display: none;">
+            <label for="wert_anteile">Anzahl der zu verkaufenden Anteile</label>
+            <input type="number" id="wert_anteile" value="10.00000" step="0.00001" min="0">
+        </div>
+
+        <button class="btn-add" style="background-color: #007bff; width: 100%; padding: 12px; font-size: 1.1em; margin-top: 20px;" onclick="sendeBerechnung()">
+            Calculation starten & Steuer berechnen
+        </button>
+
+        <div id="rechen_ergebnis" class="box" style="display: none; background-color: #e9ecef; border-left: 5px solid #007bff;">
+            <h4>Ergebnis der Berechnung:</h4>
+            <div id="ergebnis_text"></div>
+        </div>
+
+
+    </div>
+
+    <div id="bereich_suche" class="box" style="display: none;">ETF-Suche wird später gebaut.</div>
+
+    <div id="bereich_trade" class="box" style="display: none;">Trade Republic CSV upload wird später gebaut.</div>
+
+    <script>
+        // Beim Laden der Seite direkt 3 leere Zeilen anzeigen, falls keine CSV da ist
+        window.onload = function() {
+            for(let i=0; i<1; i++) {
+                fuegeZeileHinzu();
+            }
+        };
+
+        function toggleEingabeOptionen() {
+            let option = document.getElementById("eingabe_option").value;
+            document.getElementById("bereich_manuell").style.display = (option === "manuell") ? "block" : "none";
+            document.getElementById("bereich_suche").style.display = (option === "suche") ? "block" : "none";
+            document.getElementById("bereich_trade").style.display = (option === "trade") ? "block" : "none";
+        }
+
+        // Funktion fügt eine bearbeitbare Zeile in die Tabelle ein
+        function fuegeZeileHinzu(datum = "", anzahl = "", preis = "") {
+            let tbody = document.getElementById("tabelle_body");
+            let row = tbody.insertRow();
+        
+            // HIER WURDE NUR DIE ZEILE MIT DEM "row-datum" GEÄNDERT:
+            row.innerHTML = `
+                <td><input type="date" class="row-datum" value="${datum}" onchange="aktualisiereVorabpauschaleTabelle()"></td>
+                <td><input type="number" class="row-anzahl" step="0.00001" placeholder="z.B. 10.5" value="${anzahl}"></td>
+                <td><input type="number" class="row-preis" step="0.01" placeholder="z.B. 54.30" value="${preis}"></td>
+                <td><button class="btn-delete" onclick="loescheZeile(this)">🗑️</button></td>
+            `;
+        }
+
+        function loescheZeile(button) {
+            let row = button.parentNode.parentNode;
+            row.parentNode.removeChild(row);
+            aktualisiereVorabpauschaleTabelle(); // <-- NEU HIER
+        }
+
+
+        // ASYNC FUNCTION: Kommuniziert mit FastAPI beim CSV Upload
+        async function uploadCSV() {
+            let fileInput = document.getElementById("csv_file");
+            if (fileInput.files.length === 0) return;
+
+            let file = fileInput.files[0];
+            let formData = new FormData();
+            formData.append("file", file);
+
+            // Sende Datei via POST an FastAPI
+            let response = await fetch("/api/upload-csv", {
+                method: "POST",
+                body: formData
+            });
+
+            let result = await response.json();
+
+            if (result.success) {
+                // Tabelle leeren
+                document.getElementById("tabelle_body").innerHTML = "";
+                
+                // Gefundene Zeilen in die Tabelle eintragen
+                result.data.forEach(kauf => {
+                    fuegeZeileHinzu(kauf.datum, kauf.anzahl, kauf.preis);
+                });
+
+                aktualisiereVorabpauschaleTabelle();
+            } else {
+                alert("Fehler beim Laden der CSV: " + result.error);
+            }
+        }
+
+        // NEU: Berechnet die benötigten Jahre für die Vorabpauschale
+        function aktualisiereVorabpauschaleTabelle() {
+            let datumsFelder = document.querySelectorAll(".row-datum");
+            let MindestJahr = 2018; // Vorabpauschale gibt es erst seit 2018
+            let aktuellesJahr = new Date().getFullYear(); // 2026
+            let aeltestesJahr = aktuellesJahr;
+        
+            // 1. Finde das älteste eingetragene Kaufdatum
+            datumsFelder.forEach(feld => {
+                if (feld.value) {
+                    let kaufJahr = new Date(feld.value).getFullYear();
+                    if (kaufJahr < aeltestesJahr) {
+                        aeltestesJahr = kaufJahr;
+                    }
+                }
+            });
+        
+            // Begrenze auf das Jahr 2018
+            if (aeltestesJahr < MindestJahr) {
+                aeltestesJahr = MindestJahr;
+            }
+        
+            let vorabBereich = document.getElementById("bereich_vorabpauschale");
+            let tbody = document.getElementById("vorab_tabelle_body");
+            tbody.innerHTML = ""; // Vorherige Zeilen löschen
+        
+            // 2. Bedingung prüfen: Ist das älteste Jahr kleiner als das aktuelle Jahr?
+            if (aeltestesJahr < aktuellesJahr) {
+                vorabBereich.style.display = "block"; // Tabelle einblenden
+            
+                // Schleife von ältestem Jahr bis zum Vorjahr des aktuellen Jahres
+                for (let jahr = aeltestesJahr; jahr < aktuellesJahr; jahr++) {
+                    let row = tbody.insertRow();
+                    row.innerHTML = `
+                        <td><input type="number" class="vorab-jahr" value="${jahr}" disabled style="background: #eee;"></td>
+                        <td><input type="number" class="vorab-wert" value="0.00000000" step="0.00000001" min="0"></td>
+                    `;
+                }
+            } else {
+                vorabBereich.style.display = "none"; // Ausblenden, wenn im aktuellen Jahr gekauft
+            }
+        }
+
+        // NEU: Zeigt Zusatzfelder basierend auf dem gewählten Berechnungsziel an
+        function toggleRechenZielFelder() {
+            let ziel = document.getElementById("rechen_ziel").value;
+            let fNetto = document.getElementById("feld_wunschnetto");
+            let fAnteile = document.getElementById("feld_anteile");
+        
+            fNetto.style.display = (ziel === "wunschnetto") ? "block" : "none";
+            fAnteile.style.display = (ziel === "steuer_berechnen") ? "block" : "none";
+        }
+
+        // NEU: Sammelt alle Daten und schickt sie an das Backend
+        async function sendeBerechnung() {
+            // 1. Daten aus der Kaufhistorie-Tabelle auslesen
+            let kaeufe = [];
+            let kaufZeilen = document.querySelectorAll("#tabelle_body tr");
+            kaufZeilen.forEach(zeile => {
+                let datum = zeile.querySelector(".row-datum").value;
+                let anzahl = parseFloat(zeile.querySelector(".row-anzahl").value);
+                let preis = parseFloat(zeile.querySelector(".row-preis").value);
+                
+                // Nur hinzufügen, wenn die Zeile vollständig ausgefüllt ist
+                if (datum && !isNaN(anzahl) && !isNaN(preis)) {
+                    kaeufe.push({ datum: datum, anzahl: anzahl, preis: preis });
+                }
+            });
+        
+            // 2. Daten aus der Vorabpauschale-Tabelle auslesen
+            let vorabpauschalen = [];
+            let vorabZeilen = document.querySelectorAll("#vorab_tabelle_body tr");
+            vorabZeilen.forEach(zeile => {
+                let jahr = parseInt(zeile.querySelector(".vorab-jahr").value);
+                let wert = parseFloat(zeile.querySelector(".vorab-wert").value);
+                if (!isNaN(jahr) && !isNaN(wert)) {
+                    vorabpauschalen.push({ jahr: jahr, wert: wert });
+                }
+            });
+        
+            // 3. Das gesamte Daten-Paket (Payload) schnüren
+            let payload = {
+                rechen_ziel: document.getElementById("rechen_ziel").value,
+                wert_wunschnetto: parseFloat(document.getElementById("wert_wunschnetto").value) || 0,
+                wert_anteile: parseFloat(document.getElementById("wert_anteile").value) || 0,
+                verkaufskurs: parseFloat(document.getElementById("verkaufskurs").value),
+                freibetrag: parseFloat(document.getElementById("freibetrag").value),
+                verlusttopf: parseFloat(document.getElementById("verlusttopf").value),
+                kirchensteuer: document.getElementById("kirchensteuer").value,
+                tagesgenau: document.getElementById("tagesgenau").checked,
+                kaeufe: kaeufe,
+                vorabpauschalen: vorabpauschalen
+            };
+        
+            console.log("Sende Daten an Backend:", payload);
+        
+            // 4. Per POST an FastAPI senden
+            let response = await fetch("/api/calculate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+        
+            let result = await response.json();
+        
+            // 5. Ergebnis auf der Website anzeigen
+            let ergebnisBox = document.getElementById("rechen_ergebnis");
+            let ergebnisText = document.getElementById("ergebnis_text");
+            
+            ergebnisBox.style.display = "block";
+            ergebnisText.innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+        }
+
+
+
+    </script>
+</body>
+</html>
