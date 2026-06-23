@@ -22,6 +22,49 @@
 <body>
 
     <h1>ETF Steuer Rechner</h1>
+
+    <div class="form-group">
+        <label for="teilfreistellung">Teilfreistellung des ETFs</label>
+        <select id="teilfreistellung">
+            <option value="30">Aktien-ETF / -Fonds (30% Teilfreistellung)</option>
+            <option value="15">Mischfonds (15% Teilfreistellung)</option>
+            <option value="0">Keine Teilfreistellung (z.B. Geldmarkt-/Anleihen-ETF)</option>
+            <option value="60">Immobilienfonds (60% Teilfreistellung)</option>
+        </select>
+    </div>
+
+    <!-- <div class="checkbox-group" style="margin-top: 10px; margin-bottom: 15px;">
+        <input type="checkbox" id="ist_thesaurierend" checked>
+        <label for="ist_thesaurierend">ETF ist thesaurierend (Erträge werden automatisch wiederangelegt)</label>
+    </div> -->
+
+    <div class="checkbox-group" style="margin-top: 10px; margin-bottom: 15px;">
+        <input type="checkbox" id="ist_thesaurierend" checked onchange="aktualisiereThesaurierungsAnsicht()">
+        <label for="ist_thesaurierend">ETF ist thesaurierend (Erträge werden automatisch wiederangelegt)</label>
+    </div>
+
+
+
+    <div class="form-group">
+        <label for="freibetrag">Noch verfügbarer Sparerpauschbetrag (€)</label>
+        <input type="number" id="freibetrag" value="1000.00" step="0.01">
+    </div>
+    <div class="form-group">
+        <label for="verlusttopf">Allgemeiner Verlusttopf (€)</label>
+        <input type="number" id="verlusttopf" value="0.00" step="0.01">
+    </div>
+    <div class="form-group">
+        <label for="kirchensteuer">Kirchensteuerpflicht</label>
+        <select id="kirchensteuer">
+            <option value="keine">Keine Kirchensteuer</option>
+            <option value="8">Bayern / Baden-Württemberg (8%)</option>
+            <option value="9">Andere Bundesländer (9%)</option>
+        </select>
+    </div>
+
+    <!-- einfügen teilfreistellung und thesaurierend -->
+
+
     
     <div class="form-group">
         <label for="eingabe_option">Wie möchten Sie Ihre Daten eingeben?</label>
@@ -38,24 +81,7 @@
             <label for="verkaufskurs">Verkaufskurs pro Anteil (€)</label>
             <input type="number" id="verkaufskurs" value="100.00" step="0.01">
         </div>
-        <div class="form-group">
-            <label for="freibetrag">Noch verfügbarer Sparerpauschbetrag (€)</label>
-            <input type="number" id="freibetrag" value="1000.00" step="0.01">
-        </div>
-        <div class="form-group">
-            <label for="verlusttopf">Allgemeiner Verlusttopf (€)</label>
-            <input type="number" id="verlusttopf" value="0.00" step="0.01">
-        </div>
-        <div class="form-group">
-            <label for="kirchensteuer">Kirchensteuerpflicht</label>
-            <select id="kirchensteuer">
-                <option value="keine">Keine Kirchensteuer</option>
-                <option value="8">Bayern / Baden-Württemberg (8%)</option>
-                <option value="9">Andere Bundesländer (9%)</option>
-            </select>
-        </div>
 
-        <hr style="margin: 25px 0; border: 0; border-top: 1px solid #ccc;">
 
         <h3>2. Kaufhistorie</h3>
         <div class="form-group">
@@ -87,6 +113,8 @@
             <input type="checkbox" id="tagesgenau">
             <label for="tagesgenau">Tagesgenaue Berechnung der anteiligen Vorabpauschale für das Kaufjahr</label>
         </div>
+
+
 
         <div id="bereich_vorabpauschale" style="display: none; margin-top: 25px; padding-top: 15px; border-top: 1px dashed #ccc;">
             <h4>Vorabpauschale manuell eingeben</h4>
@@ -136,12 +164,225 @@
             <div id="ergebnis_text"></div>
         </div>
 
+    </div>
+
+    <div id="bereich_suche" class="box" style="display: none;">
+        <h3>ETF Suche</h3>
+        <div class="form-group" style="position: relative;">
+            <label for="etf_suche_input">ETF suchen (Name, ISIN oder Ticker):</label>
+            <input type="text" id="etf_suche_input" placeholder="z.B. MSCI World..." oninput="liveSuche(this.value)" autocomplete="off">
+            <div id="such_ergebnisse" style="display: none; position: absolute; width: 100%; background: white; border: 1px solid #ccc; max-height: 200px; overflow-y: auto; z-index: 1000; box-shadow: 0px 4px 6px rgba(0,0,0,0.1); border-radius: 4px;"></div>
+        </div>
+
+        <div id="ausgewählter_etf_box" class="box" style="display: none; background-color: #e3f2fd; border-left: 5px solid #2196f3;">
+            Gewählter ETF: <strong id="etf_name_anzeige">-</strong> (<span id="etf_symbol_anzeige">-</span>)
+        </div>
+
+        <div class="form-group" style="margin-top: 15px;">
+            <label for="verkaufskurs_suche">Verkaufskurs pro Anteil (€) <span id="kurs_lade_status" style="font-weight: normal; font-size: 0.9em; color: #666;"></span></label>
+            <input type="number" id="verkaufskurs_suche" value="100.00" step="0.01">
+        </div>
+
+        <hr style="margin: 20px 0; border: 0; border-top: 1px dashed #ccc;">
+
+        <div class="form-group">
+            <label for="suche_kauf_option">Wie möchten Sie Kaufdaten hinzufügen?</label>
+            <select id="suche_kauf_option" onchange="toggleSucheKaufLogik()">
+                <option value="suche_manuell">Käufe manuell erfassen / CSV Import</option>
+                <option value="suche_sparplan">Sparplan historisch berechnen (Hinzufügen)</option>
+            </select>
+        </div>
+
+        <div id="suche_sub_csv" class="form-group" style="display: block;">
+            <label for="csv_file_suche">Kaufdaten aus CSV-Datei in diese Tabelle importieren:</label>
+            <input type="file" id="csv_file_suche" accept=".csv" onchange="uploadCSVSuche()">
+        </div>
+
+        <div id="suche_sub_sparplan" style="display: none; background: #f1f3f5; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+            <h4>Sparplan-Parameter hinzufügen</h4>
+            <div class="form-group"><label>Startdatum</label><input type="date" id="sparplan_start" value="2024-01-01"></div>
+            <div class="form-group"><label>Enddatum</label><input type="date" id="sparplan_ende" value="2024-06-01"></div>
+            <div class="form-group">
+                <label>Ausführungstag</label>
+                <select id="sparplan_tag"><option value="1">1. des Monats</option><option value="15">15. des Monats</option></select>
+            </div>
+            <div class="form-group"><label>Sparrate pro Monat (€)</label><input type="number" id="sparplan_rate" value="100.00" step="10"></div>
+            <button class="btn-add" style="background-color: #6f42c1; width: 100%;" onclick="generiereSparplan()">
+                + Diese Sparplan-Käufe der Tabelle unten hinzufügen
+            </button>
+        </div>
+
+        <div id="suche_tabellen_container" style="margin-top: 20px;">
+            <h4>Erfasste Kaufhistorie für diesen ETF</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Kaufdatum</th>
+                        <th>Anzahl Anteile</th>
+                        <th>Kaufpreis pro Anteil (€)</th>
+                        <th>Aktion</th>
+                    </tr>
+                </thead>
+                <tbody id="suche_tabelle_body_manuell">
+                    </tbody>
+            </table>
+
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button class="btn-add" onclick="fuegeZeileHinzuSuche()">+ Manuelle Zeile hinzufügen</button>
+                <button class="btn-add" style="background-color: #6c757d;" onclick="downloadCSVFromTable()">📥 Tabelle als CSV herunterladen</button>
+            </div>
+        </div>
+
+        <hr style="margin: 25px 0; border: 0; border-top: 1px solid #ccc;">
+
+        <div class="form-group">
+            <label for="bereits_verkauft_suche">Anzahl bereits verkaufter Anteile (für FIFO-Berechnung)</label>
+            <input type="number" id="bereits_verkauft_suche" value="0.00000" step="0.00001" min="0">
+        </div>
+
+        <div class="checkbox-group" style="margin-top: 15px;">
+            <input type="checkbox" id="tagesgenau_suche">
+            <label for="tagesgenau_suche">Tagesgenaue Berechnung der anteiligen Vorabpauschale für das Kaufjahr</label>
+        </div>
+
+        <div class="checkbox-group" style="margin-top: 15px;">
+            <input type="checkbox" id="haken_vorabpauschale_suche" onchange="toggleVorabpauschaleSuche()">
+            <label for="haken_vorabpauschale_suche">Vorabpauschale manuell eingeben</label>
+        </div>
+
+        <div id="bereich_vorabpauschale_suche" style="display: none; margin-top: 25px; padding-top: 15px; border-top: 1px dashed #ccc;">
+            <h4>Vorabpauschale für gewählten ETF manuell eingeben</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Jahr</th>
+                        <th>Vorabpauschale pro Anteil (€)</th>
+                    </tr>
+                </thead>
+                <tbody id="vorab_tabelle_body_suche">
+                    </tbody>
+            </table>
+        </div>
+
+        <hr style="margin: 25px 0; border: 0; border-top: 1px solid #ccc;">
+
+        <h3>4. Berechnungs-Ziel (ETF Suche)</h3>
+
+        <div class="form-group">
+            <label for="rechen_ziel_suche">Was möchten Sie berechnen?</label>
+            <select id="rechen_ziel_suche" onchange="toggleRechenZielFelderSuche()">
+                <option value="steuerfrei">Steuerfrei verkaufbare Anteile ermitteln</option>
+                <option value="wunschnetto">Anteile für gewünschten Netto-Betrag bestimmen</option>
+                <option value="steuer_berechnen">Steuer beim Verkauf einer bestimmten Anzahl Anteile berechnen</option>
+            </select>
+        </div>
+
+        <div class="form-group" id="feld_wunschnetto_suche" style="display: none;">
+            <label for="wert_wunschnetto_suche">Gewünschter Netto-Auszahlungsbetrag (€)</label>
+            <input type="number" id="wert_wunschnetto_suche" value="1000.00" step="0.01" min="0">
+        </div>
+
+        <div class="form-group" id="feld_anteile_suche" style="display: none;">
+            <label for="wert_anteile_suche">Anzahl der zu verkaufenden Anteile</label>
+            <input type="number" id="wert_anteile_suche" value="10.00000" step="0.00001" min="0">
+        </div>
+
+        <button class="btn-add" style="background-color: #007bff; width: 100%; padding: 12px; font-size: 1.1em; margin-top: 20px;" onclick="sendeBerechnungSuche()">
+            Calculation starten & Steuer berechnen
+        </button>
+
+        <div id="rechen_ergebnis_suche" class="box" style="display: none; background-color: #e9ecef; border-left: 5px solid #007bff;">
+            <h4>Ergebnis der Berechnung:</h4>
+            <div id="ergebnis_text_suche"></div>
+        </div>
 
     </div>
 
-    <div id="bereich_suche" class="box" style="display: none;">ETF-Suche wird später gebaut.</div>
 
-    <div id="bereich_trade" class="box" style="display: none;">Trade Republic CSV upload wird später gebaut.</div>
+
+    <div id="bereich_csv" class="box" style="display: none;">
+        <h3>Trade Republic CSV Import</h3>
+        <p style="font-size: 0.9em; color: #666;">Laden Sie hier Ihren Depotauszug/Umsatzexport als CSV hoch.</p>
+
+        <div class="form-group">
+            <label for="tr_csv_file">Trade Republic CSV-Datei auswählen:</label>
+            <input type="file" id="tr_csv_file" accept=".csv" onchange="uploadTradeRepublicCSV()">
+        </div>
+
+        <div class="form-group" id="tr_etf_auswahl_container" style="display: none; background: #e8f5e9; padding: 15px; border-radius: 6px; border-left: 5px solid #4caf50;">
+            <label for="tr_etf_dropdown" style="color: #2e7d32;">In der Datei gefundene ETFs/Aktien:</label>
+            <select id="tr_etf_dropdown" onchange="waehleTradeRepublicETF()">
+                </select>
+            <p style="font-size: 0.85em; margin-top: 5px; color: #555;">Wählen Sie ein Wertpapier aus, um dessen Kaufhistorie in die Tabelle unten zu laden.</p>
+        </div>
+
+        <div id="tr_tabelle_container" style="display: none; margin-top: 20px;">
+            <hr style="margin: 20px 0; border: 0; border-top: 1px dashed #ccc;">
+            <h4>Generierte Kaufhistorie aus Trade Republic</h4>
+
+            <div class="form-group">
+                <label for="verkaufskurs_tr">Verkaufskurs pro Anteil für dieses Wertpapier (€)</label>
+                <input type="number" id="verkaufskurs_tr" value="100.00" step="0.01">
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Kaufdatum</th>
+                        <th>Anzahl Anteile</th>
+                        <th>Kaufpreis pro Anteil (€)</th>
+                        <th>Aktion</th>
+                    </tr>
+                </thead>
+                <tbody id="tr_tabelle_body">
+                    </tbody>
+            </table>
+
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button class="btn-add" onclick="fuegeZeileHinzuTR()">+ Manuelle Zeile hinzufügen</button>
+            </div>
+
+            <div class="checkbox-group" style="margin-top: 15px;">
+                <input type="checkbox" id="tagesgenau_tr">
+                <label for="tagesgenau_tr">Tagesgenaue Berechnung der anteiligen Vorabpauschale für das Kaufjahr</label>
+            </div>
+
+            <hr style="margin: 25px 0; border: 0; border-top: 1px solid #ccc;">
+            <h3>4. Berechnungs-Ziel (Trade Republic)</h3>
+
+            <div class="form-group">
+                <label for="rechen_ziel_tr">Was möchten Sie berechnen?</label>
+                <select id="rechen_ziel_tr" onchange="toggleRechenZielFelderTR()">
+                    <option value="steuerfrei">Steuerfrei verkaufbare Anteile ermitteln</option>
+                    <option value="wunschnetto">Anteile für gewünschten Netto-Betrag bestimmen</option>
+                    <option value="steuer_berechnen">Steuer beim Verkauf einer bestimmten Anzahl Anteile berechnen</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="feld_wunschnetto_tr" style="display: none;">
+                <label for="wert_wunschnetto_tr">Gewünschter Netto-Auszahlungsbetrag (€)</label>
+                <input type="number" id="wert_wunschnetto_tr" value="1000.00" step="0.01">
+            </div>
+
+            <div class="form-group" id="feld_anteile_tr" style="display: none;">
+                <label for="wert_anteile_tr">Anzahl der zu verkaufenden Anteile</label>
+                <input type="number" id="wert_anteile_tr" value="10.00000" step="0.00001">
+            </div>
+
+            <button class="btn-add" style="background-color: #007bff; width: 100%; padding: 12px; font-size: 1.1em; margin-top: 20px;" onclick="sendeBerechnungTR()">
+                Calculation starten & Steuer berechnen
+            </button>
+
+            <div id="rechen_ergebnis_tr" class="box" style="display: none; background-color: #e9ecef; border-left: 5px solid #007bff;">
+                <h4>Ergebnis der Berechnung:</h4>
+                <div id="ergebnis_text_tr"></div>
+            </div>
+        </div>
+
+
+        <!-- hier noch vorabpauschale genau wie bei suche und manuell als option -->
+    </div>
+
 
     <script>
         // Beim Laden der Seite direkt 3 leere Zeilen anzeigen, falls keine CSV da ist
@@ -155,7 +396,7 @@
             let option = document.getElementById("eingabe_option").value;
             document.getElementById("bereich_manuell").style.display = (option === "manuell") ? "block" : "none";
             document.getElementById("bereich_suche").style.display = (option === "suche") ? "block" : "none";
-            document.getElementById("bereich_trade").style.display = (option === "trade") ? "block" : "none";
+            document.getElementById("bereich_csv").style.display = (option === "trade") ? "block" : "none";
         }
 
         // Funktion fügt eine bearbeitbare Zeile in die Tabelle ein
@@ -273,7 +514,7 @@
                 let datum = zeile.querySelector(".row-datum").value;
                 let anzahl = parseFloat(zeile.querySelector(".row-anzahl").value);
                 let preis = parseFloat(zeile.querySelector(".row-preis").value);
-                
+
                 // Nur hinzufügen, wenn die Zeile vollständig ausgefüllt ist
                 if (datum && !isNaN(anzahl) && !isNaN(preis)) {
                     kaeufe.push({ datum: datum, anzahl: anzahl, preis: preis });
@@ -302,7 +543,9 @@
                 kirchensteuer: document.getElementById("kirchensteuer").value,
                 tagesgenau: document.getElementById("tagesgenau").checked,
                 kaeufe: kaeufe,
-                vorabpauschalen: vorabpauschalen
+                vorabpauschalen: vorabpauschalen,
+                teilfreistellung: parseFloat(document.getElementById("teilfreistellung").value),
+                ist_thesaurierend: document.getElementById("ist_thesaurierend").checked,
             };
         
             console.log("Sende Daten an Backend:", payload);
@@ -319,9 +562,568 @@
             // 5. Ergebnis auf der Website anzeigen
             let ergebnisBox = document.getElementById("rechen_ergebnis");
             let ergebnisText = document.getElementById("ergebnis_text");
-            
+
             ergebnisBox.style.display = "block";
             ergebnisText.innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+        }
+
+        // NEU: Triggert die Live-Suche im Backend bei der Eingabe
+        async function liveSuche(suchbegriff) {
+            let ergebnisDiv = document.getElementById("such_ergebnisse");
+
+            if (suchbegriff.length < 2) {
+                ergebnisDiv.style.display = "none";
+                return;
+            }
+        
+            // Abfrage an unseren neuen FastAPI-Endpunkt
+            let response = await fetch(`/api/search?q=${encodeURIComponent(suchbegriff)}`);
+            let treffer = await response.json();
+        
+            ergebnisDiv.innerHTML = "";
+        
+            if (treffer && treffer.length > 0 && !treffer.error) {
+                ergebnisDiv.style.display = "block";
+
+                treffer.forEach(item => {
+                    let eintrag = document.createElement("div");
+                    eintrag.style.padding = "10px";
+                    eintrag.style.cursor = "pointer";
+                    eintrag.style.borderBottom = "1px solid #eee";
+                    eintrag.innerText = `${item.name} (${item.symbol})`;
+
+                    // Hover-Effekt mit JS (simples CSS)
+                    eintrag.onmouseover = () => eintrag.style.backgroundColor = "#f5f5f5";
+                    eintrag.onmouseout = () => eintrag.style.backgroundColor = "white";
+
+                    // Wenn der Nutzer auf einen Vorschlag klickt
+                    eintrag.onclick = () => waehleETF(item.name, item.symbol);
+
+                    ergebnisDiv.appendChild(eintrag);
+                });
+            } else {
+                ergebnisDiv.style.display = "none";
+            }
+        }
+
+        // AKTUALISIERT: Wird aufgerufen, wenn ein ETF angeklickt wurde
+        function waehleETF(name, symbol) {
+            document.getElementById("such_ergebnisse").style.display = "none";
+            document.getElementById("etf_suche_input").value = `${name} (${symbol})`;
+
+            // Infobox einblenden
+            document.getElementById("ausgewählter_etf_box").style.display = "block";
+            document.getElementById("etf_name_anzeige").innerText = name;
+            document.getElementById("etf_symbol_anzeige").innerText = symbol;
+        
+            console.log("ETF ausgewählt:", symbol);
+
+            // NEU: Sofort den aktuellen Kurs für dieses Symbol im Hintergrund laden
+            ladeAktuellenKurs(symbol);
+        }
+
+        // NEU: Holt den Live-Kurs vom Backend und schreibt ihn als Default in das Feld
+        async function ladeAktuellenKurs(symbol) {
+            let statusSpan = document.getElementById("kurs_lade_status");
+            let kursInput = document.getElementById("verkaufskurs_suche");
+
+            statusSpan.innerText = "(Kurs wird geladen...)";
+            statusSpan.style.color = "#666";
+        
+            try {
+                // Abfrage an unseren neuen FastAPI-Endpunkt
+                let response = await fetch(`/api/get-price?symbol=${encodeURIComponent(symbol)}`);
+                let result = await response.json();
+            
+                if (result.success) {
+                    // Wert als Default in das Input-Feld eintragen
+                    kursInput.value = result.price;
+                    statusSpan.innerText = "(Live-Kurs erfolgreich geladen!)";
+                    statusSpan.style.color = "#28a745";
+                } else {
+                    statusSpan.innerText = "(Fehler beim Laden des Live-Kurses)";
+                    statusSpan.style.color = "#dc3545";
+                }
+            } catch (e) {
+                statusSpan.innerText = "(Netzwerkfehler beim Kursladen)";
+                statusSpan.style.color = "#dc3545";
+            }
+        }
+
+
+        function fuegeZeileHinzuSuche(datum = "", anzahl = "", preis = "") {
+            let tbody = document.getElementById("suche_tabelle_body_manuell");
+            let row = tbody.insertRow();
+            row.innerHTML = `
+                <td><input type="date" class="row-datum-suche" value="${datum}" onchange="toggleVorabpauschaleSuche()"></td>
+                <td><input type="number" class="row-anzahl-suche" step="0.00001" value="${anzahl}"></td>
+                <td><input type="number" class="row-preis-suche" step="0.01" value="${preis}"></td>
+                <td><button class="btn-delete" onclick="this.parentNode.parentNode.remove(); toggleVorabpauschaleSuche();">🗑️</button></td>
+            `;
+        }
+
+
+        // Beim Laden der Seite auch hier 1 leere Zeile bereitstellen
+        let alterOnload = window.onload;
+        window.onload = function() {
+            if (alterOnload) alterOnload();
+            fuegeZeileHinzuSuche();
+        };
+
+        // let alterOnload = window.onload;
+        // window.onload = function() {
+        //     if (alterOnload) alterOnload();
+
+        //     let kaufOption = document.getElementById("suche_kauf_option").value;
+        //     // Nur eine leere Zeile erzeugen, wenn der Nutzer NICHT im Sparplan-Modus startet
+        //     if (kaufOption === "suche_manuell") {
+        //         fuegeZeileHinzuSuche();
+        //     }
+        // };
+
+
+        // 1. Schaltet die Eingabemasken (CSV vs Sparplan) über der Tabelle um
+        function toggleSucheKaufLogik() {
+            let opt = document.getElementById("suche_kauf_option").value;
+            document.getElementById("suche_sub_csv").style.display = (opt === "suche_manuell") ? "block" : "none";
+            document.getElementById("suche_sub_sparplan").style.display = (opt === "suche_sparplan") ? "block" : "none";
+        }
+
+        // 2. NEU: CSV-Upload speziell für den Suchpfad (leert die Tabelle nicht zwingend, sondern man kann importieren)
+        async function uploadCSVSuche() {
+            let fileInput = document.getElementById("csv_file_suche");
+            if (fileInput.files.length === 0) return;
+        
+            let formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+        
+            let response = await fetch("/api/upload-csv", { method: "POST", body: formData });
+            let result = await response.json();
+        
+            if (result.success) {
+                // Bei CSV-Upload leeren wir einmalig die Tabelle vor dem Befüllen
+                document.getElementById("suche_tabelle_body_manuell").innerHTML = "";
+                result.data.forEach(kauf => {
+                    fuegeZeileHinzuSuche(kauf.datum, kauf.anzahl, kauf.preis);
+                });
+                toggleVorabpauschaleSuche();
+            } else {
+                alert("Fehler beim Laden der CSV: " + result.error);
+            }
+        }
+
+        // 3. KORRIGIERT: Sparplan-Simulation fügt Daten JETZT HINZU ohne die Ansicht umzuschalten
+        async function generiereSparplan() {
+            let symbol = document.getElementById("etf_symbol_anzeige").innerText;
+            if (symbol === "-") {
+                alert("Bitte wählen Sie zuerst einen ETF über die Suche aus!");
+                return;
+            }
+        
+            let payload = {
+                symbol: symbol,
+                start_date: document.getElementById("sparplan_start").value,
+                end_date: document.getElementById("sparplan_ende").value,
+                tag: parseInt(document.getElementById("sparplan_tag").value),
+                rate: parseFloat(document.getElementById("sparplan_rate").value)
+            };
+        
+            let response = await fetch("/api/generate-sparplan", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            let result = await response.json();
+        
+            if (result.success) {
+                // NICHT MEHR UMSCHALTEN! Einfach an das bestehende tbody HÄNGEN
+                result.data.forEach(kauf => {
+                    fuegeZeileHinzuSuche(kauf.datum, kauf.anzahl, kauf.preis);
+                });
+                toggleVorabpauschaleSuche();
+                alert(`${result.data.length} Sparplan-Käufe erfolgreich der Tabelle unten hinzugefügt!`);
+            } else {
+                alert("Fehler bei Sparplan-Generierung: " + result.error);
+            }
+        }
+
+        // 4. NEU: Funktion generiert eine CSV-Datei direkt aus den Tabellenzeilen im Browser und startet den Download
+        function downloadCSVFromTable() {
+            let kaufZeilen = document.querySelectorAll("#suche_tabelle_body_manuell tr");
+            if(kaufZeilen.length === 0) {
+                alert("Die Tabelle ist leer. Es gibt nichts herunterzuladen.");
+                return;
+            }
+        
+            let csvContent = "data:text/csv;charset=utf-8,Kaufdatum,Anzahl,Preis\n";
+
+            kaufZeilen.forEach(zeile => {
+                let datum = zeile.querySelector(".row-datum-suche").value;
+                let anzahl = zeile.querySelector(".row-anzahl-suche").value;
+                let preis = zeile.querySelector(".row-preis-suche").value;
+
+                if(datum || anzahl || preis) {
+                    csvContent += `${datum},${anzahl},${preis}\n`;
+                }
+            });
+        
+            // Erzeuge einen unsichtbaren Download-Link und klicke ihn via JS an
+            let encodedUri = encodeURI(csvContent);
+            let link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "etf_kaufhistorie_export.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // NEU: Blendet die Vorabpauschalen-Tabelle im Suchbereich ein/aus und berechnet die Jahre
+        function toggleVorabpauschaleSuche() {
+            let haken = document.getElementById("haken_vorabpauschale_suche").checked;
+            let vorabBereich = document.getElementById("bereich_vorabpauschale_suche");
+            let tbody = document.getElementById("vorab_tabelle_body_suche");
+
+            tbody.innerHTML = ""; // Vorherige Zeilen leeren
+        
+            if (!haken) {
+                vorabBereich.style.display = "none";
+                return;
+            }
+        
+            // Ältestes Jahr aus der Suche-Kauftabelle ermitteln
+            let datumsFelder = document.querySelectorAll(".row-datum-suche");
+            let MindestJahr = 2018;
+            let aktuellesJahr = 2026; // Fixes aktuelles Jahr
+            let aeltestesJahr = aktuellesJahr;
+        
+            datumsFelder.forEach(feld => {
+                if (feld.value) {
+                    let kaufJahr = new Date(feld.value).getFullYear();
+                    if (kaufJahr < aeltestesJahr) {
+                        aeltestesJahr = kaufJahr;
+                    }
+                }
+            });
+        
+            if (aeltestesJahr < MindestJahr) {
+                aeltestesJahr = MindestJahr;
+            }
+        
+            // Wenn Käufe vor dem aktuellen Jahr existieren, Tabelle aufbauen
+            if (aeltestesJahr < aktuellesJahr) {
+                vorabBereich.style.display = "block";
+                for (let jahr = aeltestesJahr; jahr < aktuellesJahr; jahr++) {
+                    let row = tbody.insertRow();
+                    row.innerHTML = `
+                        <td><input type="number" class="vorab-jahr-suche" value="${jahr}" disabled style="background: #eee;"></td>
+                        <td><input type="number" class="vorab-wert-suche" value="0.00000000" step="0.00000001" min="0"></td>
+                    `;
+                }
+            } else {
+                vorabBereich.style.display = "block";
+                // Falls kein älteres Jahr gefunden wurde, dem Nutzer einen Hinweiszeile geben
+                let row = tbody.insertRow();
+                row.innerHTML = `<td colspan="2" style="color: #666; text-align: center;">Keine Käufe aus Vorjahren in der Tabelle gefunden.</td>`;
+            }
+        }
+
+        // NEU: Zeigt Zusatzfelder basierend auf dem gewählten Berechnungsziel im Suchbereich an
+        function toggleRechenZielFelderSuche() {
+            let ziel = document.getElementById("rechen_ziel_suche").value;
+            let fNetto = document.getElementById("feld_wunschnetto_suche");
+            let fAnteile = document.getElementById("feld_anteile_suche");
+        
+            fNetto.style.display = (ziel === "wunschnetto") ? "block" : "none";
+            fAnteile.style.display = (ziel === "steuer_berechnen") ? "block" : "none";
+        }
+
+        // NEU: Sammelt alle Daten aus dem Suchbereich und schickt sie an das Backend
+        async function sendeBerechnungSuche() {
+            let symbol = document.getElementById("etf_symbol_anzeige").innerText;
+            if (symbol === "-") {
+                alert("Bitte wählen Sie zuerst einen ETF über die Suche aus!");
+                return;
+            }
+        
+            // 1. Daten aus der Suche-Kaufhistorie auslesen
+            let kaeufe = [];
+            let kaufZeilen = document.querySelectorAll("#suche_tabelle_body_manuell tr");
+            kaufZeilen.forEach(zeile => {
+                let datum = zeile.querySelector(".row-datum-suche")?.value;
+                let anzahl = parseFloat(zeile.querySelector(".row-anzahl-suche")?.value);
+                let preis = parseFloat(zeile.querySelector(".row-preis-suche")?.value);
+
+                if (datum && !isNaN(anzahl) && !isNaN(preis)) {
+                    kaeufe.push({ datum: datum, anzahl: anzahl, preis: preis });
+                }
+            });
+        
+            // 2. Daten aus der Suche-Vorabpauschale auslesen (nur wenn Haken gesetzt)
+            let vorabpauschalen = [];
+            if (document.getElementById("haken_vorabpauschale_suche").checked) {
+                let vorabZeilen = document.querySelectorAll("#vorab_tabelle_body_suche tr");
+                vorabZeilen.forEach(zeile => {
+                    let jahrField = zeile.querySelector(".vorab-jahr-suche");
+                    let wertField = zeile.querySelector(".vorab-wert-suche");
+
+                    if (jahrField && wertField) {
+                        let jahr = parseInt(jahrField.value);
+                        let wert = parseFloat(wertField.value);
+                        if (!isNaN(jahr) && !isNaN(wert)) {
+                            vorabpauschalen.push({ jahr: jahr, wert: wert });
+                        }
+                    }
+                });
+            }
+        
+            // 3. Das Daten-Paket schnüren (nutzt auch die geteilten steuerlichen Basisdaten von oben!)
+            let payload = {
+                rechen_ziel: document.getElementById("rechen_ziel_suche").value,
+                wert_wunschnetto: parseFloat(document.getElementById("wert_wunschnetto_suche").value) || 0,
+                wert_anteile: parseFloat(document.getElementById("wert_anteile_suche").value) || 0,
+                verkaufskurs: parseFloat(document.getElementById("verkaufskurs_suche").value),
+                freibetrag: parseFloat(document.getElementById("freibetrag").value),       // Geteiltes Feld
+                verlusttopf: parseFloat(document.getElementById("verlusttopf").value),     // Geteiltes Feld
+                kirchensteuer: document.getElementById("kirchensteuer").value,             // Geteiltes Feld
+                tagesgenau: document.getElementById("tagesgenau_suche").checked,
+                kaeufe: kaeufe,
+                vorabpauschalen: vorabpauschalen,
+                teilfreistellung: parseFloat(document.getElementById("teilfreistellung").value),
+                ist_thesaurierend: document.getElementById("ist_thesaurierend").checked,
+            };
+        
+            console.log("Sende Suchpfad-Daten an Backend:", payload);
+        
+            // 4. Per POST an den existierenden FastAPI-Endpunkt senden
+            let response = await fetch("/api/calculate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+        
+            let result = await response.json();
+        
+            // 5. Ergebnis anzeigen
+            let ergebnisBox = document.getElementById("rechen_ergebnis_suche");
+            let ergebnisText = document.getElementById("ergebnis_text_suche");
+
+            ergebnisBox.style.display = "block";
+            ergebnisText.innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+        }
+
+
+        let aktuelleTRDaten = null;
+        let aktuelleTRKurse = {}; // NEU: Speichert die vom Server gelieferten Kurse global
+
+        // Aktualisiert: CSV hochladen und Kurse merken
+        async function uploadTradeRepublicCSV() {
+            let fileInput = document.getElementById("tr_csv_file");
+            if (fileInput.files.length === 0) return;
+        
+            let formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+        
+            let response = await fetch("/api/upload-trade-republic", { method: "POST", body: formData });
+            let result = await response.json();
+        
+            if (result.success) {
+                aktuelleTRDaten = result.data; 
+                aktuelleTRKurse = result.kurse; // NEU: Kurse im Frontend merken
+
+                let dropdown = document.getElementById("tr_etf_dropdown");
+                dropdown.innerHTML = '<option value="">-- Bitte wählen --</option>';
+
+                result.etfs.forEach(etf => {
+                    let opt = document.createElement("option");
+                    opt.value = etf;
+                    opt.innerText = etf;
+                    dropdown.appendChild(opt);
+                });
+            
+                document.getElementById("tr_etf_auswahl_container").style.display = "block";
+                document.getElementById("tr_tabelle_container").style.display = "none";
+            } else {
+                alert("Fehler beim Verarbeiten der Trade Republic Datei: " + result.error);
+            }
+        }
+
+        // Aktualisiert: Beim Auswählen des ETFs auch direkt den ermittelten Kurs setzen
+        function waehleTradeRepublicETF() {
+            let gewaehlterETF = document.getElementById("tr_etf_dropdown").value;
+            let tableContainer = document.getElementById("tr_tabelle_container");
+            let tbody = document.getElementById("tr_tabelle_body");
+            let verkaufskursInput = document.getElementById("verkaufskurs_tr");
+
+            tbody.innerHTML = ""; 
+        
+            if (!gewaehlterETF || !aktuelleTRDaten) {
+                tableContainer.style.display = "none";
+                return;
+            }
+        
+            // NEU: Setze den vorermittelten Live-Kurs oder den Fallback (100)
+            if (aktuelleTRKurse && aktuelleTRKurse[gewaehlterETF]) {
+                verkaufskursInput.value = aktuelleTRKurse[gewaehlterETF];
+            } else {
+                verkaufskursInput.value = "100.00";
+            }
+        
+            let gefilterteKaeufe = aktuelleTRDaten.filter(item => item.asset === gewaehlterETF);
+            gefilterteKaeufe.forEach(kauf => {
+                fuegeZeileHinzuTR(kauf.datum, kauf.anzahl, kauf.preis);
+            });
+        
+            tableContainer.style.display = "block"; 
+        }
+
+        // // Variable speichert die kompletten TR-Daten global im Frontend, damit wir ohne erneuten Server-Call filtern können
+        // let aktuelleTRDaten = null;
+
+        // // 1. Sendet die CSV an FastAPI und baut das Dropdown der gefundenen ETFs auf
+        // async function uploadTradeRepublicCSV() {
+        //     let fileInput = document.getElementById("tr_csv_file");
+        //     if (fileInput.files.length === 0) return;
+        
+        //     let formData = new FormData();
+        //     formData.append("file", fileInput.files[0]);
+        
+        //     let response = await fetch("/api/upload-trade-republic", { method: "POST", body: formData });
+        //     let result = await response.json();
+        
+        //     if (result.success) {
+        //         aktuelleTRDaten = result.data; // Daten merken
+
+        //         // Dropdown füllen
+        //         let dropdown = document.getElementById("tr_etf_dropdown");
+        //         dropdown.innerHTML = '<option value="">-- Bitte wählen --</option>';
+
+        //         result.etfs.forEach(etf => {
+        //             let opt = document.createElement("option");
+        //             opt.value = etf;
+        //             opt.innerText = etf;
+        //             dropdown.appendChild(opt);
+        //         });
+            
+        //         // Dropdown-Container einblenden, Tabelle erst noch verstecken
+        //         document.getElementById("tr_etf_auswahl_container").style.display = "block";
+        //         document.getElementById("tr_tabelle_container").style.display = "none";
+        //     } else {
+        //         alert("Fehler beim Verarbeiten der Trade Republic Datei: " + result.error);
+        //     }
+        // }
+
+        // // 2. Filtert die globalen Daten, wenn der Nutzer einen ETF im Dropdown auswählt
+        // function waehleTradeRepublicETF() {
+        //     let gewaehlterETF = document.getElementById("tr_etf_dropdown").value;
+        //     let tableContainer = document.getElementById("tr_tabelle_container");
+        //     let tbody = document.getElementById("tr_tabelle_body");
+
+        //     tbody.innerHTML = ""; // Leeren
+        
+        //     if (!gewaehlterETF || !aktuelleTRDaten) {
+        //         tableContainer.style.display = "none";
+        //         return;
+        //     }
+        
+        //     // Filter alle Zeilen heraus, die zum ausgewählten ETF-Namen/Symbol gehören
+        //     let gefilterteKaeufe = aktuelleTRDaten.filter(item => item.asset === gewaehlterETF);
+        
+        //     gefilterteKaeufe.forEach(kauf => {
+        //         fuegeZeileHinzuTR(kauf.datum, kauf.anzahl, kauf.preis);
+        //     });
+        
+        //     tableContainer.style.display = "block"; // Zeige Tabelle und Berechnungs-Maske
+        // }
+
+        // Helper: Fügt eine Zeile in die TR-Tabelle ein
+        function fuegeZeileHinzuTR(datum = "", anzahl = "", preis = "") {
+            let tbody = document.getElementById("tr_tr_tabelle_body") || document.getElementById("tr_tabelle_body");
+            let row = tbody.insertRow();
+            row.innerHTML = `
+                <td><input type="date" class="row-datum-tr" value="${datum}"></td>
+                <td><input type="number" class="row-anzahl-tr" step="0.00001" value="${anzahl}"></td>
+                <td><input type="number" class="row-preis-tr" step="0.01" value="${preis}"></td>
+                <td><button class="btn-delete" onclick="this.parentNode.parentNode.remove()">🗑️</button></td>
+            `;
+        }
+
+        // Umschalter für Berechnungsfelder im TR-Pfad
+        function toggleRechenZielFelderTR() {
+            let ziel = document.getElementById("rechen_ziel_tr").value;
+            document.getElementById("feld_wunschnetto_tr").style.display = (ziel === "wunschnetto") ? "block" : "none";
+            document.getElementById("feld_anteile_tr").style.display = (ziel === "steuer_berechnen") ? "block" : "none";
+        }
+
+
+
+
+
+        // Absenden-Logik für Trade Republic
+        async function sendeBerechnungTR() {
+            let kaeufe = [];
+            document.querySelectorAll("#tr_tabelle_body tr").forEach(zeile => {
+                let datum = zeile.querySelector(".row-datum-tr")?.value;
+                let anzahl = parseFloat(zeile.querySelector(".row-anzahl-tr")?.value);
+                let preis = parseFloat(zeile.querySelector(".row-preis-tr")?.value);
+                if (datum && !isNaN(anzahl) && !isNaN(preis)) {
+                    kaeufe.push({ datum: datum, anzahl: anzahl, preis: preis });
+                }
+            });
+
+            let payload = {
+                rechen_ziel: document.getElementById("rechen_ziel_tr").value,
+                wert_wunschnetto: parseFloat(document.getElementById("wert_wunschnetto_tr").value) || 0,
+                wert_anteile: parseFloat(document.getElementById("wert_anteile_tr").value) || 0,
+                verkaufskurs: parseFloat(document.getElementById("verkaufskurs_tr").value),
+                freibetrag: parseFloat(document.getElementById("freibetrag").value),
+                verlusttopf: parseFloat(document.getElementById("verlusttopf").value),
+                kirchensteuer: document.getElementById("kirchensteuer").value,
+                tagesgenau: document.getElementById("tagesgenau_tr").checked,
+                kaeufe: kaeufe,
+                vorabpauschalen: [],
+                teilfreistellung: parseFloat(document.getElementById("teilfreistellung").value),
+                ist_thesaurierend: document.getElementById("ist_thesaurierend").checked,
+            };
+        
+            let response = await fetch("/api/calculate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+        
+            let result = await response.json();
+            document.getElementById("rechen_ergebnis_tr").style.display = "block";
+            document.getElementById("ergebnis_text_tr").innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+        }
+
+
+        function aktualisiereThesaurierungsAnsicht() {
+            let istThesaurierend = document.getElementById("ist_thesaurierend").checked;
+                
+            // 1. Manueller Pfad
+            let vorabManuell = document.getElementById("bereich_vorabpauschale");
+            if (vorabManuell) {
+                if (!istThesaurierend) {
+                    vorabManuell.style.display = "none"; // Tippfehler korrigiert (nur 1x .style)
+                } else {
+                    if (typeof aktualisiereVorabpauschaleTabelle === 'function') {
+                        aktualisiereVorabpauschaleTabelle();
+                    }
+                }
+            }
+        
+            // 2. ETF-Suchpfad
+            let vorabHakenSucheContainer = document.getElementById("haken_vorabpauschale_suche")?.parentNode;
+            let vorabTabelleSuche = document.getElementById("bereich_vorabpauschale_suche");
+
+            if (!istThesaurierend) {
+                if (vorabHakenSucheContainer) vorabHakenSucheContainer.style.display = "none";
+                if (vorabTabelleSuche) vorabTabelleSuche.style.display = "none";
+                document.getElementById("haken_vorabpauschale_suche").checked = false;
+            } else {
+                if (vorabHakenSucheContainer) vorabHakenSucheContainer.style.display = "block";
+            }
         }
 
 
