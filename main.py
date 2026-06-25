@@ -15,12 +15,14 @@ import re  # Oben bei den Importen hinzufügen, falls noch nicht da
 from fastapi.responses import StreamingResponse
 import base64
 from models import SparplanPayload
-
+from fastapi.staticfiles import StaticFiles
 
 ########## TERMINAL EINGABE 
 # uvicorn main:app --reload
 
 app = FastAPI(title="ETF Steuer Rechner")
+# Mountet den Ordner "static" für CSS, Bilder oder JS-Dateien
+app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 @app.get("/", response_class=HTMLResponse)

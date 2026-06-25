@@ -1,0 +1,459 @@
+/* -------------------------------------------------- */
+/* Grundlayout */
+/* -------------------------------------------------- */
+
+/* ==========================================================================
+   1. BASIS-STYLING (Global & Layout)
+   ========================================================================== */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  line-height: 1.6;
+  background: #f1f5f9;
+  color: #1f2937;
+  margin: 0;
+}
+p { margin: 0 0 14px; }
+
+.container {
+    max-width: 1000px;
+    margin: auto;
+    padding: 40px 20px;
+}
+
+/* ==========================================================================
+   2. SEKTIONEN & BLÖCKE (Hero, Tool, FAQ)
+   ========================================================================== */
+.hero, .faq {
+  background: #ffffff;
+  padding: 32px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+  margin-bottom: 28px;
+  border-left: 4px solid #2563eb;
+}
+
+.tool {
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    margin-top: 50px;
+    margin-right: 0;
+    margin-bottom: 10px;
+    margin-left: 0;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+    border: 1px solid #e5e7eb;
+    border-left: 4px solid #2563eb;
+}
+
+/* Der untere .box Style wurde hier elegant integriert */
+.box { 
+  padding: 20px; 
+  background: #f8fafc; 
+  margin-top: 20px; 
+  border-radius: 8px; 
+  border: 1px solid #e2e8f0; 
+}
+
+/* ==========================================================================
+   3. TYPOGRAFIE & ELEMENTE
+   ========================================================================== */
+h1 {
+  font-size: 2.4rem;
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  font-size: 1.6rem;
+  margin-top: 36px;
+}
+
+ul { padding-left: 20px; }
+li { margin-bottom: 6px; }
+
+hr {
+  border: none;
+  border-top: 1px solid #2563eb;
+  margin: 30px 0;
+  color: #2563eb;
+}
+
+iframe {
+    width: 100%;
+    height: 90vh;
+    border: none;
+    display: block;
+}
+
+footer {
+    margin-top: 40px;
+    font-size: 0.9em;
+    color: #555;
+}
+
+hr.trennlinie {
+  border: none;               /* Entfernt den hässlichen Standard-Rahmen des Browsers */
+  border-top: 1px solid #cbd5e1; /* Ein schönes, dezentes Hellgrau (passend zu deinen Input-Feldern) */
+  margin: 25px 0;             /* 25px Platz nach oben und unten */
+  opacity: 1;                 /* Sorgt dafür, dass sie voll sichtbar bleibt */
+}
+
+/* ==========================================================================
+   4. FORMULARE & EINGABEN (An das Blue/Modern-Design angepasst)
+   ========================================================================== */
+.form-group { 
+  margin-bottom: 18px; 
+}
+
+label { 
+  display: block; 
+  font-weight: 600; 
+  margin-bottom: 6px; 
+  font-size: 0.95rem;
+}
+
+input[type="number"], 
+input[type="date"], 
+select { 
+  width: 100%; 
+  padding: 10px 12px; 
+  box-sizing: border-box; 
+  border: 1px solid #cbd5e1; 
+  border-radius: 6px; 
+  background-color: #ffffff;
+  color: #1f2937;
+  font-family: inherit;
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input[type="number"]:focus, 
+input[type="date"]:focus, 
+select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+
+/* ==========================================================================
+   5. TABELLEN (Modernisiert & Clean)
+   ========================================================================== */
+table { 
+  width: 100%; 
+  border-collapse: collapse; 
+  margin-top: 20px; 
+  margin-bottom: 15px;
+}
+
+th, td { 
+
+  padding: 12px 10px; 
+  text-align: left; 
+  color: #1f2937; /* <--- HIER! Erzwingt die gleiche dunkle Schriftfarbe für Namen und Werte */
+}
+
+th { 
+  background-color: #f1f5f9; 
+  font-weight: 600;
+  color: #475569;
+}
+
+/* Alle Zellen in der Tabelle werden jetzt fett und tiefschwarz */
+td {
+  color: #000000;      /* Echtes, sattes Schwarz */
+  font-weight: 600;    /* Kräftiger Fettdruck, genau wie die Zahlen */
+}
+
+/* ==========================================================================
+   6. BUTTONS
+   ========================================================================== */
+.btn-add { 
+  background-color: #007bff; /* Angenehmeres Emerald-Grün */
+  color: white; 
+  border: none; 
+  padding: 10px 20px; 
+  border-radius: 6px; 
+  cursor: pointer; 
+  font-weight: 600;
+  margin-top: 10px; 
+  transition: background 0.2s;
+}
+.btn-add:hover { background-color: #007bff; }
+
+.btn-delete { 
+  background-color: #ef4444; /* Modernes Rot */
+  color: white; 
+  border: none; 
+  padding: 6px 12px; 
+  border-radius: 6px; 
+  cursor: pointer; 
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+.btn-delete:hover { background-color: #dc2626; }
+
+/* ==========================================================================
+   7. AKKORDEON (DETAILS) & MODALS
+   ========================================================================== */
+details { margin-bottom: 12px; }
+summary { cursor: pointer; font-weight: bold; padding: 10px 0; }
+summary:hover { color: #2563eb; }
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+  background: white;
+  color: #1f2937;
+  margin: 5% auto;
+  padding: 30px;
+  border-radius: 10px;
+  max-width: 700px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.close {
+  float: right;
+  font-size: 28px;
+  cursor: pointer;
+  position: sticky;
+  top: 0;
+}
+
+.disclaimer {
+    font-size: 0.9em;
+    color: #555;
+    margin-top: 2px;
+    margin-bottom: 30px;
+}
+
+/* ==========================================================================
+   8. DARK MODE ADJUSTMENTS (Formulare & Tabellen integriert!)
+   ========================================================================== */
+@media (prefers-color-scheme: dark) {
+  body { background: #0f172a; color: #e5e7eb; }
+  .hero, .tool, .faq { background: #1e293b; border: 1px solid #334155; }
+  .box { background: #1e293b; border-color: #334155; }
+  footer, .disclaimer { color: #cbd5f5; }
+  summary:hover { color: #60a5fa; }
+  
+  /* Formulare im Dark Mode */
+  input[type="number"], input[type="date"], select {
+    background-color: #334155;
+    border-color: #475569;
+    color: #f8fafc;
+  }
+  input[type="number"]:focus, input[type="date"]:focus, select:focus {
+    border-color: #60a5fa;
+  }
+  
+  /* Tabellen im Dark Mode */
+th { 
+    background-color: #334155; 
+    color: #cbd5e1; 
+  }
+  
+  /* th, td { 
+    border-bottom-color: #334155; 
+  } */
+  
+  /* Überschreibt das Schwarz aus dem Lightmode mit leuchtendem Weiß */
+  td { 
+    color: #ffffff !important; /* !important sorgt dafür, dass das Lightmode-Schwarz sicher überschrieben wird */
+  }
+
+  hr.trennlinie {
+    border-top-color: #334155; /* Ein perfekt abgestimmtes, sichtbares Grau auf dunklem Grund */
+  }
+
+}
+
+
+/* ==========================================================================
+   9. RESPONSIVE / MOBILE DESIGN
+   ========================================================================== */
+@media (max-width: 600px) {
+  .container { padding: 10px; max-width: 100%; }
+  
+  .tool {
+    margin-left: -10px;
+    margin-right: -10px;
+    border-radius: 0;
+    border-left: none;
+    padding: 20px 15px;
+  }
+
+  .tool-frame { width: 100%; height: 95vh; border: none; display: block; }
+  .hero, .faq { padding: 18px; margin-bottom: 20px; }
+  h1 { font-size: 1.8rem; }
+  h2 { font-size: 1.3rem; }
+  iframe { width: 100%; min-height: 90vh; }
+
+  body {
+    font-size: 17px;
+    padding-bottom: 90px;
+    margin: 0;
+  }
+
+  .modal-content {
+    margin: 10% 10px;
+    padding: 20px;
+    max-width: 100%;
+    max-height: 85vh;
+  }
+  
+  /* Tabellen mobil scrollbar machen, damit sie das Layout nicht sprengen */
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}
+
+/* Sticky Mobile Button */
+.mobile-tool-button { display: none; }
+@media (max-width: 600px) {
+  .mobile-tool-button {
+    display: none;
+    position: fixed;
+    bottom: 16px;
+    left: 16px;
+    right: 16px;
+    background: #2563eb;
+    color: white;
+    text-align: center;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 15px;
+    z-index: 999;
+  }
+  .mobile-tool-button.visible { display: block; }
+}
+
+
+/* ==========================================================================
+   10. BERECHNUNGSERGEBNIS CONTAINER & DETAILS
+   ========================================================================== */
+/* Der Hauptcontainer nutzt bereits das .faq / .hero Design */
+#ergebnis_container h2 {
+  margin-top: 0;
+  color: #2563eb; /* Blaues Highlight für die Überschrift */
+}
+
+/* Flexbox-Layout für die drei KPI-Karten oben */
+.kpi-wrapper {
+  display: flex; 
+  justify-content: space-between; 
+  gap: 20px; 
+  margin-bottom: 30px;
+}
+
+/* Die einzelnen KPI-Karten (Wert 1, 2, 3) */
+.kpi-card {
+  flex: 1; 
+  background: #f8fafc; /* Heller, moderner Grauton passend zur .box */
+  padding: 20px; 
+  border-radius: 8px; 
+  box-shadow: inset 0 0 0 1px #e2e8f0; /* Subtiler Innenrahmen statt harter Schatten */
+  text-align: center;
+}
+
+.kpi-label {
+  font-size: 0.85rem; 
+  color: #64748b; 
+  font-weight: 700; 
+  display: block; 
+  margin-bottom: 8px;
+  text-transform: uppercase; /* Lässt Labels wie 'STEUER' professioneller wirken */
+  letter-spacing: 0.05em;
+}
+
+.kpi-wert {
+  font-size: 1.8rem; 
+  font-weight: 800; 
+  letter-spacing: -0.02em;
+}
+
+/* Farbliche Akzente für die KPI-Werte (Grün = Positiv/Netto, Rot = Steuer) */
+.kpi-green { color: #10b981; }
+.kpi-red { color: #ef4444; }
+.kpi-neutral { color: #1e293b; }
+
+/* PDF-Button Styling */
+#btn_pdf_download {
+  background: #ef4444; 
+  color: white; 
+  border: none; 
+  padding: 12px 25px; 
+  font-size: 1rem; 
+  border-radius: 6px; 
+  cursor: pointer; 
+  font-weight: 600;
+  transition: background 0.2s, transform 0.1s;
+}
+
+#btn_pdf_download:hover {
+  background: #dc2626;
+}
+
+#btn_pdf_download:active {
+  transform: scale(0.98);
+}
+
+/* ==========================================================================
+   11. ERGEBNIS DARK MODE ADJUSTMENTS
+   ========================================================================== */
+@media (prefers-color-scheme: dark) {
+  #ergebnis_container h2 {
+    color: #60a5fa;
+  }
+  
+  .kpi-card {
+    background: #1e293b;
+    box-shadow: inset 0 0 0 1px #334155;
+  }
+  
+  .kpi-label {
+    color: #94a3b8;
+  }
+  
+  .kpi-neutral {
+    color: #f8fafc;
+  }
+}
+
+/* ==========================================================================
+   12. ERGEBNIS RESPONSIVE DESIGN (MOBIL)
+   ========================================================================== */
+@media (max-width: 600px) {
+  /* Auf dem Smartphone stehen die KPI-Karten untereinander */
+  .kpi-wrapper {
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  
+  .kpi-card {
+    padding: 15px;
+  }
+  
+  .kpi-wert {
+    font-size: 1.5rem;
+  }
+  
+  #btn_pdf_download {
+    width: 100%; /* Button nimmt auf dem Handy die volle Breite ein */
+    text-align: center;
+  }
+}

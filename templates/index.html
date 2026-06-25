@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
@@ -18,17 +18,105 @@
         .btn-add { background-color: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; margin-top: 10px; }
         .btn-delete { background-color: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
     </style>
+</head> -->
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- <title>ETF Steuer Rechner – ETF steuerfrei verkaufen & Steuer berechnen (Deutschland)</title> -->
+<title>ETF Steuer Rechner – ETF Steuer beim Verkauf berechnen (Deutschland)</title>
+
+<meta name="description" content="Kostenloser ETF Steuer Rechner für Deutschland. Berechnen Sie die Steuer beim ETF-Verkauf, wie viele ETF-Anteile steuerfrei verkauft werden können und wie viele Anteile Sie für einen gewünschten Nettoerlös verkaufen müssen.">
+
+<meta name="robots" content="index, follow">
+
+<meta property="og:title" content="ETF Steuer Rechner Deutschland">
+<meta property="og:description" content="Berechnen Sie, wie viele ETF-Anteile Sie steuerfrei verkaufen können oder wie viele Anteile Sie für einen bestimmten Nettoerlös verkaufen müssen.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://etfsteuerrechner.de">
+<meta property="og:image" content="https://etfsteuerrechner.de/preview.png">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ETF Steuer Rechner Deutschland">
+<meta name="twitter:description" content="Kostenloser Rechner für ETF-Steuern in Deutschland.">
+
+<meta name="theme-color" content="#ffffff">
+
+<meta name="color-scheme" content="light dark">
+
+<link rel="canonical" href="https://etfsteuerrechner.de">
+<link rel="icon" type="image/png" sizes="32x32" href="/preview.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/preview.png">
+
+<script src="https://unpkg.com/htmx.org@1.9.12"></script>
+
+<link rel="stylesheet" href="/static/style.css">
+
 </head>
+
+
+
+<script>
+
+function openModal(id) {
+  document.getElementById(id).style.display = "block";
+}
+
+function closeModal(id) {
+  document.getElementById(id).style.display = "none";
+}
+
+window.onclick = function(event) {
+  let modals = document.getElementsByClassName("modal");
+  for (let modal of modals) {
+    if (event.target == modal) {
+      modal.style.display = "none";
+    }
+  }
+}
+
+</script>
+
+
+
 <body>
 
-    <h1>ETF Steuer Rechner</h1>
+<main class="container">
+<section class="hero">
+  <h1>ETF Steuer Rechner (Deutschland)</h1>
+<p>
+Kostenloser Rechner zur Berechnung der Steuer beim Verkauf von ETFs in Deutschland.
+</p>
+<hr>
+<h2>ETF Steuer beim ETF-Verkauf berechnen (Deutschland)</h2>
+<p>
+Mit diesem <strong>ETF Steuer Rechner für Deutschland</strong> können Sie berechnen, 
+welche Steuer beim Verkauf Ihrer ETF-Anteile anfällt. 
+Der Rechner berücksichtigt wichtige steuerliche Regeln wie FIFO, Teilfreistellung, 
+Vorabpauschale, Verlusttopf und den Sparerpauschbetrag.
+</p>
+<p>
+Der Rechner hilft Ihnen dabei:
+</p>
+<ul>
+<li>zu berechnen, <strong>wie viele ETF-Anteile Sie steuerfrei verkaufen können, um den Sparerpauschbetrag optimal zu nutzen</strong></li>
+<li>herauszufinden, <strong>wie viele Anteile Sie verkaufen müssen, um einen bestimmten Nettobetrag zu erhalten</strong></li>
+<li>die <strong>voraussichtliche Steuer beim Verkauf von ETFs</strong> zu berechnen</li>
+</ul>
+<p>
+Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpauschbetrag optimal nutzen</strong> oder einen ETF-Verkauf planen um einen bestimmten Nettobetrag zu erhalten.
+</p>
+</section>
 
-
-
+<div class="tool">
+<h2>ETF Steuer Rechner</h2>
 
 
     <div class="form-group">
-        <label for="freibetrag">Noch verfügbarer Sparerpauschbetrag (€)</label>
+        <label for="freibetrag">Verfügbarer Sparerpauschbetrag (€)</label>
         <input type="number" id="freibetrag" value="1000.00" step="0.01" min="0" max="2000.00" onchange="if(this.value !== '') { if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min; if(parseFloat(this.value) > parseFloat(this.max)) this.value = this.max; }">
     </div>
     <div class="form-group">
@@ -36,7 +124,7 @@
         <input type="number" id="verlusttopf" value="0.00" step="0.01" min="0" onchange="if(this.value !== '') { if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min; }">
     </div>
     <div class="form-group">
-        <label for="kirchensteuer">Kirchensteuerpflicht</label>
+        <label for="kirchensteuer">Kirchensteuer</label>
         <select id="kirchensteuer">
             <option value="keine">Keine Kirchensteuer</option>
             <option value="8">Bayern / Baden-Württemberg (8%)</option>
@@ -55,34 +143,29 @@
         </select>
     </div>
 
-    <!-- HIER NOCH DROP DOWN ALLE OPTIONEN EINFÜGEN, WIE STARTAUSWAHL FESTLEGEN? INFOS HINZUFÜGEN -->
-
     <div class="form-group">
         <label for="ertragsverwendung">Ertragsverwendung des ETFs</label>
         <select id="ertragsverwendung" onchange="aktualisiereThesaurierungsAnsicht()">
             <option value="thesaurierend">Thesaurierend (Erträge werden automatisch wiederangelegt)</option>
-            <option value="ausschüttend">Ausschüttend (Erträge werden bar ausgezahlt)</option>
+            <option value="ausschüttend">Ausschüttend (Erträge werden ausgezahlt)</option>
         </select>
     </div>
 
     <div class="form-group">
         <label for="eingabe_option">Wie möchten Sie Ihre Daten eingeben?</label>
         <select id="eingabe_option" onchange="toggleEingabeOptionen()">
-            <option value="manuell">Manuelle Eingabe / CSV Import</option>
+            <option value="manuell">Manuelle Eingabe</option>
             <option value="suche">ETF Suche</option>
-            <option value="trade">Trade Republic CSV upload</option>
+            <option value="trade">CSV upload von Trade Republic</option>
         </select>
     </div>
 
-    <div id="bereich_manuell" class="box">
-        <h3>1. Basisdaten</h3>
+    <div id="bereich_manuell">
         <div class="form-group">
             <label for="verkaufskurs">Verkaufskurs pro Anteil (€)</label>
             <input type="number" id="verkaufskurs" value="100.00" step="0.01" min="0" onchange="if(this.value !== '') { if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min; }">
         </div>
 
-
-        <h3>2. Kaufhistorie</h3>
         <div class="form-group">
             <label for="csv_file">Kaufdaten aus CSV-Datei importieren (optional):</label>
             <input type="file" id="csv_file" accept=".csv" onchange="uploadCSV()">
@@ -102,6 +185,8 @@
         </table>
         
         <button class="btn-add" onclick="fuegeZeileHinzu()">+ Zeile hinzufügen</button>
+
+        <hr>
 
         <div class="form-group">
             <label for="bereits_verkauft_manuell">Bereits verkaufte Anteile (für FIFO-Ermittlung)</label>
@@ -143,7 +228,7 @@
 
 
 
-        <div id="bereich_vorabpauschale" style="display: none; margin-top: 25px; padding-top: 15px; border-top: 1px dashed #ccc;">
+        <div id="bereich_vorabpauschale" style="display: none; margin-top: 25px; padding-top: 15px;">
             <h4>Vorabpauschale manuell eingeben</h4>
             <p style="font-size: 0.9em; color: #666;">
                 Bitte geben Sie die Vorabpauschale pro Anteil für jedes Jahr ein. Jahre, die älter als 2018 sind, werden ignoriert, da es die Vorabpauschale erst seit 2018 gibt.
@@ -160,8 +245,7 @@
             </table>
         </div>
 
-        <hr style="margin: 25px 0; border: 0; border-top: 1px solid #ccc;">
-        <h3>3. Berechnungs-Ziel</h3>
+
 
         <div class="form-group">
             <label for="rechen_ziel">Was möchten Sie berechnen?</label>
@@ -183,12 +267,12 @@
         </div>
 
         <button class="btn-add" style="background-color: #007bff; width: 100%; padding: 12px; font-size: 1.1em; margin-top: 20px;" onclick="sendeBerechnung()">
-            Calculation starten & Steuer berechnen
+            Berechnen
         </button>
 
     </div>
 
-    <div id="bereich_suche" class="box" style="display: none;">
+    <div id="bereich_suche" style="display: none;">
         <h3>ETF Suche</h3>
         <div class="form-group" style="position: relative;">
             <label for="etf_suche_input">ETF suchen (Name, ISIN oder Ticker):</label>
@@ -205,8 +289,6 @@
             <input type="number" id="verkaufskurs_suche" value="100.00" step="0.01" min="0" onchange="if(this.value !== '') { if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min; }">
         </div>
 
-        <hr style="margin: 20px 0; border: 0; border-top: 1px dashed #ccc;">
-
         <div class="form-group">
             <label for="suche_kauf_option">Wie möchten Sie Kaufdaten hinzufügen?</label>
             <select id="suche_kauf_option" onchange="toggleSucheKaufLogik()">
@@ -222,14 +304,6 @@
 
         <div id="suche_sub_sparplan" style="display: none; background: #f1f3f5; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
             <h4>Sparplan-Parameter hinzufügen</h4>
-            <!-- <div class="form-group">
-                <label>Startdatum</label>
-                <input type="date" id="sparplan_start">
-            </div>
-            <div class="form-group">
-                <label>Enddatum</label>
-                <input type="date" id="sparplan_ende">
-            </div> -->
 
 
             <div class="form-group">
@@ -285,12 +359,6 @@
                        ">
             </div>
 
-            <!-- <div class="form-group"><label>Startdatum</label><input type="date" id="sparplan_start" value="2024-01-01"></div>
-            <div class="form-group"><label>Enddatum</label><input type="date" id="sparplan_ende" value="2024-06-01"></div> -->
-            <!-- <div class="form-group">
-                <label>Ausführungstag</label>
-                <select id="sparplan_tag"><option value="1">1. des Monats</option><option value="15">15. des Monats</option></select>
-            </div> -->
             <div class="form-group"><label>Sparrate pro Monat (€)</label><input type="number" id="sparplan_rate" value="100.00" step="10" min="0" onchange="if(this.value !== '') { if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min; }"></div>
             <button class="btn-add" style="background-color: #6f42c1; width: 100%;" onclick="generiereSparplan()">
                 + Diese Sparplan-Käufe der Tabelle unten hinzufügen
@@ -318,7 +386,7 @@
             </div>
         </div>
 
-        <hr style="margin: 25px 0; border: 0; border-top: 1px solid #ccc;">
+        <hr>
 
         <div class="form-group">
             <label for="bereits_verkauft_suche">Bereits verkaufte Anteile (für FIFO-Ermittlung)</label>
@@ -351,12 +419,6 @@
                        }
                    ">
         </div>
-
-
-        <!-- <div class="form-group">
-            <label for="bereits_verkauft_suche">Bereits verkaufte Anteile (für FIFO-Ermittlung)</label>
-            <input type="number" id="bereits_verkauft_suche" step="0.00001" min="0" value="0.0" placeholder="z.B. 5.0" onchange="if(this.value !== '') { if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min; }">
-        </div> -->
 
 
         <div class="checkbox-group" style="margin-top: 15px;">
@@ -407,14 +469,14 @@
         </div>
 
         <button class="btn-add" style="background-color: #007bff; width: 100%; padding: 12px; font-size: 1.1em; margin-top: 20px;" onclick="sendeBerechnungSuche()">
-            Calculation starten & Steuer berechnen
+            Berechnen
         </button>
 
     </div>
 
 
 
-    <div id="bereich_csv" class="box" style="display: none;">
+    <div id="bereich_csv" style="display: none;">
         <h3>Trade Republic CSV Import</h3>
         <p style="font-size: 0.9em; color: #666;">Laden Sie hier Ihren Depotauszug/Umsatzexport als CSV hoch.</p>
 
@@ -431,7 +493,7 @@
         </div>
 
         <div id="tr_tabelle_container" style="display: none; margin-top: 20px;">
-            <hr style="margin: 20px 0; border: 0; border-top: 1px dashed #ccc;">
+            <!-- <hr style="margin: 20px 0; border: 0; border-top: 1px dashed #ccc;"> -->
             <h4>Generierte Kaufhistorie aus Trade Republic</h4>
 
             <div class="form-group">
@@ -507,7 +569,7 @@
             </div>
 
             <button class="btn-add" style="background-color: #007bff; width: 100%; padding: 12px; font-size: 1.1em; margin-top: 20px;" onclick="sendeBerechnungTR()">
-                Calculation starten & Steuer berechnen
+                Berechnen
             </button>
 
         </div>
@@ -518,45 +580,42 @@
 
 
 
-
-    <div id="ergebnis_container" style="display: none; margin-top: 30px; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9;">
-        <h2>📊 Berechnungsergebnis</h2>
+    <div id="ergebnis_container" style="display: none; margin-top: 40px;">
+        <h3>📊 Berechnungsergebnis</h3>
         <hr>
 
-        <div style="display: flex; justify-content: space-between; gap: 20px; margin-bottom: 30px;">
-            <div style="flex: 1; background: white; padding: 20px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); text-align: center;">
-                <span id="kpi_label_1" style="font-size: 0.9rem; color: #666; font-weight: bold; display: block; margin-bottom: 5px;">Wert 1</span>
-                <span id="kpi_wert_1" style="font-size: 1.8rem; font-weight: bold; color: #2c3e50;">0,00 €</span>
+        <div class="kpi-wrapper">
+            <div class="kpi-card">
+                <span id="kpi_label_1" class="kpi-label">Wert 1</span>
+                <span id="kpi_wert_1" class="kpi-wert kpi-neutral">0,00 €</span>
             </div>
-            <div style="flex: 1; background: white; padding: 20px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); text-align: center;">
-                <span id="kpi_label_2" style="font-size: 0.9rem; color: #666; font-weight: bold; display: block; margin-bottom: 5px;">Wert 2</span>
-                <span id="kpi_wert_2" style="font-size: 1.8rem; font-weight: bold; color: #27ae60;">0,00 €</span>
+            <div class="kpi-card">
+                <span id="kpi_label_2" class="kpi-label">Wert 2</span>
+                <span id="kpi_wert_2" class="kpi-wert kpi-neutral">0,00 €</span>
             </div>
-            <div style="flex: 1; background: white; padding: 20px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); text-align: center;">
-                <span id="kpi_label_3" style="font-size: 0.9rem; color: #666; font-weight: bold; display: block; margin-bottom: 5px;">Wert 3</span>
-                <span id="kpi_wert_3" style="font-size: 1.8rem; font-weight: bold; color: #c0392b;">0,00 €</span>
+            <div class="kpi-card">
+                <span id="kpi_label_3" class="kpi-label">Wert 3</span>
+                <span id="kpi_wert_3" class="kpi-wert kpi-neutral">0,00 €</span>
             </div>
         </div>
 
         <h3>📋 Detaillierte Aufschlüsselung</h3>
-        <table style="width: 100%; border-collapse: collapse; background: white; margin-bottom: 25px;">
+        <table>
             <thead>
-                <tr style="background: #f2f2f2; border-bottom: 2px solid #ddd; text-align: left;">
-                    <!-- <th style="padding: 10px;">Posten / Kennzahl</th>
-                    <th style="padding: 10px; text-align: right;">Betrag</th> -->
-                </tr>
+                <tr>
+                    </tr>
             </thead>
             <tbody id="ergebnis_tabelle_body">
                 </tbody>
         </table>
 
-        <div id="vorab_ergebnis_container" style="margin-top: 25px; margin-bottom: 25px;">
+        <div id="vorab_ergebnis_container" style="margin-top: 30px; margin-bottom: 25px;">
             <h3>💰 Berücksichtigte Vorabpauschalen</h3>
-            <table style="width: 100%; border-collapse: collapse; background: white;">
+            <table>
                 <thead>
-                    <tr style="background: #f2f2f2; border-bottom: 2px solid #ddd; text-align: left;">
-                        <th style="padding: 10px;">Jahr</th>
-                        <th style="padding: 10px; text-align: right;">Betrag pro Anteil (€)</th>
+                    <tr>
+                        <th>Jahr</th>
+                        <th style="text-align: right;">Betrag pro Anteil (€)</th>
                     </tr>
                 </thead>
                 <tbody id="vorab_ergebnis_tabelle_body">
@@ -564,13 +623,514 @@
             </table>
         </div>
 
-
-        <div style="text-align: right;">
-            <button id="btn_pdf_download" onclick="downloadeErgebnisPDF()" style="background: #e74c3c; color: white; border: none; padding: 12px 25px; font-size: 1rem; border-radius: 5px; cursor: pointer; font-weight: bold;">
+        <div style="text-align: right; margin-top: 30px;">
+            <button id="btn_pdf_download" onclick="downloadeErgebnisPDF()">
                 📄 PDF-Report herunterladen
             </button>
         </div>
     </div>
+
+
+</div>
+
+
+<div class="disclaimer">
+Hinweis: Die bereitgestellten Berechnungen dienen ausschließlich der unverbindlichen Information und stellen keine steuerliche Beratung dar. Trotz sorgfältiger Erstellung wird keine Gewähr für die Richtigkeit, Vollständigkeit oder Aktualität der Ergebnisse übernommen. Für verbindliche Auskünfte wenden Sie sich bitte an einen Steuerberater oder das zuständige Finanzamt.
+</div>
+
+<section class="hero">
+
+<h2>Welche Steuerregeln berücksichtigt der ETF Steuer Rechner?</h2>
+
+<p>
+Der ETF Steuer Rechner berücksichtigt wichtige steuerliche Regeln für ETFs in Deutschland:
+</p>
+
+<ul>
+<li><strong>FIFO-Prinzip (First-In-First-Out)</strong> bei Verkäufen</li>
+<li><strong>Teilfreistellung für Aktien-ETFs</strong> (30% steuerfrei)</li>
+<li><strong>Vorabpauschale</strong> bei thesaurierenden ETFs</li>
+<li><strong>Sparerpauschbetrag</strong></li>
+<li><strong>Verlustverrechnung über den Verlusttopf</strong></li>
+</ul>
+
+<p>
+Damit erhalten Sie eine möglichst realistische Schätzung der Steuer beim Verkauf Ihrer ETF-Anteile.
+</p>
+
+<hr>
+
+<h2>Welche Faktoren berücksichtigt der ETF Steuer Rechner nicht?</h2>
+
+<p>
+Der ETF Steuer Rechner berücksichtigt die wichtigsten steuerlichen Regeln für ETFs in Deutschland. 
+Einige kleinere Faktoren können jedoch nicht exakt abgebildet werden. Dazu gehören zum Beispiel:
+</p>
+
+<ul>
+
+<li>
+<strong>Verkaufsgebühren oder Orderkosten Ihres Brokers.</strong>
+Diese reduzieren in der Praxis den tatsächlichen Nettoerlös, werden aber in diesem Rechner nicht berücksichtigt.
+</li>
+
+<li>
+<strong>Berechnung der Vorabpauschale.</strong>
+Einige Banken berechnen die Vorabpauschale tagesgenau, andere monatsgenau. 
+In diesem Tool erfolgt die Berechnung auf Monatsbasis.
+Zudem wird angenommen, dass bei ausschüttenden ETFs keine Vorabpauschale anfällt. 
+Technisch kann in seltenen Fällen dennoch eine Vorabpauschale entstehen, wenn die Ausschüttungen kleiner als der berechnete Basisertrag sind.
+</li>
+
+<li>
+<strong>Rundungsregeln und Kursquellen.</strong>
+Banken können leicht unterschiedliche Rundungsregeln oder Kursquellen verwenden, wodurch kleine Unterschiede entstehen können.
+</li>
+
+<li>
+<strong>Zukünftige Änderungen der Steuerregeln.</strong>
+Die Berechnung basiert auf dem aktuellen Stand der deutschen Steuergesetzgebung (Stand: Juni 2026).
+</li>
+
+</ul>
+
+<p>
+Insgesamt kann es daher zu kleinen Abweichungen zwischen der Berechnung dieses Tools und der tatsächlichen Steuerberechnung Ihrer Bank kommen.
+</p>
+
+<hr>
+
+<h2>Beispielrechnung für den ETF Steuer Rechner</h2>
+
+<p>
+Angenommen, Sie besitzen ETF-Anteile mit einem Gewinn von 1.700&nbsp;€ 
+und haben noch den vollen Sparerpauschbetrag von 1.000&nbsp;€ verfügbar.
+
+Der Rechner zeigt Ihnen, wie viele Anteile Sie verkaufen können,
+ohne Abgeltungssteuer zu zahlen.
+
+Alternativ können Sie berechnen, wie viele Anteile Sie verkaufen müssen,
+um einen bestimmten Nettoerlös zu erhalten. 
+
+Wenn Sie zum Beispiel 2.000&nbsp;€ netto aus einem ETF-Verkauf erhalten möchten,
+berechnet der Rechner automatisch, wie viele Anteile Sie dafür verkaufen müssen.
+</p>
+
+<p>
+So können Sie leicht prüfen, wie Sie Ihren <strong>Sparerpauschbetrag optimal ausnutzen</strong>, ohne unnötig Steuern zu zahlen.
+</p>
+
+<hr>
+
+<h2>Warum diesen ETF Steuer Rechner nutzen?</h2>
+
+<ul>
+<li>Berücksichtigt wichtige deutsche Steuerregeln für ETFs (FIFO, Teilfreistellung, Vorabpauschale)</li>
+<li>Kostenlos und ohne Registrierung nutzbar</li>
+<li>Keine Speicherung persönlicher Finanzdaten</li>
+<li>Berechnung direkt im Browser ohne Upload persönlicher Depotdaten</li>
+</ul>
+
+<hr>
+
+<h2>Für wen ist dieser ETF Steuer Rechner geeignet?</h2>
+
+<p>
+Der Rechner eignet sich für Anleger in Deutschland, die ihre ETF-Steuer beim Verkauf abschätzen möchten oder ihren Sparerpauschbetrag optimal nutzen wollen.
+</p>
+
+<hr>
+
+<h2>Hinweis</h2>
+
+<p>
+Die Ergebnisse sind eine realistische Schätzung und dienen nur zur Orientierung.
+In der tatsächlichen Abrechnung Ihrer Bank können leichte Abweichungen entstehen.
+</p>
+
+<p>
+Die auf dieser Website bereitgestellten Steuerberechnungen dienen ausschließlich zu Informationszwecken und stellen <strong>keine steuerliche Beratung dar</strong>. Trotz sorgfältiger Erstellung wird keine Gewähr für die Richtigkeit, Vollständigkeit oder Aktualität der Ergebnisse übernommen. Für verbindliche Auskünfte wenden Sie sich bitte an einen Steuerberater oder das zuständige Finanzamt.
+</p>
+
+</section>
+
+<section class="faq">
+
+<h2>FAQ: ETF Steuer und ETF-Verkauf in Deutschland</h2>
+
+<hr>
+
+<details>
+<summary>Wie hoch ist die Steuer beim Verkauf von ETFs in Deutschland?</summary>
+<p>
+Der Steuersatz beträgt 25&nbsp;% zuzüglich Solidaritätszuschlag und gegebenenfalls Kirchensteuer. Durch die Teilfreistellung bei Aktien-ETFs sind jedoch 30&nbsp;% der Gewinne steuerfrei, sodass effektiv nur 70&nbsp;% des Gewinns versteuert werden müssen.
+</p>
+</details>
+
+<details>
+<summary>Wann muss ich beim ETF-Verkauf Steuern zahlen?</summary>
+<p>
+Steuern fallen an, wenn Sie beim Verkauf von ETF-Anteilen einen Gewinn erzielen und Ihr Sparerpauschbetrag bereits ausgeschöpft ist. Solange der jährliche Sparerpauschbetrag noch nicht vollständig genutzt wurde, können Gewinne bis zu dieser Höhe steuerfrei bleiben.
+</p>
+</details>
+
+<details>
+<summary>Was ist der Sparerpauschbetrag?</summary>
+<p>
+Der Sparerpauschbetrag ist ein Freibetrag für Kapitalerträge. In Deutschland können derzeit bis zu 1000&nbsp;€ pro Person pro Jahr steuerfrei verdient werden. Erst darüber hinaus fällt Abgeltungssteuer an.
+</p>
+</details>
+
+<details>
+<summary>Wie hoch ist der Sparerpauschbetrag aktuell?</summary>
+<p>
+Der Sparerpauschbetrag beträgt derzeit in Deutschland <strong>1.000&nbsp;€ pro Person und Jahr</strong>. 
+Für Ehepaare oder eingetragene Lebenspartnerschaften, die gemeinsam veranlagt werden, liegt der Freibetrag bei <strong>2.000&nbsp;€ pro Jahr</strong>. 
+Kapitalerträge wie Zinsen, Dividenden oder Gewinne aus dem Verkauf von ETFs bleiben bis zu dieser Höhe steuerfrei. 
+Erst wenn die gesamten Kapitalerträge den Sparerpauschbetrag überschreiten, fällt Abgeltungssteuer an.
+</p>
+</details>
+
+<details>
+<summary>Was bedeutet FIFO beim ETF-Verkauf?</summary>
+<p>
+FIFO steht für „First-In-First-Out“. Beim Verkauf von ETF-Anteilen gilt steuerlich, dass immer die zuerst gekauften Anteile zuerst verkauft werden. Dadurch kann sich der steuerpflichtige Gewinn je nach Kaufzeitpunkt der Anteile unterscheiden.
+</p>
+</details>
+
+<details>
+<summary>Was ist die Teilfreistellung bei ETFs?</summary>
+<p>
+Bei Aktien-ETFs sind 30&nbsp;% der Gewinne steuerfrei. Das bedeutet, dass nur 70&nbsp;% des Gewinns tatsächlich versteuert werden müssen.
+</p>
+</details>
+
+<details>
+<summary>Was ist die Vorabpauschale bei ETFs?</summary>
+<p>
+Die Vorabpauschale ist eine jährliche Mindestbesteuerung für Fonds. Sie sorgt dafür, dass auch bei thesaurierenden ETFs ein Teil der Erträge besteuert wird, selbst wenn keine Ausschüttungen erfolgen.
+</p>
+</details>
+
+<details>
+<summary>Wie viele ETF-Anteile kann ich steuerfrei verkaufen?</summary>
+<p>
+Das hängt davon ab, wie hoch Ihr Gewinn pro Anteil ist und wie viel Sparerpauschbetrag noch verfügbar ist. Der ETF Steuer Rechner berechnet automatisch, wie viele Anteile Sie verkaufen können, ohne dass Abgeltungssteuer anfällt.
+</p>
+</details>
+
+<details>
+<summary>Wie wird der Gewinn beim ETF-Verkauf berechnet?</summary>
+<p>
+Der Gewinn beim Verkauf von ETFs ergibt sich aus der Differenz zwischen dem Verkaufspreis und dem ursprünglichen Kaufpreis der Anteile. 
+Dabei wird in Deutschland das <strong>FIFO-Prinzip (First-In-First-Out)</strong> angewendet. Das bedeutet, dass steuerlich immer die zuerst gekauften ETF-Anteile als zuerst verkauft gelten.
+</p>
+
+<p>
+Der steuerpflichtige Gewinn wird anschließend um mehrere Faktoren angepasst, zum Beispiel:
+</p>
+
+<ul>
+<li><strong>Teilfreistellung</strong> bei Aktien-ETFs (30&nbsp;% der Gewinne sind steuerfrei)</li>
+<li><strong>Vorabpauschalen</strong>, die bereits in früheren Jahren versteuert wurden</li>
+<li><strong>Verlustverrechnung</strong aus dem Verlusttopf Ihrer Bank</li>
+<li>den noch verfügbaren <strong>Sparerpauschbetrag</strong></li>
+</ul>
+
+<p>
+Der ETF Steuer Rechner berücksichtigt diese Faktoren automatisch und berechnet daraus den voraussichtlichen steuerpflichtigen Gewinn sowie die zu zahlende Steuer.
+</p>
+</details>
+
+<details>
+<summary>Muss ich ETF-Gewinne in der Steuererklärung angeben?</summary>
+<p>
+In den meisten Fällen führt Ihr Broker die Abgeltungssteuer automatisch ab. Wenn jedoch kein Freistellungsauftrag vorliegt oder ausländische Broker genutzt werden, kann es erforderlich sein, die Kapitalerträge in der Steuererklärung anzugeben.
+</p>
+</details>
+
+<details>
+<summary>Wie genau ist die Steuerberechnung dieses Rechners?</summary>
+<p>
+Der Rechner verwendet die aktuellen deutschen Steuerregeln und berücksichtigt FIFO, Teilfreistellung, Vorabpauschale, Sparerpauschbetrag und Verlusttopf. Dennoch können in der tatsächlichen Abrechnung Ihrer Bank leichte Abweichungen entstehen.
+</p>
+</details>
+
+<details>
+<summary>Warum kann die Steuerberechnung von der meiner Bank abweichen?</summary>
+<p>
+Banken können leicht unterschiedliche Rundungsregeln, Kursquellen oder Berechnungsmethoden verwenden. Daher können kleine Unterschiede zwischen der Berechnung dieses Tools und der tatsächlichen Steuerabrechnung Ihrer Bank entstehen.
+</p>
+</details>
+
+<details>
+<summary>Welche Daten benötigt der ETF Steuer Rechner?</summary>
+<p>
+Für die Berechnung werden in der Regel folgende Informationen benötigt:
+</p>
+
+<ul>
+<li><strong>Kaufdatum der ETF-Anteile</strong> – bestimmt die Reihenfolge der Verkäufe nach dem FIFO-Prinzip</li>
+<li><strong>Kaufpreis pro Anteil</strong> – dient zur Berechnung des Gewinns beim Verkauf</li>
+<li><strong>Anzahl der gekauften Anteile</strong> – bestimmt den Gesamtwert der Position</li>
+<li><strong>Aktueller Verkaufskurs</strong> – Preis, zu dem die Anteile verkauft werden sollen</li>
+</ul>
+
+<p>
+Auf Basis dieser Daten berechnet der ETF Steuer Rechner den Gewinn aus dem Verkauf sowie die voraussichtlich anfallende Steuer.
+</p>
+</details>
+
+<details>
+<summary>Werden meine eingegebenen Daten gespeichert?</summary>
+<p>
+Nein. Alle Berechnungen erfolgen direkt im Browser beziehungsweise innerhalb des eingebetteten Tools. Es werden keine persönlichen Finanzdaten dauerhaft gespeichert.
+</p>
+</details>
+
+</section>
+
+<a href="#rechner" class="mobile-tool-button">Zum Rechner</a>
+
+<hr>
+
+<footer>
+
+<p>© 2026 ETF Steuer Rechner – Alle Berechnungen ohne Gewähr. Keine steuerliche Beratung.</p>
+
+
+<p>
+<a href="#" onclick="openModal('impressumModal')">Impressum</a> |
+<a href="#" onclick="openModal('datenschutzModal')">Datenschutz</a>
+</p>
+
+</footer>
+
+<div id="impressumModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('impressumModal')">&times;</span>
+
+    <h2>Impressum</h2>
+
+    <p>Angaben gemäß §5 Digitale-Dienste-Gesetz (DDG)</p>
+
+    <p>
+    Dennis Hermelyn<br>
+    Krawehlstr. 44<br>
+    45130 Essen<br>
+    Deutschland<br>
+    E-Mail: dennishermelyn@gmail.com<br>
+    </p>
+
+    <p>
+    Verantwortlich für den Inhalt nach §55 Abs. 2 RStV:<br>
+    Dennis Hermelyn
+    </p>
+
+    <p>
+    Dieses Projekt ist ein privates Informationsangebot. Alle Berechnungen erfolgen ohne Gewähr.
+    </p>
+
+  </div>
+</div>
+
+
+
+<div id="datenschutzModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('datenschutzModal')">&times;</span>
+        
+        <h2>Datenschutzerklärung</h2>
+        
+        <h3>1. Allgemeine Hinweise</h3>
+        <p>
+        Der Schutz Ihrer persönlichen Daten ist mir wichtig. Diese Website kann grundsätzlich ohne Angabe personenbezogener Daten genutzt werden. 
+        Die Verarbeitung personenbezogener Daten erfolgt ausschließlich im Rahmen der gesetzlichen Bestimmungen der Datenschutz-Grundverordnung (DSGVO) sowie der einschlägigen nationalen Datenschutzgesetze.
+        </p>
+        
+        <h3>2. Verantwortlicher</h3>
+        <p>
+        Verantwortlich für die Datenverarbeitung auf dieser Website ist:
+        </p>
+        
+        <p>
+        Dennis Hermelyn<br>
+        Krawehlstr. 44<br>
+        45130 Essen<br>
+        Deutschland<br>
+        E-Mail: dennishermelyn@gmail.com
+        </p>
+        
+        <h3>3. Hosting über Vercel</h3>
+        <p>
+        Diese Website wird über den Hosting-Dienst Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, USA betrieben.
+        Beim Aufruf der Website werden durch den Hosting-Provider automatisch technische Informationen verarbeitet.
+        Dies ist erforderlich, um die Website auszuliefern und die Stabilität sowie Sicherheit der Systeme zu gewährleisten.
+        </p>
+        
+        <p>
+        Dabei können insbesondere folgende Daten verarbeitet werden:
+        </p>
+        
+        <ul>
+        <li>IP-Adresse des anfragenden Geräts</li>
+        <li>Datum und Uhrzeit des Zugriffs</li>
+        <li>Browsertyp und Browserversion</li>
+        <li>verwendetes Betriebssystem</li>
+        <li>aufgerufene Seiten</li>
+        <li>Referrer-URL (zuvor besuchte Seite)</li>
+        </ul>
+        
+        <p>
+        Diese Daten werden in sogenannten Server-Logfiles verarbeitet. Eine Zusammenführung dieser Daten mit anderen Datenquellen erfolgt durch den Betreiber dieser Website nicht.
+        </p>
+        
+        <p>
+        Rechtsgrundlage für diese Verarbeitung ist Art. 6 Abs. 1 lit. f DSGVO. Das berechtigte Interesse liegt in der technisch fehlerfreien Darstellung und der sicheren Bereitstellung dieser Website.
+        </p>
+        
+        <p>
+        Vercel ist ein Anbieter aus den USA. Eine Übermittlung personenbezogener Daten in ein Drittland kann daher nicht ausgeschlossen werden. 
+        Nach Angaben des Anbieters erfolgen solche Übermittlungen auf Grundlage geeigneter Garantien im Sinne des Art. 46 DSGVO, insbesondere durch den Einsatz von Standardvertragsklauseln.
+        </p>
+        
+        <h3>4. Eingebettetes Tool (Streamlit)</h3>
+        <p>
+        Auf dieser Website ist ein Rechner eingebettet, der über die Plattform Streamlit bereitgestellt wird.
+        Beim Aufruf dieses Rechners wird eine Verbindung zu Servern des jeweiligen Dienstes hergestellt.
+        Dabei können technische Daten wie IP-Adresse, Browserinformationen und Zeitpunkt des Zugriffs verarbeitet werden.
+        </p>
+        
+        <p>
+        Die im Rechner eingegebenen Daten werden ausschließlich zur Durchführung der Berechnung verwendet.
+        Durch den Betreiber dieser Website werden keine eingegebenen Daten gespeichert oder dauerhaft verarbeitet.
+        </p>
+        
+        <h3>5. Cookies</h3>
+        <p>
+        Diese Website verwendet selbst keine Cookies zur Analyse oder Nachverfolgung von Nutzern.
+        Es kann jedoch technisch erforderlich sein, dass durch den Hosting-Anbieter oder durch eingebettete Dienste Cookies gesetzt werden.
+        Auf diese technischen Prozesse hat der Betreiber dieser Website keinen direkten Einfluss.
+        </p>
+        
+        <h3>6. Ihre Rechte</h3>
+        <p>
+        Sie haben im Rahmen der gesetzlichen Bestimmungen jederzeit folgende Rechte:
+        </p>
+        
+        <ul>
+        <li>Recht auf Auskunft über Ihre gespeicherten personenbezogenen Daten (Art. 15 DSGVO)</li>
+        <li>Recht auf Berichtigung unrichtiger Daten (Art. 16 DSGVO)</li>
+        <li>Recht auf Löschung Ihrer Daten (Art. 17 DSGVO)</li>
+        <li>Recht auf Einschränkung der Verarbeitung (Art. 18 DSGVO)</li>
+        <li>Recht auf Widerspruch gegen die Verarbeitung (Art. 21 DSGVO)</li>
+        </ul>
+        
+        <p>
+        Da diese Website selbst keine personenbezogenen Daten speichert, können entsprechende Anfragen in der Regel nicht direkt bearbeitet werden. 
+        Technische Zugriffsdaten werden ausschließlich durch den Hosting-Anbieter verarbeitet.
+        </p>
+        
+        <h3>7. Beschwerderecht bei einer Aufsichtsbehörde</h3>
+        <p>
+        Sie haben außerdem das Recht, sich bei einer Datenschutzaufsichtsbehörde über die Verarbeitung Ihrer personenbezogenen Daten zu beschweren.
+        </p>
+        
+        <h3>8. Änderungen dieser Datenschutzerklärung</h3>
+        <p>
+        Diese Datenschutzerklärung kann angepasst werden, wenn sich technische oder rechtliche Rahmenbedingungen ändern.
+        Die jeweils aktuelle Version wird auf dieser Website veröffentlicht.
+        </p>
+        
+        <h3>9. Kontakt</h3>
+        <p>
+        Bei Fragen zum Datenschutz können Sie sich jederzeit per E-Mail an mich wenden:
+        </p>
+        
+        <p>
+        dennishermelyn@gmail.com
+        </p>
+        
+        <h3>Stand: Juni 2026</h3>
+
+  </div>
+</div>
+
+
+</main>
+
+
+<script type="application/ld+json">
+{
+"@context": "https://schema.org",
+"@type": "FAQPage",
+"mainEntity": [
+{
+"@type": "Question",
+"name": "Wie hoch ist die Steuer beim Verkauf von ETFs in Deutschland?",
+"acceptedAnswer": {
+"@type": "Answer",
+"text": "Beim Verkauf von ETFs fällt in Deutschland grundsätzlich Abgeltungssteuer an. Der Steuersatz beträgt 25 Prozent zuzüglich Solidaritätszuschlag und gegebenenfalls Kirchensteuer. Bei Aktien-ETFs sind durch die Teilfreistellung 30 Prozent der Gewinne steuerfrei."
+}
+},
+{
+"@type": "Question",
+"name": "Was ist der Sparerpauschbetrag?",
+"acceptedAnswer": {
+"@type": "Answer",
+"text": "Der Sparerpauschbetrag ist ein Freibetrag für Kapitalerträge. In Deutschland können derzeit bis zu 1000 Euro pro Person und Jahr steuerfrei verdient werden. Erst darüber hinaus fällt Abgeltungssteuer an."
+}
+},
+{
+"@type": "Question",
+"name": "Was bedeutet FIFO beim ETF-Verkauf?",
+"acceptedAnswer": {
+"@type": "Answer",
+"text": "FIFO steht für „First-In-First-Out“. Beim Verkauf von ETF-Anteilen gilt steuerlich, dass immer die zuerst gekauften Anteile zuerst verkauft werden. Dadurch kann sich der steuerpflichtige Gewinn je nach Kaufzeitpunkt der Anteile unterscheiden."
+}
+},
+{
+"@type": "Question",
+"name": "Was ist die Vorabpauschale bei ETFs?",
+"acceptedAnswer": {
+"@type": "Answer",
+"text": "Die Vorabpauschale ist eine jährliche Mindestbesteuerung für Fonds. Sie sorgt dafür, dass auch bei thesaurierenden ETFs ein Teil der Erträge besteuert wird, selbst wenn keine Ausschüttungen erfolgen."
+}
+},
+{
+"@type": "Question",
+"name": "Wie viele ETF-Anteile kann ich steuerfrei verkaufen?",
+"acceptedAnswer": {
+"@type": "Answer",
+"text": "Das hängt davon ab, wie hoch Ihr Gewinn pro Anteil ist und wie viel Sparerpauschbetrag noch verfügbar ist. Der ETF Steuer Rechner kann berechnen, wie viele Anteile Sie verkaufen können, ohne dass Abgeltungssteuer anfällt."
+}
+}
+]
+}
+</script>
+
+<script type="application/ld+json">
+{
+"@context": "https://schema.org",
+"@type": "SoftwareApplication",
+"name": "ETF Steuer Rechner",
+"applicationCategory": "FinanceApplication",
+"operatingSystem": "Web",
+"url": "https://www.etfsteuerrechner.de",
+"description": "Kostenloser ETF Steuer Rechner für Deutschland. Berechnen Sie die Steuer beim ETF-Verkauf, wie viele ETF-Anteile steuerfrei verkauft werden können und wie viele Anteile Sie für einen gewünschten Nettoerlös verkaufen müssen.",
+"offers": {
+  "@type": "Offer",
+  "price": "0",
+  "priceCurrency": "EUR"
+},
+"featureList": [
+  "Berechnung der Steuer beim ETF-Verkauf",
+  "Berechnung steuerfrei verkaufbarer ETF-Anteile",
+  "Berechnung benötigter Anteile für gewünschten Nettoerlös",
+  "Berücksichtigung von FIFO, Teilfreistellung, Vorabpauschale und Sparerpauschbetrag"
+]
+}
+</script>
 
 
     <script>
@@ -606,34 +1166,39 @@
         //     `;
         // }
 
-        function fuegeZeileHinzu() {
+        // 1. Parameter (mit Standardwerten) zur Funktion hinzufügen!
+        function fuegeZeileHinzu(datum = "", anzahl = "", preis = "") {
             let tbody = document.getElementById("tabelle_body");
             let tr = document.createElement("tr");
-
+        
+            // Das heutige Datum für das "max"-Attribut ermitteln
+            const heute = new Date().toISOString().split('T')[0];
+        
+            // 2. value-Attribute in die Inputs einbauen, damit Daten geladen werden!
             tr.innerHTML = `
                 <td>
-                    <input type="date" class="row-datum" max="${heute}" onchange="
+                    <input type="date" class="row-datum" max="${heute}" value="${datum}" onchange="
                         if(this.value > this.max) { 
                             this.value = this.max; 
                         }
                     ">
                 </td>
                 <td>
-                    <input type="number" class="row-anzahl" step="0.00001" min="0.00001" placeholder="0.0" onchange="
+                    <input type="number" class="row-anzahl" step="0.00001" min="0.00001" placeholder="0.0" value="${anzahl}" onchange="
                         if(this.value !== '') {
                             if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min;
                         }
                     ">
                 </td>
                 <td>
-                    <input type="number" class="row-preis" step="0.01" min="0.01" placeholder="0.00" onchange="
+                    <input type="number" class="row-preis" step="0.01" min="0.01" placeholder="0.00" value="${preis}" onchange="
                         if(this.value !== '') {
                             if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min;
                         }
                     ">
                 </td>
                 <td>
-                    <button type="button" class="btn-delete" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #dc3545;" onclick="loescheZeile(this)">🗑️</button>
+                    <button type="button" class="btn-delete" onclick="loescheZeile(this)">🗑️</button>
                 </td>
             `;
             
@@ -642,43 +1207,122 @@
 
 
         function loescheZeile(button) {
-            let row = button.parentNode.parentNode;
-            row.parentNode.removeChild(row);
-            aktualisiereVorabpauschaleTabelle(); // <-- NEU HIER
+            // Sauberere Variante, um die Zeile zu löschen
+            button.closest("tr").remove();
+            if (typeof aktualisiereVorabpauschaleTabelle === "function") {
+                aktualisiereVorabpauschaleTabelle();
+            }
         }
 
-
-        // ASYNC FUNCTION: Kommuniziert mit FastAPI beim CSV Upload
+        // ASYNC FUNCTION: Bleibt genau so, da sie jetzt fehlerfreie Daten übergibt!
         async function uploadCSV() {
             let fileInput = document.getElementById("csv_file");
             if (fileInput.files.length === 0) return;
-
+        
             let file = fileInput.files[0];
             let formData = new FormData();
             formData.append("file", file);
-
-            // Sende Datei via POST an FastAPI
+        
             let response = await fetch("/api/upload-csv", {
                 method: "POST",
                 body: formData
             });
-
+        
             let result = await response.json();
-
+        
             if (result.success) {
-                // Tabelle leeren
                 document.getElementById("tabelle_body").innerHTML = "";
-                
-                // Gefundene Zeilen in die Tabelle eintragen
+
                 result.data.forEach(kauf => {
+                    // Reicht die Daten jetzt erfolgreich an die korrigierte Funktion weiter
                     fuegeZeileHinzu(kauf.datum, kauf.anzahl, kauf.preis);
                 });
-
-                aktualisiereVorabpauschaleTabelle();
+            
+                if (typeof aktualisiereVorabpauschaleTabelle === "function") {
+                    aktualisiereVorabpauschaleTabelle();
+                }
             } else {
                 alert("Fehler beim Laden der CSV: " + result.error);
             }
+
+            // Feld zurücksetzen, damit man dieselbe Datei erneut hochladen kann
+            fileInput.value = "";
         }
+
+
+        // function fuegeZeileHinzu() {
+        //     let tbody = document.getElementById("tabelle_body");
+        //     let tr = document.createElement("tr");
+
+        //     tr.innerHTML = `
+        //         <td>
+        //             <input type="date" class="row-datum" max="${heute}" onchange="
+        //                 if(this.value > this.max) { 
+        //                     this.value = this.max; 
+        //                 }
+        //             ">
+        //         </td>
+        //         <td>
+        //             <input type="number" class="row-anzahl" step="0.00001" min="0.00001" placeholder="0.0" onchange="
+        //                 if(this.value !== '') {
+        //                     if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min;
+        //                 }
+        //             ">
+        //         </td>
+        //         <td>
+        //             <input type="number" class="row-preis" step="0.01" min="0.01" placeholder="0.00" onchange="
+        //                 if(this.value !== '') {
+        //                     if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min;
+        //                 }
+        //             ">
+        //         </td>
+        //         <td>
+        //             <button type="button" class="btn-delete" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #dc3545;" onclick="loescheZeile(this)">🗑️</button>
+        //         </td>
+        //     `;
+            
+        //     tbody.appendChild(tr);
+        // }
+
+
+        // function loescheZeile(button) {
+        //     let row = button.parentNode.parentNode;
+        //     row.parentNode.removeChild(row);
+        //     aktualisiereVorabpauschaleTabelle(); // <-- NEU HIER
+        // }
+
+
+        // // ASYNC FUNCTION: Kommuniziert mit FastAPI beim CSV Upload
+        // async function uploadCSV() {
+        //     let fileInput = document.getElementById("csv_file");
+        //     if (fileInput.files.length === 0) return;
+
+        //     let file = fileInput.files[0];
+        //     let formData = new FormData();
+        //     formData.append("file", file);
+
+        //     // Sende Datei via POST an FastAPI
+        //     let response = await fetch("/api/upload-csv", {
+        //         method: "POST",
+        //         body: formData
+        //     });
+
+        //     let result = await response.json();
+
+        //     if (result.success) {
+        //         // Tabelle leeren
+        //         document.getElementById("tabelle_body").innerHTML = "";
+                
+        //         // Gefundene Zeilen in die Tabelle eintragen
+        //         result.data.forEach(kauf => {
+        //             fuegeZeileHinzu(kauf.datum, kauf.anzahl, kauf.preis);
+        //         });
+
+        //         aktualisiereVorabpauschaleTabelle();
+        //     } else {
+        //         alert("Fehler beim Laden der CSV: " + result.error);
+        //     }
+        // }
 
         // NEU: Berechnet die benötigten Jahre für die Vorabpauschale
         function aktualisiereVorabpauschaleTabelle() {
@@ -1543,12 +2187,12 @@
 
         // }
 
-        // let aktuelleTRDaten = null;
-        // let aktuelleTRKurse = {}; // NEU: Speichert die vom Server gelieferten Kurse global
-        // let aktuelleTRVerkaeufe = {};
-        // let aktuellerTRTicker = null; // Speichert den aktuell aktiven Ticker für die Berechnung
-        // let aktuelleTRTickerMapping = {}; // NEU: Merkt sich die Ticker-Übersetzungen
-        // let aktuellerPdfBase64 = null;
+        let aktuelleTRDaten = null;
+        let aktuelleTRKurse = {}; // NEU: Speichert die vom Server gelieferten Kurse global
+        let aktuelleTRVerkaeufe = {};
+        let aktuellerTRTicker = null; // Speichert den aktuell aktiven Ticker für die Berechnung
+        let aktuelleTRTickerMapping = {}; // NEU: Merkt sich die Ticker-Übersetzungen
+        let aktuellerPdfBase64 = null;
 
         async function uploadTradeRepublicCSV() {
             let fileInput = document.getElementById("tr_csv_file");
