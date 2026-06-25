@@ -29,11 +29,11 @@
 
     <div class="form-group">
         <label for="freibetrag">Noch verfügbarer Sparerpauschbetrag (€)</label>
-        <input type="number" id="freibetrag" value="1000.00" step="0.01">
+        <input type="number" id="freibetrag" value="1000.00" step="0.01" min="0" max="2000.00" onchange="if(this.value !== '') { if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min; if(parseFloat(this.value) > parseFloat(this.max)) this.value = this.max; }">
     </div>
     <div class="form-group">
         <label for="verlusttopf">Allgemeiner Verlusttopf (€)</label>
-        <input type="number" id="verlusttopf" value="0.00" step="0.01">
+        <input type="number" id="verlusttopf" value="0.00" step="0.01" min="0" onchange="if(this.value !== '') { if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min; }">
     </div>
     <div class="form-group">
         <label for="kirchensteuer">Kirchensteuerpflicht</label>
@@ -47,12 +47,15 @@
     <div class="form-group">
         <label for="teilfreistellung">Teilfreistellung des ETFs</label>
         <select id="teilfreistellung">
-            <option value="30">Aktien-ETF / -Fonds (30% Teilfreistellung)</option>
-            <option value="15">Mischfonds (15% Teilfreistellung)</option>
             <option value="0">Keine Teilfreistellung (z.B. Geldmarkt-/Anleihen-ETF)</option>
-            <option value="60">Immobilienfonds (60% Teilfreistellung)</option>
+            <option value="15">Mischfonds (15% Teilfreistellung)</option>
+            <option value="30">Aktien-ETF / -Fonds (30% Teilfreistellung)</option>
+            <option value="60">Inlands-Immobilienfonds (60% Teilfreistellung)</option>
+            <option value="80">Auslands-Immobilienfonds (80% Teilfreistellung)</option>
         </select>
     </div>
+
+    <!-- HIER NOCH DROP DOWN ALLE OPTIONEN EINFÜGEN, WIE STARTAUSWAHL FESTLEGEN? INFOS HINZUFÜGEN -->
 
     <div class="form-group">
         <label for="ertragsverwendung">Ertragsverwendung des ETFs</label>
@@ -62,9 +65,6 @@
         </select>
     </div>
 
-
-
-    
     <div class="form-group">
         <label for="eingabe_option">Wie möchten Sie Ihre Daten eingeben?</label>
         <select id="eingabe_option" onchange="toggleEingabeOptionen()">
@@ -78,7 +78,7 @@
         <h3>1. Basisdaten</h3>
         <div class="form-group">
             <label for="verkaufskurs">Verkaufskurs pro Anteil (€)</label>
-            <input type="number" id="verkaufskurs" value="100.00" step="0.01">
+            <input type="number" id="verkaufskurs" value="100.00" step="0.01" min="0" onchange="if(this.value !== '') { if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min; }">
         </div>
 
 
@@ -103,16 +103,37 @@
         
         <button class="btn-add" onclick="fuegeZeileHinzu()">+ Zeile hinzufügen</button>
 
-        <!-- <div class="form-group" style="margin-top: 25px;">
-            <label for="bereits_verkauft">Anzahl bereits verkaufter Anteile (für FIFO-Berechnung)</label>
-            <input type="number" id="bereits_verkauft" value="0.00000" step="0.00001" min="0">
-        </div> -->
-
         <div class="form-group">
             <label for="bereits_verkauft_manuell">Bereits verkaufte Anteile (für FIFO-Ermittlung)</label>
-            <input type="number" id="bereits_verkauft_manuell" step="0.00001" min="0" value="0.0" placeholder="z.B. 12.345">
+            <input type="number" 
+                   id="bereits_verkauft_manuell" 
+                   step="0.00001" 
+                   min="0" 
+                   value="0.0" 
+                   placeholder="z.B. 5.0" 
+                   onchange="
+                       if(this.value !== '') { 
+                           // 1. Minimum prüfen (0)
+                           if(parseFloat(this.value) < parseFloat(this.min)) {
+                               this.value = this.min; 
+                           }
+                           
+                           // 2. Dynamisches Maximum aus der Tabelle berechnen
+                           let maxAnteile = 0;
+                           document.querySelectorAll('#tabelle_body tr').forEach(zeile => {
+                               let anzahlField = zeile.querySelector('.row-anzahl');
+                               if(anzahlField && !isNaN(parseFloat(anzahlField.value))) {
+                                   maxAnteile += parseFloat(anzahlField.value);
+                               }
+                           });
+                           
+                           // 3. Maximum prüfen
+                           if(parseFloat(this.value) > maxAnteile) {
+                               this.value = maxAnteile;
+                           }
+                       }
+                   ">
         </div>
-
 
 
         <div class="checkbox-group" style="margin-top: 15px;">
@@ -153,22 +174,17 @@
 
         <div class="form-group" id="feld_wunschnetto" style="display: none;">
             <label for="wert_wunschnetto">Gewünschter Netto-Auszahlungsbetrag (€)</label>
-            <input type="number" id="wert_wunschnetto" value="1000.00" step="0.01" min="0">
+            <input type="number" id="wert_wunschnetto" value="1000.00" step="0.01" min="0" onchange="if(this.value !== '') { if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min; }">
         </div>
 
         <div class="form-group" id="feld_anteile" style="display: none;">
             <label for="wert_anteile">Anzahl der zu verkaufenden Anteile</label>
-            <input type="number" id="wert_anteile" value="10.00000" step="0.00001" min="0">
+            <input type="number" id="wert_anteile" value="10.00000" step="0.00001" min="0" onchange="if(this.value !== '') { if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min; }">
         </div>
 
         <button class="btn-add" style="background-color: #007bff; width: 100%; padding: 12px; font-size: 1.1em; margin-top: 20px;" onclick="sendeBerechnung()">
             Calculation starten & Steuer berechnen
         </button>
-
-        <div id="rechen_ergebnis" class="box" style="display: none; background-color: #e9ecef; border-left: 5px solid #007bff;">
-            <h4>Ergebnis der Berechnung:</h4>
-            <div id="ergebnis_text"></div>
-        </div>
 
     </div>
 
@@ -186,7 +202,7 @@
 
         <div class="form-group" style="margin-top: 15px;">
             <label for="verkaufskurs_suche">Verkaufskurs pro Anteil (€) <span id="kurs_lade_status" style="font-weight: normal; font-size: 0.9em; color: #666;"></span></label>
-            <input type="number" id="verkaufskurs_suche" value="100.00" step="0.01">
+            <input type="number" id="verkaufskurs_suche" value="100.00" step="0.01" min="0" onchange="if(this.value !== '') { if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min; }">
         </div>
 
         <hr style="margin: 20px 0; border: 0; border-top: 1px dashed #ccc;">
@@ -206,22 +222,76 @@
 
         <div id="suche_sub_sparplan" style="display: none; background: #f1f3f5; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
             <h4>Sparplan-Parameter hinzufügen</h4>
-            <div class="form-group">
+            <!-- <div class="form-group">
                 <label>Startdatum</label>
                 <input type="date" id="sparplan_start">
             </div>
             <div class="form-group">
                 <label>Enddatum</label>
                 <input type="date" id="sparplan_ende">
+            </div> -->
+
+
+            <div class="form-group">
+                <label for="sparplan_start">Startdatum</label>
+                <input type="date" 
+                       id="sparplan_start" 
+                       onchange="
+                           // Das Enddatum darf frühestens am Tag nach dem Startdatum liegen
+                           if(this.value) {
+                               document.getElementById('sparplan_ende').min = this.value;
+                           }
+                           // Falls das Enddatum jetzt logisch VOR dem neuen Startdatum liegt, korrigieren
+                           let endeFeld = document.getElementById('sparplan_ende');
+                           if(endeFeld.value && endeFeld.value < this.value) {
+                               endeFeld.value = this.value;
+                           }
+                       ">
+            </div>
+
+            <div class="form-group">
+                <label for="sparplan_ende">Enddatum</label>
+                <input type="date" 
+                       id="sparplan_ende" 
+                       onchange="
+                           // Das Enddatum darf maximal HEUTE sein (nicht in der Zukunft)
+                           const heute = new Date().toISOString().split('T')[0];
+                           if(this.value > heute) {
+                               this.value = heute;
+                           }
+                           // Das Enddatum darf nicht VOR dem Startdatum liegen
+                           let startWert = document.getElementById('sparplan_start').value;
+                           if(startWert && this.value < startWert) {
+                               this.value = startWert;
+                           }
+                       ">
+            </div>
+
+
+            <div class="form-group">
+                <label for="sparplan_tag">Ausführungstag (1 - 28)</label>
+                <input type="number" 
+                       id="sparplan_tag" 
+                       value="1" 
+                       min="1" 
+                       max="28" 
+                       step="1" 
+                       onchange="
+                           if(this.value !== '') { 
+                               let val = parseInt(this.value);
+                               if(isNaN(val) || val < parseInt(this.min)) this.value = this.min; 
+                               if(val > parseInt(this.max)) this.value = this.max; 
+                           }
+                       ">
             </div>
 
             <!-- <div class="form-group"><label>Startdatum</label><input type="date" id="sparplan_start" value="2024-01-01"></div>
             <div class="form-group"><label>Enddatum</label><input type="date" id="sparplan_ende" value="2024-06-01"></div> -->
-            <div class="form-group">
+            <!-- <div class="form-group">
                 <label>Ausführungstag</label>
                 <select id="sparplan_tag"><option value="1">1. des Monats</option><option value="15">15. des Monats</option></select>
-            </div>
-            <div class="form-group"><label>Sparrate pro Monat (€)</label><input type="number" id="sparplan_rate" value="100.00" step="10"></div>
+            </div> -->
+            <div class="form-group"><label>Sparrate pro Monat (€)</label><input type="number" id="sparplan_rate" value="100.00" step="10" min="0" onchange="if(this.value !== '') { if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min; }"></div>
             <button class="btn-add" style="background-color: #6f42c1; width: 100%;" onclick="generiereSparplan()">
                 + Diese Sparplan-Käufe der Tabelle unten hinzufügen
             </button>
@@ -252,8 +322,41 @@
 
         <div class="form-group">
             <label for="bereits_verkauft_suche">Bereits verkaufte Anteile (für FIFO-Ermittlung)</label>
-            <input type="number" id="bereits_verkauft_suche" step="0.00001" min="0" value="0.0" placeholder="z.B. 5.0">
+            <input type="number" 
+                   id="bereits_verkauft_suche" 
+                   step="0.00001" 
+                   min="0" 
+                   value="0.0" 
+                   placeholder="z.B. 5.0" 
+                   onchange="
+                       if(this.value !== '') { 
+                           // 1. Minimum prüfen (0)
+                           if(parseFloat(this.value) < parseFloat(this.min)) {
+                               this.value = this.min; 
+                           }
+
+                           // 2. Dynamisches Maximum aus der Tabelle berechnen
+                           let maxAnteile = 0;
+                           document.querySelectorAll('#suche_tabelle_body_manuell tr').forEach(zeile => {
+                               let anzahlField = zeile.querySelector('.row-anzahl-suche');
+                               if(anzahlField && !isNaN(parseFloat(anzahlField.value))) {
+                                   maxAnteile += parseFloat(anzahlField.value);
+                               }
+                           });
+
+                           // 3. Maximum prüfen
+                           if(parseFloat(this.value) > maxAnteile) {
+                               this.value = maxAnteile;
+                           }
+                       }
+                   ">
         </div>
+
+
+        <!-- <div class="form-group">
+            <label for="bereits_verkauft_suche">Bereits verkaufte Anteile (für FIFO-Ermittlung)</label>
+            <input type="number" id="bereits_verkauft_suche" step="0.00001" min="0" value="0.0" placeholder="z.B. 5.0" onchange="if(this.value !== '') { if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min; }">
+        </div> -->
 
 
         <div class="checkbox-group" style="margin-top: 15px;">
@@ -295,22 +398,17 @@
 
         <div class="form-group" id="feld_wunschnetto_suche" style="display: none;">
             <label for="wert_wunschnetto_suche">Gewünschter Netto-Auszahlungsbetrag (€)</label>
-            <input type="number" id="wert_wunschnetto_suche" value="1000.00" step="0.01" min="0">
+            <input type="number" id="wert_wunschnetto_suche" value="1000.00" step="0.01" min="0" onchange="if(this.value !== '') { if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min; }">
         </div>
 
         <div class="form-group" id="feld_anteile_suche" style="display: none;">
             <label for="wert_anteile_suche">Anzahl der zu verkaufenden Anteile</label>
-            <input type="number" id="wert_anteile_suche" value="10.00000" step="0.00001" min="0">
+            <input type="number" id="wert_anteile_suche" value="10.00000" step="0.00001" min="0" onchange="if(this.value !== '') { if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min; }">
         </div>
 
         <button class="btn-add" style="background-color: #007bff; width: 100%; padding: 12px; font-size: 1.1em; margin-top: 20px;" onclick="sendeBerechnungSuche()">
             Calculation starten & Steuer berechnen
         </button>
-
-        <div id="rechen_ergebnis_suche" class="box" style="display: none; background-color: #e9ecef; border-left: 5px solid #007bff;">
-            <h4>Ergebnis der Berechnung:</h4>
-            <div id="ergebnis_text_suche"></div>
-        </div>
 
     </div>
 
@@ -338,7 +436,7 @@
 
             <div class="form-group">
                 <label for="verkaufskurs_tr">Verkaufskurs pro Anteil für dieses Wertpapier (€)</label>
-                <input type="number" id="verkaufskurs_tr" value="100.00" step="0.01">
+                <input type="number" id="verkaufskurs_tr" value="100.00" step="0.01" min="0" onchange="if(this.value !== '') { if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min; }">
             </div>
 
             <table>
@@ -400,25 +498,24 @@
 
             <div class="form-group" id="feld_wunschnetto_tr" style="display: none;">
                 <label for="wert_wunschnetto_tr">Gewünschter Netto-Auszahlungsbetrag (€)</label>
-                <input type="number" id="wert_wunschnetto_tr" value="1000.00" step="0.01">
+                <input type="number" id="wert_wunschnetto_tr" value="1000.00" step="0.01" min="0" onchange="if(this.value !== '') { if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min; }">
             </div>
 
             <div class="form-group" id="feld_anteile_tr" style="display: none;">
                 <label for="wert_anteile_tr">Anzahl der zu verkaufenden Anteile</label>
-                <input type="number" id="wert_anteile_tr" value="10.00000" step="0.00001">
+                <input type="number" id="wert_anteile_tr" value="10.00000" step="0.00001" min="0" onchange="if(this.value !== '') { if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min; }">
             </div>
 
             <button class="btn-add" style="background-color: #007bff; width: 100%; padding: 12px; font-size: 1.1em; margin-top: 20px;" onclick="sendeBerechnungTR()">
                 Calculation starten & Steuer berechnen
             </button>
 
-            <div id="rechen_ergebnis_tr" class="box" style="display: none; background-color: #e9ecef; border-left: 5px solid #007bff;">
-                <h4>Ergebnis der Berechnung:</h4>
-                <div id="ergebnis_text_tr"></div>
-            </div>
         </div>
 
     </div>
+
+    <div id="validation_alert" style="display: none; padding: 15px; margin: 15px 0; border-radius: 6px; font-weight: bold;"></div>
+
 
 
 
@@ -445,13 +542,28 @@
         <table style="width: 100%; border-collapse: collapse; background: white; margin-bottom: 25px;">
             <thead>
                 <tr style="background: #f2f2f2; border-bottom: 2px solid #ddd; text-align: left;">
-                    <th style="padding: 10px;">Posten / Kennzahl</th>
-                    <th style="padding: 10px; text-align: right;">Betrag</th>
+                    <!-- <th style="padding: 10px;">Posten / Kennzahl</th>
+                    <th style="padding: 10px; text-align: right;">Betrag</th> -->
                 </tr>
             </thead>
             <tbody id="ergebnis_tabelle_body">
                 </tbody>
         </table>
+
+        <div id="vorab_ergebnis_container" style="margin-top: 25px; margin-bottom: 25px;">
+            <h3>💰 Berücksichtigte Vorabpauschalen</h3>
+            <table style="width: 100%; border-collapse: collapse; background: white;">
+                <thead>
+                    <tr style="background: #f2f2f2; border-bottom: 2px solid #ddd; text-align: left;">
+                        <th style="padding: 10px;">Jahr</th>
+                        <th style="padding: 10px; text-align: right;">Betrag pro Anteil (€)</th>
+                    </tr>
+                </thead>
+                <tbody id="vorab_ergebnis_tabelle_body">
+                    </tbody>
+            </table>
+        </div>
+
 
         <div style="text-align: right;">
             <button id="btn_pdf_download" onclick="downloadeErgebnisPDF()" style="background: #e74c3c; color: white; border: none; padding: 12px 25px; font-size: 1rem; border-radius: 5px; cursor: pointer; font-weight: bold;">
@@ -462,6 +574,10 @@
 
 
     <script>
+
+        // Ermittelt das heutige Datum im Format YYYY-MM-DD
+        const heute = new Date().toISOString().split('T')[0];
+
         // Beim Laden der Seite direkt 1 leere Zeilen anzeigen, falls keine CSV da ist
         window.onload = function() {
             for(let i=0; i<1; i++) {
@@ -476,19 +592,54 @@
             document.getElementById("bereich_csv").style.display = (option === "trade") ? "block" : "none";
         }
 
-        // Funktion fügt eine bearbeitbare Zeile in die Tabelle ein
-        function fuegeZeileHinzu(datum = "", anzahl = "", preis = "") {
-            let tbody = document.getElementById("tabelle_body");
-            let row = tbody.insertRow();
+        // // Funktion fügt eine bearbeitbare Zeile in die Tabelle ein
+        // function fuegeZeileHinzu(datum = "", anzahl = "", preis = "") {
+        //     let tbody = document.getElementById("tabelle_body");
+        //     let row = tbody.insertRow();
         
-            // HIER WURDE NUR DIE ZEILE MIT DEM "row-datum" GEÄNDERT:
-            row.innerHTML = `
-                <td><input type="date" class="row-datum" value="${datum}" onchange="aktualisiereVorabpauschaleTabelle()"></td>
-                <td><input type="number" class="row-anzahl" step="0.00001" placeholder="z.B. 10.5" value="${anzahl}"></td>
-                <td><input type="number" class="row-preis" step="0.01" placeholder="z.B. 54.30" value="${preis}"></td>
-                <td><button class="btn-delete" onclick="loescheZeile(this)">🗑️</button></td>
+        //     // HIER WURDE NUR DIE ZEILE MIT DEM "row-datum" GEÄNDERT:
+        //     row.innerHTML = `
+        //         <td><input type="date" class="row-datum" value="${datum}" onchange="aktualisiereVorabpauschaleTabelle()"></td>
+        //         <td><input type="number" class="row-anzahl" step="0.00001" placeholder="z.B. 10.5" value="${anzahl}"></td>
+        //         <td><input type="number" class="row-preis" step="0.01" placeholder="z.B. 54.30" value="${preis}"></td>
+        //         <td><button class="btn-delete" onclick="loescheZeile(this)">🗑️</button></td>
+        //     `;
+        // }
+
+        function fuegeZeileHinzu() {
+            let tbody = document.getElementById("tabelle_body");
+            let tr = document.createElement("tr");
+
+            tr.innerHTML = `
+                <td>
+                    <input type="date" class="row-datum" max="${heute}" onchange="
+                        if(this.value > this.max) { 
+                            this.value = this.max; 
+                        }
+                    ">
+                </td>
+                <td>
+                    <input type="number" class="row-anzahl" step="0.00001" min="0.00001" placeholder="0.0" onchange="
+                        if(this.value !== '') {
+                            if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min;
+                        }
+                    ">
+                </td>
+                <td>
+                    <input type="number" class="row-preis" step="0.01" min="0.01" placeholder="0.00" onchange="
+                        if(this.value !== '') {
+                            if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min;
+                        }
+                    ">
+                </td>
+                <td>
+                    <button type="button" class="btn-delete" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #dc3545;" onclick="loescheZeile(this)">🗑️</button>
+                </td>
             `;
+            
+            tbody.appendChild(tr);
         }
+
 
         function loescheZeile(button) {
             let row = button.parentNode.parentNode;
@@ -582,16 +733,20 @@
             fAnteile.style.display = (ziel === "steuer_berechnen") ? "block" : "none";
         }
 
-        // NEU: Sammelt alle Daten und schickt sie an das Backend
+
+
         async function sendeBerechnung() {
+            // --- VALIDIERUNG VOR DEM ABSENDEN ---
+            versteckeHinweis(); // Alte Meldungen löschen
+
             // 1. Daten aus der Kaufhistorie-Tabelle auslesen
             let kaeufe = [];
             let kaufZeilen = document.querySelectorAll("#tabelle_body tr");
             kaufZeilen.forEach(zeile => {
-                let datum = zeile.querySelector(".row-datum").value;
-                let anzahl = parseFloat(zeile.querySelector(".row-anzahl").value);
-                let preis = parseFloat(zeile.querySelector(".row-preis").value);
-
+                let datum = zeile.querySelector(".row-datum")?.value;
+                let anzahl = parseFloat(zeile.querySelector(".row-anzahl")?.value);
+                let preis = parseFloat(zeile.querySelector(".row-preis")?.value);
+            
                 // Nur hinzufügen, wenn die Zeile vollständig ausgefüllt ist
                 if (datum && !isNaN(anzahl) && !isNaN(preis)) {
                     kaeufe.push({ datum: datum, anzahl: anzahl, preis: preis });
@@ -602,10 +757,15 @@
             let vorabpauschalen = [];
             let vorabZeilen = document.querySelectorAll("#vorab_tabelle_body tr");
             vorabZeilen.forEach(zeile => {
-                let jahr = parseInt(zeile.querySelector(".vorab-jahr").value);
-                let wert = parseFloat(zeile.querySelector(".vorab-wert").value);
-                if (!isNaN(jahr) && !isNaN(wert)) {
-                    vorabpauschalen.push({ jahr: jahr, wert: wert });
+                let jahrField = zeile.querySelector(".vorab-jahr");
+                let wertField = zeile.querySelector(".vorab-wert");
+
+                if (jahrField && wertField) {
+                    let jahr = parseInt(jahrField.value);
+                    let wert = parseFloat(wertField.value);
+                    if (!isNaN(jahr) && !isNaN(wert)) {
+                        vorabpauschalen.push({ jahr: jahr, wert: wert });
+                    }
                 }
             });
         
@@ -622,50 +782,185 @@
                 kaeufe: kaeufe,
                 vorabpauschalen: vorabpauschalen,
                 teilfreistellung: parseFloat(document.getElementById("teilfreistellung").value),
-                // RICHTIG (liest das neue Dropdown aus):
                 ist_thesaurierend: (document.getElementById("ertragsverwendung").value === "thesaurierend"),
-                bereits_verkaufte_anteile: parseFloat(document.getElementById("bereits_verkauft_manuell").value),
+                bereits_verkaufte_anteile: parseFloat(document.getElementById("bereits_verkauft_manuell").value) || 0,
                 quelle: "manuell"
             };
-
-            console.log("Sende Daten an Backend:", payload);
         
-            // 4. Per POST an FastAPI senden
-            let response = await fetch("/api/calculate", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            });
-        
-            let result = await response.json();
-
-            // 5. ERSETZT: Ergebnis schön visualisieren
-            if (result.success) {
-                // 🎯 HIER WIRD DIE FUNKTION AUFGERUFEN!
-                // Sie blendet das Dashboard ein, setzt die 3 KPIs und befüllt die Tabelle
-                zeigeErgebnisseImFrontend(result, payload.rechen_ziel);
-                
-                // Falls du deine alte rohe Textbox zur Sicherheit behalten willst, 
-                // kannst du diese zwei Zeilen drin lassen, ansonsten kannst du sie löschen:
-                if (document.getElementById("rechen_ergebnis_suche")) {
-                    document.getElementById("rechen_ergebnis_suche").style.display = "block";
-                    document.getElementById("ergebnis_text_suche").innerHTML = `<pre>Berechnung erfolgreich!</pre>`;
-                }
-            } else {
-                // Falls das Backend ein anderes Fehlerformat schickt, sehen wir jetzt das ganze Objekt
-                console.error("Kompletter Backend-Fehler:", result);
-                let fehlerText = result.error || result.detail || JSON.stringify(result);
-                alert("Fehler bei der Berechnung: " + fehlerText);
+            // --- FRONTEND-VALIDIERUNGEN ---
+            // 🛑 KRITISCHER FEHLER: Verkaufskurs fehlt oder ist <= 0
+            if (!payload.verkaufskurs || payload.verkaufskurs <= 0) {
+                zeigeHinweis("🛑 Berechnung gestoppt: Der Verkaufskurs muss größer als 0 sein!", "error");
+                return; 
             }
+        
+            // 🛑 KRITISCHER FEHLER: Keine Käufe eingetragen
+            if (payload.kaeufe.length === 0) {
+                zeigeHinweis("🛑 Berechnung gestoppt: Bitte tragen Sie mindestens eine Kaufhistorie-Zeile ein!", "error");
+                return; 
+            }
+        
+            // 🛑 KRITISCHER FEHLER: Wunschnetto gewählt, aber Betrag ist 0
+            if (payload.rechen_ziel === "wunschnetto" && payload.wert_wunschnetto <= 0) {
+                zeigeHinweis("🛑 Berechnung gestoppt: Für das Rechenziel 'Wunschnetto' muss ein Betrag größer als 0 eingegeben werden!", "error");
+                return;
+            }
+        
+            // ⚠️ WARNUNG: Verlusttopf unrealistisch hoch (wir rechnen weiter)
+            if (payload.verlusttopf > 50000) {
+                zeigeHinweis("⚠️ Hinweis: Der eingegebene Verlusttopf ist sehr hoch. Die Berechnung läuft normal weiter.", "warning");
+            }
+            // --- VALIDIERUNG ENDE ---
+        
+            try {
+                // 4. Per POST an FastAPI senden
+                let response = await fetch("/api/calculate", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+            
+                let result = await response.json();
+            
+                // 5. Ergebnis schön visualisieren
+                if (result.success) {
+                    // Render die KPIs und Tabellen im Frontend
+                    zeigeErgebnisseImFrontend(result, payload.rechen_ziel);
+
+                    // 🎯 NEU: Prüfen, ob das Backend unkritische Warnungen mitgeliefert hat
+                    if (result.warnings && result.warnings.length > 0) {
+                        let warnText = "⚠️ " + result.warnings.join("\n⚠️ ");
+                        zeigeHinweis(warnText, "warning"); 
+                    } else {
+                        // Wenn alles glatt lief und keine Frontend-Warnung aktiv war, Box schließen
+                        if (payload.verlusttopf <= 50000) {
+                            versteckeHinweis();
+                        }
+                    }
+                
+                    // Optionale alte Textbox aktualisieren (falls noch verwendet)
+                    if (document.getElementById("rechen_ergebnis_suche")) {
+                        document.getElementById("rechen_ergebnis_suche").style.display = "block";
+                        document.getElementById("ergebnis_text_suche").innerHTML = `<pre>Berechnung erfolgreich!</pre>`;
+                    }
+                } else {
+                    // 🎯 KORRIGIERT: Kritische Fehler aus dem Backend elegant anzeigen (kein alert mehr)
+                    console.error("Kompletter Backend-Fehler:", result);
+                    let fehlerText = result.error || result.detail || "Ein unerwarteter Fehler ist aufgetreten.";
+                    zeigeHinweis("🛑 " + fehlerText, "error");
+                }
+            
+            } catch (error) {
+                console.error("Netzwerkfehler beim Senden:", error);
+                zeigeHinweis("💥 Netzwerkfehler: Der Server antwortet nicht oder sendet fehlerhafte Daten.", "error");
+            }
+        }
+
+
+        // NEU: Sammelt alle Daten und schickt sie an das Backend
+        // async function sendeBerechnung() {
+        //     // 1. Daten aus der Kaufhistorie-Tabelle auslesen
+        //     let kaeufe = [];
+        //     let kaufZeilen = document.querySelectorAll("#tabelle_body tr");
+        //     kaufZeilen.forEach(zeile => {
+        //         let datum = zeile.querySelector(".row-datum").value;
+        //         let anzahl = parseFloat(zeile.querySelector(".row-anzahl").value);
+        //         let preis = parseFloat(zeile.querySelector(".row-preis").value);
+
+        //         // Nur hinzufügen, wenn die Zeile vollständig ausgefüllt ist
+        //         if (datum && !isNaN(anzahl) && !isNaN(preis)) {
+        //             kaeufe.push({ datum: datum, anzahl: anzahl, preis: preis });
+        //         }
+        //     });
+        
+        //     // 2. Daten aus der Vorabpauschale-Tabelle auslesen
+        //     let vorabpauschalen = [];
+        //     let vorabZeilen = document.querySelectorAll("#vorab_tabelle_body tr");
+        //     vorabZeilen.forEach(zeile => {
+        //         let jahr = parseInt(zeile.querySelector(".vorab-jahr").value);
+        //         let wert = parseFloat(zeile.querySelector(".vorab-wert").value);
+        //         if (!isNaN(jahr) && !isNaN(wert)) {
+        //             vorabpauschalen.push({ jahr: jahr, wert: wert });
+        //         }
+        //     });
+        
+        //     // 3. Das gesamte Daten-Paket (Payload) schnüren
+        //     let payload = {
+        //         rechen_ziel: document.getElementById("rechen_ziel").value,
+        //         wert_wunschnetto: parseFloat(document.getElementById("wert_wunschnetto").value) || 0,
+        //         wert_anteile: parseFloat(document.getElementById("wert_anteile").value) || 0,
+        //         verkaufskurs: parseFloat(document.getElementById("verkaufskurs").value),
+        //         freibetrag: parseFloat(document.getElementById("freibetrag").value),
+        //         verlusttopf: parseFloat(document.getElementById("verlusttopf").value),
+        //         kirchensteuer: document.getElementById("kirchensteuer").value,
+        //         tagesgenau: document.getElementById("tagesgenau").checked,
+        //         kaeufe: kaeufe,
+        //         vorabpauschalen: vorabpauschalen,
+        //         teilfreistellung: parseFloat(document.getElementById("teilfreistellung").value),
+        //         ist_thesaurierend: (document.getElementById("ertragsverwendung").value === "thesaurierend"),
+        //         bereits_verkaufte_anteile: parseFloat(document.getElementById("bereits_verkauft_manuell").value),
+        //         quelle: "manuell"
+        //     };
+
+        //     // --- VALIDIERUNG START ---
+        //     versteckeHinweis(); // Alte Meldungen löschen
+
+        //     // 🛑 KRITISCHER FEHLER: Verkaufskurs fehlt oder ist <= 0
+        //     if (!payload.verkaufskurs || payload.verkaufskurs <= 0) {
+        //         zeigeHinweis("🛑 Berechnung gestoppt: Der Verkaufskurs muss größer als 0 sein!", "error");
+        //         return; // BRICHT DIE FUNKTION AB, kein Fetch ans Backend!
+        //     }
+
+        //     // 🛑 KRITISCHER FEHLER: Keine Käufe eingetragen
+        //     if (!payload.kaeufe || payload.kaeufe.length === 0) {
+        //         zeigeHinweis("🛑 Berechnung gestoppt: Bitte tragen Sie mindestens eine Kaufhistorie-Zeile ein!", "error");
+        //         return; 
+        //     }
+
+        //     // 🛑 KRITISCHER FEHLER: Wunschnetto gewählt, aber Betrag ist 0
+        //     if (payload.rechen_ziel === "wunschnetto" && payload.wert_wunschnetto <= 0) {
+        //         zeigeHinweis("🛑 Berechnung gestoppt: Für das Rechenziel 'Wunschnetto' muss ein Betrag größer als 0 eingegeben werden!", "error");
+        //         return;
+        //     }
+
+        //     // ⚠️ WARNUNG: Verlusttopf unrealistisch hoch (nur als netter Hinweis, wir rechnen weiter)
+        //     if (payload.verlusttopf > 50000) {
+        //         zeigeHinweis("⚠️ Hinweis: Der eingegebene Verlusttopf ist sehr hoch. Die Berechnung läuft normal weiter.", "warning");
+        //     }
+        //     // --- VALIDIERUNG ENDE ---
+
+        //     // Hier drunter folgt dein normaler let response = await fetch(...)
 
         
-            // // 5. Ergebnis auf der Website anzeigen
-            // let ergebnisBox = document.getElementById("rechen_ergebnis");
-            // let ergebnisText = document.getElementById("ergebnis_text");
+        //     // 4. Per POST an FastAPI senden
+        //     let response = await fetch("/api/calculate", {
+        //         method: "POST",
+        //         headers: { "Content-Type": "application/json" },
+        //         body: JSON.stringify(payload)
+        //     });
+        
+        //     let result = await response.json();
 
-            // ergebnisBox.style.display = "block";
-            // ergebnisText.innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
-        }
+        //     // 5. ERSETZT: Ergebnis schön visualisieren
+        //     if (result.success) {
+        //         // 🎯 HIER WIRD DIE FUNKTION AUFGERUFEN!
+        //         // Sie blendet das Dashboard ein, setzt die 3 KPIs und befüllt die Tabelle
+        //         zeigeErgebnisseImFrontend(result, payload.rechen_ziel);
+                
+        //         // Falls du deine alte rohe Textbox zur Sicherheit behalten willst, 
+        //         // kannst du diese zwei Zeilen drin lassen, ansonsten kannst du sie löschen:
+        //         if (document.getElementById("rechen_ergebnis_suche")) {
+        //             document.getElementById("rechen_ergebnis_suche").style.display = "block";
+        //             document.getElementById("ergebnis_text_suche").innerHTML = `<pre>Berechnung erfolgreich!</pre>`;
+        //         }
+        //     } else {
+        //         // Falls das Backend ein anderes Fehlerformat schickt, sehen wir jetzt das ganze Objekt
+        //         console.error("Kompletter Backend-Fehler:", result);
+        //         let fehlerText = result.error || result.detail || JSON.stringify(result);
+        //         alert("Fehler bei der Berechnung: " + fehlerText);
+        //     }
+
+        // }
 
         // NEU: Triggert die Live-Suche im Backend bei der Eingabe
         async function liveSuche(suchbegriff) {
@@ -715,8 +1010,6 @@
             document.getElementById("ausgewählter_etf_box").style.display = "block";
             document.getElementById("etf_name_anzeige").innerText = name;
             document.getElementById("etf_symbol_anzeige").innerText = symbol;
-        
-            console.log("ETF ausgewählt:", symbol);
 
             // NEU: Sofort den aktuellen Kurs für dieses Symbol im Hintergrund laden
             ladeAktuellenKurs(symbol);
@@ -750,17 +1043,54 @@
             }
         }
 
-
         function fuegeZeileHinzuSuche(datum = "", anzahl = "", preis = "") {
             let tbody = document.getElementById("suche_tabelle_body_manuell");
             let row = tbody.insertRow();
+        
+            // 📅 Ermittelt das heutige Datum live im Format YYYY-MM-DD
+            const heute = new Date().toISOString().split('T')[0];
+        
             row.innerHTML = `
-                <td><input type="date" class="row-datum-suche" value="${datum}" onchange="toggleVorabpauschaleSuche()"></td>
-                <td><input type="number" class="row-anzahl-suche" step="0.00001" value="${anzahl}"></td>
-                <td><input type="number" class="row-preis-suche" step="0.01" value="${preis}"></td>
-                <td><button class="btn-delete" onclick="this.parentNode.parentNode.remove(); toggleVorabpauschaleSuche();">🗑️</button></td>
+                <td>
+                    <input type="date" class="row-datum-suche" max="${heute}" value="${datum}" onchange="
+                        if(this.value > this.max) { 
+                            this.value = this.max; 
+                        }
+                        toggleVorabpauschaleSuche();
+                    ">
+                </td>
+                <td>
+                    <input type="number" class="row-anzahl-suche" step="0.00001" min="0.00001" placeholder="0.0" value="${anzahl}" onchange="
+                        if(this.value !== '') {
+                            if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min;
+                        }
+                    ">
+                </td>
+                <td>
+                    <input type="number" class="row-preis-suche" step="0.01" min="0.01" placeholder="0.00" value="${preis}" onchange="
+                        if(this.value !== '') {
+                            if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min;
+                        }
+                    ">
+                </td>
+                <td>
+                    <button class="btn-delete" onclick="this.parentNode.parentNode.remove(); toggleVorabpauschaleSuche();">🗑️</button>
+                </td>
             `;
         }
+
+        // function fuegeZeileHinzuSuche(datum = "", anzahl = "", preis = "") {
+        //     let tbody = document.getElementById("suche_tabelle_body_manuell");
+        //     let row = tbody.insertRow();
+
+
+        //     row.innerHTML = `
+        //         <td><input type="date" class="row-datum-suche" value="${datum}" onchange="toggleVorabpauschaleSuche()"></td>
+        //         <td><input type="number" class="row-anzahl-suche" step="0.00001" value="${anzahl}"></td>
+        //         <td><input type="number" class="row-preis-suche" step="0.01" value="${preis}"></td>
+        //         <td><button class="btn-delete" onclick="this.parentNode.parentNode.remove(); toggleVorabpauschaleSuche();">🗑️</button></td>
+        //     `;
+        // }
 
 
         let alterOnload = window.onload;
@@ -968,9 +1298,12 @@
 
 
         async function sendeBerechnungSuche() {
+            versteckeHinweis(); // Alte Meldungen direkt zu Beginn löschen
+
             let symbol = document.getElementById("etf_symbol_anzeige").innerText;
+            // 🛑 VOR-VALIDIERUNG: Wurde überhaupt ein ETF gesucht? (Ersetzt das alte alert)
             if (symbol === "-") {
-                alert("Bitte wählen Sie zuerst einen ETF über die Suche aus!");
+                zeigeHinweis("🛑 Bitte wählen Sie zuerst einen ETF über die Suche aus!", "error");
                 return;
             }
         
@@ -981,7 +1314,7 @@
                 let datum = zeile.querySelector(".row-datum-suche")?.value;
                 let anzahl = parseFloat(zeile.querySelector(".row-anzahl-suche")?.value);
                 let preis = parseFloat(zeile.querySelector(".row-preis-suche")?.value);
-
+            
                 if (datum && !isNaN(anzahl) && !isNaN(preis)) {
                     kaeufe.push({ datum: datum, anzahl: anzahl, preis: preis });
                 }
@@ -994,7 +1327,7 @@
                 vorabZeilen.forEach(zeile => {
                     let jahrField = zeile.querySelector(".vorab-jahr-suche");
                     let wertField = zeile.querySelector(".vorab-wert-suche");
-
+                
                     if (jahrField && wertField) {
                         let jahr = parseInt(jahrField.value);
                         let wert = parseFloat(wertField.value);
@@ -1019,44 +1352,80 @@
                 vorabpauschalen: vorabpauschalen,
                 teilfreistellung: parseFloat(document.getElementById("teilfreistellung").value),
                 ist_thesaurierend: (document.getElementById("ertragsverwendung").value === "thesaurierend"),
-                bereits_verkaufte_anteile: parseFloat(document.getElementById("bereits_verkauft_suche").value) || 0, // Fallback auf 0 hinzugefügt
+                bereits_verkaufte_anteile: parseFloat(document.getElementById("bereits_verkauft_suche").value) || 0,
                 ticker: document.getElementById("etf_symbol_anzeige")?.innerText || null,
                 quelle: "suche"
             };
         
-            console.log("Sende Suchpfad-Daten an Backend:", payload);
-        
-            // 4. Per POST an den FastAPI-Endpunkt senden
-            let response = await fetch("/api/calculate", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            });
-        
-            let result = await response.json();
-        
-            // 5. ERSETZT: Ergebnis schön visualisieren
-            if (result.success) {
-                // 🎯 HIER WIRD DIE FUNKTION AUFGERUFEN!
-                // Sie blendet das Dashboard ein, setzt die 3 KPIs und befüllt die Tabelle
-                zeigeErgebnisseImFrontend(result, payload.rechen_ziel);
-                
-                // Falls du deine alte rohe Textbox zur Sicherheit behalten willst, 
-                // kannst du diese zwei Zeilen drin lassen, ansonsten kannst du sie löschen:
-                if (document.getElementById("rechen_ergebnis_suche")) {
-                    document.getElementById("rechen_ergebnis_suche").style.display = "block";
-                    document.getElementById("ergebnis_text_suche").innerHTML = `<pre>Berechnung erfolgreich!</pre>`;
-                }
-            } else {
-                // Falls das Backend ein anderes Fehlerformat schickt, sehen wir jetzt das ganze Objekt
-                console.error("Kompletter Backend-Fehler:", result);
-                let fehlerText = result.error || result.detail || JSON.stringify(result);
-                alert("Fehler bei der Berechnung: " + fehlerText);
+            // --- VALIDIERUNG VOR DEM SENDEN (FRONTEND-SCHUTZ) ---
+            // 🛑 KRITISCHER FEHLER: Verkaufskurs fehlt oder ist <= 0
+            if (!payload.verkaufskurs || payload.verkaufskurs <= 0) {
+                zeigeHinweis("🛑 Berechnung gestoppt: Der Verkaufskurs muss größer als 0 sein!", "error");
+                return; 
             }
+        
+            // 🛑 KRITISCHER FEHLER: Keine Käufe eingetragen
+            if (!payload.kaeufe || payload.kaeufe.length === 0) {
+                zeigeHinweis("🛑 Berechnung gestoppt: Bitte tragen Sie mindestens eine Kaufhistorie-Zeile ein!", "error");
+                return; 
+            }
+        
+            // 🛑 KRITISCHER FEHLER: Wunschnetto gewählt, aber Betrag ist 0
+            if (payload.rechen_ziel === "wunschnetto" && payload.wert_wunschnetto <= 0) {
+                zeigeHinweis("🛑 Berechnung gestoppt: Für das Rechenziel 'Wunschnetto' muss ein Betrag größer als 0 eingegeben werden!", "error");
+                return;
+            }
+        
+            // ⚠️ WARNUNG: Verlusttopf unrealistisch hoch (wir rechnen weiter)
+            if (payload.verlusttopf > 50000) {
+                zeigeHinweis("⚠️ Hinweis: Der eingegebene Verlusttopf ist sehr hoch. Die Berechnung läuft normal weiter.", "warning");
+            }
+            // --- VALIDIERUNG ENDE ---
+        
+            try {
+                // 4. Per POST an den FastAPI-Endpunkt senden
+                let response = await fetch("/api/calculate", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+            
+                let result = await response.json();
+            
+                // 5. Ergebnis im Dashboard visualisieren
+                if (result.success) {
+                    // Render die KPIs und Tabellen im Frontend
+                    zeigeErgebnisseImFrontend(result, payload.rechen_ziel);
 
+                    // 🎯 NEU: Prüfen, ob das Backend unkritische Warnungen mitgeliefert hat
+                    if (result.warnings && result.warnings.length > 0) {
+                        let warnText = "⚠️ " + result.warnings.join("\n⚠️ ");
+                        zeigeHinweis(warnText, "warning"); 
+                    } else {
+                        // Wenn alles glatt lief und keine Frontend-Warnung aktiv war, Box schließen
+                        if (payload.verlusttopf <= 50000) {
+                            versteckeHinweis();
+                        }
+                    }
+                
+                    // Optionale alte Textbox aktualisieren
+                    if (document.getElementById("rechen_ergebnis_suche")) {
+                        document.getElementById("rechen_ergebnis_suche").style.display = "block";
+                        document.getElementById("ergebnis_text_suche").innerHTML = `<pre>Berechnung erfolgreich!</pre>`;
+                    }
+                } else {
+                    // 🎯 KORRIGIERT: Backend-Fehler elegant in der roten Hinweisbox anzeigen (kein alert mehr)
+                    console.error("Kompletter Backend-Fehler:", result);
+                    let fehlerText = result.error || result.detail || "Ein unerwarteter Fehler ist aufgetreten.";
+                    zeigeHinweis("🛑 " + fehlerText, "error");
+                }
+            
+            } catch (error) {
+                console.error("Netzwerkfehler beim Senden:", error);
+                zeigeHinweis("💥 Netzwerkfehler: Der Server antwortet nicht oder sendet fehlerhafte Daten.", "error");
+            }
         }
 
-        // NEU: Sammelt alle Daten aus dem Suchbereich und schickt sie an das Backend
         // async function sendeBerechnungSuche() {
         //     let symbol = document.getElementById("etf_symbol_anzeige").innerText;
         //     if (symbol === "-") {
@@ -1095,29 +1464,56 @@
         //         });
         //     }
         
-        //     // 3. Das Daten-Paket schnüren (nutzt auch die geteilten steuerlichen Basisdaten von oben!)
+        //     // 3. Das Daten-Paket schnüren
         //     let payload = {
         //         rechen_ziel: document.getElementById("rechen_ziel_suche").value,
         //         wert_wunschnetto: parseFloat(document.getElementById("wert_wunschnetto_suche").value) || 0,
         //         wert_anteile: parseFloat(document.getElementById("wert_anteile_suche").value) || 0,
         //         verkaufskurs: parseFloat(document.getElementById("verkaufskurs_suche").value),
-        //         freibetrag: parseFloat(document.getElementById("freibetrag").value),       // Geteiltes Feld
-        //         verlusttopf: parseFloat(document.getElementById("verlusttopf").value),     // Geteiltes Feld
-        //         kirchensteuer: document.getElementById("kirchensteuer").value,             // Geteiltes Feld
+        //         freibetrag: parseFloat(document.getElementById("freibetrag").value),       
+        //         verlusttopf: parseFloat(document.getElementById("verlusttopf").value),     
+        //         kirchensteuer: document.getElementById("kirchensteuer").value,             
         //         tagesgenau: document.getElementById("tagesgenau_suche").checked,
         //         kaeufe: kaeufe,
         //         vorabpauschalen: vorabpauschalen,
         //         teilfreistellung: parseFloat(document.getElementById("teilfreistellung").value),
-        //         // RICHTIG (liest das neue Dropdown aus):
         //         ist_thesaurierend: (document.getElementById("ertragsverwendung").value === "thesaurierend"),
-        //         bereits_verkaufte_anteile: parseFloat(document.getElementById("bereits_verkauft_suche").value),
+        //         bereits_verkaufte_anteile: parseFloat(document.getElementById("bereits_verkauft_suche").value) || 0, // Fallback auf 0 hinzugefügt
         //         ticker: document.getElementById("etf_symbol_anzeige")?.innerText || null,
         //         quelle: "suche"
         //     };
+
+        //     // --- VALIDIERUNG START ---
+        //     versteckeHinweis(); // Alte Meldungen löschen
+
+        //     // 🛑 KRITISCHER FEHLER: Verkaufskurs fehlt oder ist <= 0
+        //     if (!payload.verkaufskurs || payload.verkaufskurs <= 0) {
+        //         zeigeHinweis("🛑 Berechnung gestoppt: Der Verkaufskurs muss größer als 0 sein!", "error");
+        //         return; // BRICHT DIE FUNKTION AB, kein Fetch ans Backend!
+        //     }
+
+        //     // 🛑 KRITISCHER FEHLER: Keine Käufe eingetragen
+        //     if (!payload.kaeufe || payload.kaeufe.length === 0) {
+        //         zeigeHinweis("🛑 Berechnung gestoppt: Bitte tragen Sie mindestens eine Kaufhistorie-Zeile ein!", "error");
+        //         return; 
+        //     }
+
+        //     // 🛑 KRITISCHER FEHLER: Wunschnetto gewählt, aber Betrag ist 0
+        //     if (payload.rechen_ziel === "wunschnetto" && payload.wert_wunschnetto <= 0) {
+        //         zeigeHinweis("🛑 Berechnung gestoppt: Für das Rechenziel 'Wunschnetto' muss ein Betrag größer als 0 eingegeben werden!", "error");
+        //         return;
+        //     }
+
+        //     // ⚠️ WARNUNG: Verlusttopf unrealistisch hoch (nur als netter Hinweis, wir rechnen weiter)
+        //     if (payload.verlusttopf > 50000) {
+        //         zeigeHinweis("⚠️ Hinweis: Der eingegebene Verlusttopf ist sehr hoch. Die Berechnung läuft normal weiter.", "warning");
+        //     }
+        //     // --- VALIDIERUNG ENDE ---
+
+        //     // Hier drunter folgt dein normaler let response = await fetch(...)
+
         
-        //     console.log("Sende Suchpfad-Daten an Backend:", payload);
-        
-        //     // 4. Per POST an den existierenden FastAPI-Endpunkt senden
+        //     // 4. Per POST an den FastAPI-Endpunkt senden
         //     let response = await fetch("/api/calculate", {
         //         method: "POST",
         //         headers: { "Content-Type": "application/json" },
@@ -1126,21 +1522,33 @@
         
         //     let result = await response.json();
         
-        //     // 5. Ergebnis anzeigen
-        //     let ergebnisBox = document.getElementById("rechen_ergebnis_suche");
-        //     let ergebnisText = document.getElementById("ergebnis_text_suche");
+        //     // 5. ERSETZT: Ergebnis schön visualisieren
+        //     if (result.success) {
+        //         // 🎯 HIER WIRD DIE FUNKTION AUFGERUFEN!
+        //         // Sie blendet das Dashboard ein, setzt die 3 KPIs und befüllt die Tabelle
+        //         zeigeErgebnisseImFrontend(result, payload.rechen_ziel);
+                
+        //         // Falls du deine alte rohe Textbox zur Sicherheit behalten willst, 
+        //         // kannst du diese zwei Zeilen drin lassen, ansonsten kannst du sie löschen:
+        //         if (document.getElementById("rechen_ergebnis_suche")) {
+        //             document.getElementById("rechen_ergebnis_suche").style.display = "block";
+        //             document.getElementById("ergebnis_text_suche").innerHTML = `<pre>Berechnung erfolgreich!</pre>`;
+        //         }
+        //     } else {
+        //         // Falls das Backend ein anderes Fehlerformat schickt, sehen wir jetzt das ganze Objekt
+        //         console.error("Kompletter Backend-Fehler:", result);
+        //         let fehlerText = result.error || result.detail || JSON.stringify(result);
+        //         alert("Fehler bei der Berechnung: " + fehlerText);
+        //     }
 
-        //     ergebnisBox.style.display = "block";
-        //     ergebnisText.innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
         // }
 
-
-        let aktuelleTRDaten = null;
-        let aktuelleTRKurse = {}; // NEU: Speichert die vom Server gelieferten Kurse global
-        let aktuelleTRVerkaeufe = {};
-        let aktuellerTRTicker = null; // Speichert den aktuell aktiven Ticker für die Berechnung
-        let aktuelleTRTickerMapping = {}; // NEU: Merkt sich die Ticker-Übersetzungen
-        let aktuellerPdfBase64 = null;
+        // let aktuelleTRDaten = null;
+        // let aktuelleTRKurse = {}; // NEU: Speichert die vom Server gelieferten Kurse global
+        // let aktuelleTRVerkaeufe = {};
+        // let aktuellerTRTicker = null; // Speichert den aktuell aktiven Ticker für die Berechnung
+        // let aktuelleTRTickerMapping = {}; // NEU: Merkt sich die Ticker-Übersetzungen
+        // let aktuellerPdfBase64 = null;
 
         async function uploadTradeRepublicCSV() {
             let fileInput = document.getElementById("tr_csv_file");
@@ -1204,7 +1612,6 @@
             // Wir setzen den Ticker für das Berechnungs-Backend auf das yfinance-Symbol, das zur ISIN gehört!
             if (aktuelleTRTickerMapping && aktuelleTRTickerMapping[gewaehlteISIN]) {
                 aktuellerTRTicker = aktuelleTRTickerMapping[gewaehlteISIN];
-                console.log("🤖 Ticker erfolgreich über ISIN gesetzt auf:", aktuellerTRTicker);
             } else {
                 aktuellerTRTicker = gewaehlteISIN; // Fallback
             }
@@ -1224,16 +1631,53 @@
 
 
         // Helper: Fügt eine Zeile in die TR-Tabelle ein
+        // function fuegeZeileHinzuTR(datum = "", anzahl = "", preis = "") {
+        //     let tbody = document.getElementById("tr_tr_tabelle_body") || document.getElementById("tr_tabelle_body");
+        //     let row = tbody.insertRow();
+        //     row.innerHTML = `
+        //         <td><input type="date" class="row-datum-tr" value="${datum}"></td>
+        //         <td><input type="number" class="row-anzahl-tr" step="0.00001" value="${anzahl}"></td>
+        //         <td><input type="number" class="row-preis-tr" step="0.01" value="${preis}"></td>
+        //         <td><button class="btn-delete" onclick="this.parentNode.parentNode.remove()">🗑️</button></td>
+        //     `;
+        // }
+
         function fuegeZeileHinzuTR(datum = "", anzahl = "", preis = "") {
             let tbody = document.getElementById("tr_tr_tabelle_body") || document.getElementById("tr_tabelle_body");
             let row = tbody.insertRow();
+                
+            // 📅 Ermittelt das heutige Datum live im Format YYYY-MM-DD
+            const heute = new Date().toISOString().split('T')[0];
+                
             row.innerHTML = `
-                <td><input type="date" class="row-datum-tr" value="${datum}"></td>
-                <td><input type="number" class="row-anzahl-tr" step="0.00001" value="${anzahl}"></td>
-                <td><input type="number" class="row-preis-tr" step="0.01" value="${preis}"></td>
-                <td><button class="btn-delete" onclick="this.parentNode.parentNode.remove()">🗑️</button></td>
+                <td>
+                    <input type="date" class="row-datum-suche" max="${heute}" value="${datum}" onchange="
+                        if(this.value > this.max) { 
+                            this.value = this.max; 
+                        }
+                        toggleVorabpauschaleSuche();
+                    ">
+                </td>
+                <td>
+                    <input type="number" class="row-anzahl-suche" step="0.00001" min="0.00001" placeholder="0.0" value="${anzahl}" onchange="
+                        if(this.value !== '') {
+                            if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min;
+                        }
+                    ">
+                </td>
+                <td>
+                    <input type="number" class="row-preis-suche" step="0.01" min="0.01" placeholder="0.00" value="${preis}" onchange="
+                        if(this.value !== '') {
+                            if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min;
+                        }
+                    ">
+                </td>
+                <td>
+                    <button class="btn-delete" onclick="this.parentNode.parentNode.remove(); toggleVorabpauschaleSuche();">🗑️</button>
+                </td>
             `;
         }
+
 
         // Umschalter für Berechnungsfelder im TR-Pfad
         function toggleRechenZielFelderTR() {
@@ -1241,13 +1685,12 @@
             document.getElementById("feld_wunschnetto_tr").style.display = (ziel === "wunschnetto") ? "block" : "none";
             document.getElementById("feld_anteile_tr").style.display = (ziel === "steuer_berechnen") ? "block" : "none";
         }
-
-
-
+            
+            
         async function sendeBerechnungTR() {
-            // NEU: Welcher ETF ist aktuell im Dropdown ausgewählt?
+            // 1. Welcher ETF ist aktuell im Dropdown ausgewählt?
             let gewaehlterETF = document.getElementById("tr_etf_dropdown").value;
-        
+                
             let kaeufe = [];
             document.querySelectorAll("#tr_tabelle_body tr").forEach(zeile => {
                 let datum = zeile.querySelector(".row-datum-tr")?.value;
@@ -1258,7 +1701,7 @@
                 }
             });
         
-            // 1. Vorabpauschalen sauber auslesen
+            // 2. Vorabpauschalen auslesen
             let vorabpauschalen = [];
             if (document.getElementById("haken_vorabpauschale_tr").checked) {
                 let vorabZeilen = document.querySelectorAll("#vorab_tabelle_body_tr tr");
@@ -1276,13 +1719,13 @@
                 });
             }
         
-            // NEU: Bereits verkaufte Anteile für diesen spezifischen ETF ermitteln
+            // Bereits verkaufte Anteile für diesen spezifischen ETF ermitteln
             let verkaufteAnteile = 0.0;
             if (aktuelleTRVerkaeufe && aktuelleTRVerkaeufe[gewaehlterETF]) {
                 verkaufteAnteile = parseFloat(aktuelleTRVerkaeufe[gewaehlterETF]);
             }
         
-            // 2. Das Payload-Objekt schnüren
+            // 3. Das Payload-Objekt schnüren
             let payload = {
                 rechen_ziel: document.getElementById("rechen_ziel_tr").value,
                 wert_wunschnetto: parseFloat(document.getElementById("wert_wunschnetto_tr").value) || 0,
@@ -1301,35 +1744,79 @@
                 quelle: "tr"
             };
         
-            // 3. Daten senden
-            let response = await fetch("/api/calculate", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            });
+            // --- VALIDIERUNG VOR DEM SENDEN (FRONTEND-SCHUTZ) ---
+            versteckeHinweis(); // Alte Meldungen löschen
+
+            // 🛑 KRITISCHER FEHLER: Verkaufskurs fehlt oder ist <= 0
+            if (!payload.verkaufskurs || payload.verkaufskurs <= 0) {
+                zeigeHinweis("🛑 Berechnung gestoppt: Der Verkaufskurs muss größer als 0 sein!", "error");
+                return; // Bricht ab, kein Request ans Backend
+            }
+
+            // 🛑 KRITISCHER FEHLER: Keine Käufe eingetragen
+            if (!payload.kaeufe || payload.kaeufe.length === 0) {
+                zeigeHinweis("🛑 Berechnung gestoppt: Bitte tragen Sie mindestens eine Kaufhistorie-Zeile ein!", "error");
+                return; 
+            }
+
+            // 🛑 KRITISCHER FEHLER: Wunschnetto gewählt, aber Betrag ist 0
+            if (payload.rechen_ziel === "wunschnetto" && payload.wert_wunschnetto <= 0) {
+                zeigeHinweis("🛑 Berechnung gestoppt: Für das Rechenziel 'Wunschnetto' muss ein Betrag größer als 0 eingegeben werden!", "error");
+                return;
+            }
+
+            // ⚠️ WARNUNG: Verlusttopf unrealistisch hoch (nur Hinweis, wir rechnen weiter)
+            if (payload.verlusttopf > 50000) {
+                zeigeHinweis("⚠️ Hinweis: Der eingegebene Verlusttopf ist sehr hoch. Die Berechnung läuft normal weiter.", "warning");
+            }
+            // --- VALIDIERUNG ENDE ---
         
-            let result = await response.json();
+            try {
+                // 4. Daten an das Backend senden
+                let response = await fetch("/api/calculate", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
             
-            // 4. KORRIGIERT: Ergebnis im Dashboard anzeigen
-            if (result.success) {
-                // 🎯 HIER WIRD DIE DYNAMISCHE STRUKTUR AUFGERUFEN
-                zeigeErgebnisseImFrontend(result, payload.rechen_ziel);
+                let result = await response.json();
+
+                // 5. Verarbeitung der Backend-Antwort
+                if (result.success) {
+                    // Render die KPIs und Tabellen im Frontend
+                    zeigeErgebnisseImFrontend(result, payload.rechen_ziel);
+
+                    // 🎯 NEU: Prüfen, ob das Backend unkritische Warnungen mitgeliefert hat
+                    if (result.warnings && result.warnings.length > 0) {
+                        let warnText = "⚠️ " + result.warnings.join("\n⚠️ ");
+                        zeigeHinweis(warnText, "warning"); 
+                    } else {
+                        // Wenn alles perfekt lief und keine Frontend-Warnung aktiv war, Box schließen
+                        if (payload.verlusttopf <= 50000) {
+                            versteckeHinweis();
+                        }
+                    }
                 
-                // Falls du die alte Textbox behalten willst, bleibt das hier aktiv.
-                // Ansonsten kannst du diese zwei Zeilen löschen.
-                if (document.getElementById("rechen_ergebnis_tr")) {
-                    document.getElementById("rechen_ergebnis_tr").style.display = "block";
-                    document.getElementById("ergebnis_text_tr").innerHTML = `<pre>Berechnung erfolgreich!</pre>`;
+                    // Optionale alte Textbox aktualisieren (falls noch im HTML vorhanden)
+                    if (document.getElementById("rechen_ergebnis_tr")) {
+                        document.getElementById("rechen_ergebnis_tr").style.display = "block";
+                        document.getElementById("ergebnis_text_tr").innerHTML = `<pre>Berechnung erfolgreich!</pre>`;
+                    }
+                
+                } else {
+                    // 🎯 KORRIGIERT: Kritische Fehler aus dem Backend elegant in der roten Warnbox anzeigen
+                    console.error("Kompletter Backend-Fehler:", result);
+                    let fehlerText = result.error || result.detail || "Ein unerwarteter Fehler ist aufgetreten.";
+                    zeigeHinweis("🛑 " + fehlerText, "error");
                 }
-            } else {
-                // Falls das Backend ein anderes Fehlerformat schickt, sehen wir jetzt das ganze Objekt
-                console.error("Kompletter Backend-Fehler:", result);
-                let fehlerText = result.error || result.detail || JSON.stringify(result);
-                alert("Fehler bei der Berechnung: " + fehlerText);
+            
+            } catch (error) {
+                console.error("Netzwerkfehler beim Senden:", error);
+                zeigeHinweis("💥 Netzwerkfehler: Der Server antwortet nicht oder sendet fehlerhafte Daten.", "error");
             }
         }
 
-        // Absenden-Logik für Trade Republic
+
         // async function sendeBerechnungTR() {
         //     // NEU: Welcher ETF ist aktuell im Dropdown ausgewählt?
         //     let gewaehlterETF = document.getElementById("tr_etf_dropdown").value;
@@ -1382,12 +1869,42 @@
         //         vorabpauschalen: vorabpauschalen,
         //         teilfreistellung: parseFloat(document.getElementById("teilfreistellung").value),
         //         ist_thesaurierend: (document.getElementById("ertragsverwendung").value === "thesaurierend"),
-        //         // NEU: Das Match mit deinem neuen Pydantic-Feld im Backend!
         //         bereits_verkaufte_anteile: verkaufteAnteile,
         //         ticker: aktuellerTRTicker,
         //         quelle: "tr"
         //     };
+
+        //     // --- VALIDIERUNG START ---
+        //     versteckeHinweis(); // Alte Meldungen löschen
+
+        //     // 🛑 KRITISCHER FEHLER: Verkaufskurs fehlt oder ist <= 0
+        //     if (!payload.verkaufskurs || payload.verkaufskurs <= 0) {
+        //         zeigeHinweis("🛑 Berechnung gestoppt: Der Verkaufskurs muss größer als 0 sein!", "error");
+        //         return; // BRICHT DIE FUNKTION AB, kein Fetch ans Backend!
+        //     }
+
+        //     // 🛑 KRITISCHER FEHLER: Keine Käufe eingetragen
+        //     if (!payload.kaeufe || payload.kaeufe.length === 0) {
+        //         zeigeHinweis("🛑 Berechnung gestoppt: Bitte tragen Sie mindestens eine Kaufhistorie-Zeile ein!", "error");
+        //         return; 
+        //     }
+
+        //     // 🛑 KRITISCHER FEHLER: Wunschnetto gewählt, aber Betrag ist 0
+        //     if (payload.rechen_ziel === "wunschnetto" && payload.wert_wunschnetto <= 0) {
+        //         zeigeHinweis("🛑 Berechnung gestoppt: Für das Rechenziel 'Wunschnetto' muss ein Betrag größer als 0 eingegeben werden!", "error");
+        //         return;
+        //     }
+
+        //     // ⚠️ WARNUNG: Verlusttopf unrealistisch hoch (nur als netter Hinweis, wir rechnen weiter)
+        //     if (payload.verlusttopf > 50000) {
+        //         zeigeHinweis("⚠️ Hinweis: Der eingegebene Verlusttopf ist sehr hoch. Die Berechnung läuft normal weiter.", "warning");
+        //     }
+        //     // --- VALIDIERUNG ENDE ---
+
+        //     // Hier drunter folgt dein normaler let response = await fetch(...)
+
         
+        //     // 3. Daten senden
         //     let response = await fetch("/api/calculate", {
         //         method: "POST",
         //         headers: { "Content-Type": "application/json" },
@@ -1395,10 +1912,25 @@
         //     });
         
         //     let result = await response.json();
-        //     document.getElementById("rechen_ergebnis_tr").style.display = "block";
-        //     document.getElementById("ergebnis_text_tr").innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+            
+        //     // 4. KORRIGIERT: Ergebnis im Dashboard anzeigen
+        //     if (result.success) {
+        //         // 🎯 HIER WIRD DIE DYNAMISCHE STRUKTUR AUFGERUFEN
+        //         zeigeErgebnisseImFrontend(result, payload.rechen_ziel);
+                
+        //         // Falls du die alte Textbox behalten willst, bleibt das hier aktiv.
+        //         // Ansonsten kannst du diese zwei Zeilen löschen.
+        //         if (document.getElementById("rechen_ergebnis_tr")) {
+        //             document.getElementById("rechen_ergebnis_tr").style.display = "block";
+        //             document.getElementById("ergebnis_text_tr").innerHTML = `<pre>Berechnung erfolgreich!</pre>`;
+        //         }
+        //     } else {
+        //         // Falls das Backend ein anderes Fehlerformat schickt, sehen wir jetzt das ganze Objekt
+        //         console.error("Kompletter Backend-Fehler:", result);
+        //         let fehlerText = result.error || result.detail || JSON.stringify(result);
+        //         alert("Fehler bei der Berechnung: " + fehlerText);
+        //     }
         // }
-
 
         // Suche diese Funktion im Code und füge den "3. Trade Republic Pfad" hinzu:
         function aktualisiereThesaurierungsAnsicht() {
@@ -1485,26 +2017,27 @@
         function zeigeErgebnisseImFrontend(result, rechenZiel) {
             if (!result.success) return;
                 
-            // 🎯 NEU & WICHTIG: Die PDF-Daten für die Funktion downloadeErgebnisPDF() merken
-            // Ohne diese Zeile weiß der Download-Button nicht, was er herunterladen soll!
             aktuellerPdfBase64 = result.pdf_data || null;
-                
-            // Speicher die Berechnungs-ID (falls vorhanden)
             aktuelleBerechnungsId = result.calculation_id || null;
                 
-            // 1. Abhängig vom Rechenziel die KPIs unterschiedlich benennen und befüllen
             let kpi1 = document.getElementById("kpi_label_1");
             let kpi2 = document.getElementById("kpi_label_2");
             let kpi3 = document.getElementById("kpi_label_3");
                 
-            // Kleine Absicherung: Nur umbenennen, wenn die HTML-Elemente auch existieren
+            // 1. Labels UND Einheiten-Typen je nach Rechenziel festlegen
+            let einheitKPI1 = "EUR";
+            let einheitKPI2 = "EUR";
+            let einheitKPI3 = "EUR";
+
             if (kpi1 && kpi2 && kpi3) {
                 if (rechenZiel === "wunschnetto") {
                     kpi1.innerText = "Benötigte Anteile";
+                    einheitKPI1 = "Anteile";
                     kpi2.innerText = "Bruttoerlös";
                     kpi3.innerText = "Nettoerlös";
                 } else if (rechenZiel === "steuerfrei") {
                     kpi1.innerText = "Max. steuerfrei verkaufbare Anteile";
+                    einheitKPI1 = "Anteile";
                     kpi2.innerText = "Nettoerlös";
                     kpi3.innerText = "Verbleibender Freibetrag";
                 } else {
@@ -1513,133 +2046,103 @@
                     kpi3.innerText = "Steuerabzug";
                 }
             }
+
         
-            // Werte eintragen (schön formatiert als Währung)
+        
+            // Werte mit der jeweils passenden Einheit eintragen
             if (document.getElementById("kpi_wert_1")) {
-                document.getElementById("kpi_wert_1").innerText = formatiereWaehrung(result.kpis.wert1);
+                document.getElementById("kpi_wert_1").innerText = formatiereWert(result.kpis.wert1, einheitKPI1);
             }
             if (document.getElementById("kpi_wert_2")) {
-                document.getElementById("kpi_wert_2").innerText = formatiereWaehrung(result.kpis.wert2);
+                document.getElementById("kpi_wert_2").innerText = formatiereWert(result.kpis.wert2, einheitKPI2);
             }
             if (document.getElementById("kpi_wert_3")) {
-                document.getElementById("kpi_wert_3").innerText = formatiereWaehrung(result.kpis.wert3);
+                document.getElementById("kpi_wert_3").innerText = formatiereWert(result.kpis.wert3, einheitKPI3);
             }
         
-            // 2. Tabelle befüllen
+            // 2. Tabelle dynamisch befüllen
             let tbody = document.getElementById("ergebnis_tabelle_body");
             if (tbody) {
-                tbody.innerHTML = ""; // Altes Ergebnis löschen
+                tbody.innerHTML = ""; 
             
                 if (result.tabelle && Array.isArray(result.tabelle)) {
                     result.tabelle.forEach(posten => {
                         let tr = document.createElement("tr");
                         tr.style.borderBottom = "1px solid #eee";
                     
+                        // 🎯 Nutzt die vom Backend mitgelieferte Einheit, falls vorhanden (sonst standardmäßig EUR)
+                        let anzuzeigendeEinheit = posten.einheit || "EUR";
+                        let formatierterWert = formatiereWert(posten.wert, anzuzeigendeEinheit);
+                    
                         tr.innerHTML = `
                             <td style="padding: 10px; color: #555;">${posten.name}</td>
-                            <td style="padding: 10px; text-align: right; font-weight: bold;">${formatiereWaehrung(posten.wert)}</td>
+                            <td style="padding: 10px; text-align: right; font-weight: bold;">${formatierterWert}</td>
                         `;
                         tbody.appendChild(tr);
                     });
                 }
             }
+
+            let vorabTbody = document.getElementById("vorab_ergebnis_tabelle_body");
+            let vorabContainer = document.getElementById("vorab_ergebnis_container");
+
+            if (vorabTbody && vorabContainer) {
+                vorabTbody.innerHTML = ""; // Altes Ergebnis löschen
+            
+                // Prüfen, ob das Backend überhaupt Vorabpauschalen zurückgegeben hat und die Liste nicht leer ist
+                if (result.vorabpauschalen_ergebnis && result.vorabpauschalen_ergebnis.length > 0) {
+                    result.vorabpauschalen_ergebnis.forEach(posten => {
+                        let tr = document.createElement("tr");
+                        tr.style.borderBottom = "1px solid #eee";
+                    
+                        tr.innerHTML = `
+                            <td style="padding: 10px; color: #555;">Vorabpauschale ${posten.jahr}</td>
+                            <td style="padding: 10px; text-align: right; font-weight: bold;">
+                                ${formatiereWert(posten.wert, "Anteile")}
+                            </td>
+                        `;
+                        vorabTbody.appendChild(tr);
+                    });
+                    vorabContainer.style.display = "block"; // Tabelle anzeigen, wenn Daten da sind
+                } else {
+                    // Falls keine Vorabpauschalen im Spiel waren (oder keine eingegeben wurden), 
+                    // verstecken wir den Container einfach, damit es sauber aussieht.
+                    vorabContainer.style.display = "none"; 
+                }
+            }
+
         
-            // Ergebnis-Container sichtbar machen
+            // Container anzeigen & scrollen
             let ergebnisContainer = document.getElementById("ergebnis_container");
             if (ergebnisContainer) {
                 ergebnisContainer.style.display = "block";
-
-                // Automatisch zum Ergebnis scrollen
                 ergebnisContainer.scrollIntoView({ behavior: 'smooth' });
             }
         }
 
+        // Neue, flexible Formatierungs-Funktion
+        function formatiereWert(wert, einheit) {
+            if (einheit === "Anteile") {
+                // Formatiert Anteile mit bis zu 4 Nachkommastellen (wichtig bei Bruchstücken)
+                return new Intl.NumberFormat('de-DE', { 
+                    minimumFractionDigits: 2, 
+                    maximumFractionDigits: 5 
+                }).format(wert) ;
+            }
 
-        // function zeigeErgebnisseImFrontend(result, rechenZiel) {
-        //     if (!result.success) return;
-        
-        //     // Speicher die Berechnungs-ID (falls dein Backend eine generiert), um das PDF zu holen
-        //     aktuelleBerechnungsId = result.calculation_id || null;
-        
-        //     // 1. Abhängig vom Rechenziel die KPIs unterschiedlich benennen und befüllen
-        //     let kpi1 = document.getElementById("kpi_label_1");
-        //     let kpi2 = document.getElementById("kpi_label_2");
-        //     let kpi3 = document.getElementById("kpi_label_3");
-        
-        //     if (rechenZiel === "wunschnetto") {
-        //         kpi1.innerText = "Nötiger Brutto-Verkauf";
-        //         kpi2.innerText = "Erhaltenes Netto (Wunsch)";
-        //         kpi3.innerText = "Anfallende Steuern";
-        //     } else if (rechenZiel === "steuerfrei") {
-        //         kpi1.innerText = "Max. steuerfreier Verkauf";
-        //         kpi2.innerText = "Ausgenutzter Freibetrag";
-        //         kpi3.innerText = "Verbleibender Freibetrag";
-        //     } else {
-        //         kpi1.innerText = "Gesamt-Bruttowert";
-        //         kpi2.innerText = "Reingewinn (Netto)";
-        //         kpi3.innerText = "Steuerabzug";
-        //     }
-        
-        //     // Werte eintragen (schön formatiert als Währung)
-        //     document.getElementById("kpi_wert_1").innerText = formatiereWaehrung(result.kpis.wert1);
-        //     document.getElementById("kpi_wert_2").innerText = formatiereWaehrung(result.kpis.wert2);
-        //     document.getElementById("kpi_wert_3").innerText = formatiereWaehrung(result.kpis.wert3);
-        
-        //     // 2. Tabelle befüllen
-        //     let tbody = document.getElementById("ergebnis_tabelle_body");
-        //     tbody.innerHTML = ""; // Altes Ergebnis löschen
-        
-        //     result.tabelle.forEach(posten => {
-        //         let tr = document.createElement("tr");
-        //         tr.style.borderBottom = "1px solid #eee";
-
-        //         tr.innerHTML = `
-        //             <td style="padding: 10px; color: #555;">${posten.name}</td>
-        //             <td style="padding: 10px; text-align: right; font-weight: bold;">${formatiereWaehrung(posten.wert)}</td>
-        //         `;
-        //         tbody.appendChild(tr);
-        //     });
-        
-        //     // Ergebnis-Container sichtbar machen
-        //     document.getElementById("ergebnis_container").style.display = "block";
-
-        //     // Automatisch zum Ergebnis scrollen
-        //     document.getElementById("ergebnis_container").scrollIntoView({ behavior: 'smooth' });
-        // }
-
-        // Hilfsfunktion zur Währungsformatierung
-        function formatiereWaehrung(wert) {
-            return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(wert);
+            // Standard-Fallback: Euro-Formatierung
+            return new Intl.NumberFormat('de-DE', { 
+                style: 'currency', 
+                currency: 'EUR' 
+            }).format(wert);
         }
 
-
-        // // 🎯 DIESE FUNKTION MUSS FREI STEHEN:
-        // function downloadeErgebnisPDF() {
-        //     if (!aktuellerPdfBase64) {
-        //         alert("Keine PDF-Daten verfügbar. Bitte starte die Berechnung erneut.");
-        //         return;
-        //     }
-        
-        //     console.log("🤖 Starte PDF-Download...");
-        
-        //     // Erstelle einen unsichtbaren Download-Link
-        //     let link = document.createElement("a");
-        //     link.href = "data:application/pdf;base64," + aktuellerPdfBase64;
-        //     link.download = `Steuerreport_${aktuellerTRTicker || "ETF"}.pdf`;
-
-        //     // Klick simulieren, um den Download zu starten
-        //     document.body.appendChild(link);
-        //     link.click();
-        //     document.body.removeChild(link);
-        // }
 
         function downloadeErgebnisPDF() {
             if (!aktuellerPdfBase64) {
                 alert("Keine PDF-Daten verfügbar. Bitte starte die Berechnung erneut.");
                 return;
             }
-        
-            console.log("🤖 Starte PDF-Download via Blob-Konvertierung...");
         
             try {
                 // 1. Base64-String in rohe Binärdaten umwandeln
@@ -1669,18 +2172,31 @@
                 document.body.removeChild(link);
                 URL.revokeObjectURL(blobUrl);
 
-                console.log("🎉 Download-Befehl an Browser übergeben!");
-            
             } catch (error) {
                 console.error("❌ Fehler beim PDF-Download:", error);
                 alert("Fehler beim Generieren der PDF-Datei im Browser: " + error.message);
             }
         }
 
+        function zeigeHinweis(text, typ) {
+            let box = document.getElementById("validation_alert");
+            box.innerText = text;
+            box.style.display = "block";
+                
+            if (typ === "error") {
+                box.style.background = "#f8d7da";
+                box.style.color = "#721c24";
+                box.style.border = "1px solid #f5c6cb";
+            } else { // "warning"
+                box.style.background = "#fff3cd";
+                box.style.color = "#856404";
+                box.style.border = "1px solid #ffeeba";
+            }
+        }
 
-
-
-
+        function versteckeHinweis() {
+            document.getElementById("validation_alert").style.display = "none";
+        }
 
 
     </script>

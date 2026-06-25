@@ -14,6 +14,8 @@ import csv
 import re  # Oben bei den Importen hinzufügen, falls noch nicht da
 from fastapi.responses import StreamingResponse
 import base64
+from models import SparplanPayload
+
 
 ########## TERMINAL EINGABE 
 # uvicorn main:app --reload
@@ -64,6 +66,9 @@ async def upload_csv(file: UploadFile = File(...)):
 
 @app.post("/api/calculate")
 async def calculate_steuer(payload: CalculationPayload):
+    # raise HTTPException(status_code=501, detail="Diese Funktion ist noch nicht implementiert. Bitte implementiere die Berechnungslogik in der Funktion.")
+    aktuelle_warnungen = []  # Beispielwarnung, die du anpassen kannst
+    # aktuelle_warnungen.append("WARNUNG: Die Berechnung basiert auf den übermittelten Daten. Bitte überprüfe die Eingaben sorgfältig.")
 
     # if payload.quelle == "tr" or payload.quelle == "suche":
     if (payload.quelle == "tr" or payload.quelle == "suche") and not payload.vorabpauschalen:
@@ -71,7 +76,6 @@ async def calculate_steuer(payload: CalculationPayload):
         # bestimme startjahr für vorabpauschale
         # payoad.kaeufe.sort(key=lambda x: x.datum)  # Sortiere die Käufe nach Datum
         startjahr = payload.kaeufe[0].datum.year if payload.kaeufe else None
-        print(startjahr)
 
         # vorabpauschale berechnen
         kursdaten = funktionen.lade_kursdaten(payload.ticker,startjahr)
@@ -98,12 +102,15 @@ async def calculate_steuer(payload: CalculationPayload):
         }
     elif payload.rechen_ziel == "wunschnetto":
         # ergebnis = {"nachricht": f"Hier wird Wunschnetto für {payload.wert_wunschnetto}€ berechnet"}
-        anzahl_verkaufen, max_anteile, bereits_verkauft, brutto, gewinn, gewinn_teilfreistellung, gewinn_nach_vorabpauschale, gewinn_nach_verlusttopf, gewinn_steuerpflichtig, steuer, netto, gesamtkosten, aktueller_kurs, freibetrag, verlusttopf_nach_verkauf, gesamte_vorabpauschale, teilfreistellung_quote, kirchensteuer = funktionen.berechne_wunschnetto(payload, vorabpauschalen)
+        anzahl_verkaufen, max_anteile, bereits_verkauft, brutto, gewinn, gewinn_teilfreistellung, gewinn_nach_vorabpauschale, gewinn_nach_verlusttopf, gewinn_steuerpflichtig, steuer, netto, gesamtkosten, aktueller_kurs, freibetrag, verlusttopf_nach_verkauf, gesamte_vorabpauschale, teilfreistellung_quote, kirchensteuer= funktionen.berechne_wunschnetto(payload, vorabpauschalen)
         ergebnis_kpis = {
             "wert1": anzahl_verkaufen,  # Als Float oder Integer (kein String!)
             "wert2": brutto,
             "wert3": netto
         }
+        if netto < payload.wert_wunschnetto:
+            aktuelle_warnungen.append(f"Warnung: Das gewünschte Wunschnetto von {payload.wert_wunschnetto}€ konnte nicht erreicht werden. Es wird mit dem Verkauf aller verfügbaren Anteile gerechnet.")
+
     else:
         # ergebnis = {"nachricht": f"Hier werden Steuern für {payload.wert_anteile} Anteile berechnet"}
         anzahl_verkaufen, max_anteile, bereits_verkauft, brutto, gewinn, gewinn_teilfreistellung, gewinn_nach_vorabpauschale, gewinn_nach_verlusttopf, gewinn_steuerpflichtig, steuer, netto, gesamtkosten, aktueller_kurs, freibetrag, verlusttopf_nach_verkauf, gesamte_vorabpauschale, teilfreistellung_quote, kirchensteuer = funktionen.berechne_anteile_steuer(payload, vorabpauschalen)  # Passe den Funktionsaufruf an
@@ -123,55 +130,35 @@ async def calculate_steuer(payload: CalculationPayload):
     # 3. 🎯 DIE WICHTIGE ZEILE: Erst b64encode, DANN als utf-8 Text decodieren!
     pdf_base64 = base64.b64encode(pdf_bytes).decode("utf-8")
 
-    
-    
     ergebnis_tabelle = [
-        {"name": "Anzahl zu verkaufender Anteile", "wert": anzahl_verkaufen},
-        {"name": "Kurs bei Verkauf", "wert": aktueller_kurs},
-        {"name": "Brutto Verkaufserlös", "wert": brutto},
-        {"name": "Kosten bei Kauf", "wert": gesamtkosten},
-        {"name": "Gewinn vor Steuer", "wert": gewinn},
-        {"name": "Abzuziehende Vorabpauschale", "wert": gesamte_vorabpauschale},
-        {"name": "Gewinn nach Vorabpauschale", "wert": gewinn_nach_vorabpauschale},
-        {"name": "Gewinn nach Teilfreistellung", "wert": gewinn_teilfreistellung},
-        {"name": "Gewinn nach Verlusttopf", "wert": gewinn_nach_verlusttopf},
-        {"name": "Neuer Verlusttopf", "wert": verlusttopf_nach_verkauf},
-        {"name": "Gewinn nach Sparerpauschbetrag", "wert": gewinn_steuerpflichtig},
-        {"name": "Ungenutzter Freibetrag", "wert": freibetrag},
-        {"name": "Zu zahrende Steuer", "wert": steuer},
-        {"name": "Netto ", "wert": netto},
+        {"name": "Insgesamt gekaufte Anteile", "wert": max_anteile, "einheit": "Anteile"},
+        {"name": "Bereits verkaufte Anteile", "wert": bereits_verkauft, "einheit": "Anteile"},
+        {"name": "Anteile aktuell im Besitz", "wert": max_anteile - bereits_verkauft, "einheit": "Anteile"},
+        {"name": "Anzahl zu verkaufender Anteile", "wert": anzahl_verkaufen, "einheit": "Anteile"},
+        {"name": "Kurs bei Verkauf", "wert": aktueller_kurs, "einheit": "EUR"},
+        {"name": "Brutto Verkaufserlös", "wert": brutto, "einheit": "EUR"},
+        {"name": "Kosten bei Kauf", "wert": gesamtkosten, "einheit": "EUR"},
+        {"name": "Gewinn vor Steuer", "wert": gewinn, "einheit": "EUR"},
+        {"name": "Abzuziehende Vorabpauschale", "wert": gesamte_vorabpauschale, "einheit": "EUR"},
+        {"name": "Gewinn nach Vorabpauschale", "wert": gewinn_nach_vorabpauschale, "einheit": "EUR"},
+        {"name": "Gewinn nach Teilfreistellung", "wert": gewinn_teilfreistellung, "einheit": "EUR"},
+        {"name": "Gewinn nach Verlusttopf", "wert": gewinn_nach_verlusttopf, "einheit": "EUR"},
+        {"name": "Neuer Verlusttopf", "wert": verlusttopf_nach_verkauf, "einheit": "EUR"},
+        {"name": "Gewinn nach Sparerpauschbetrag", "wert": gewinn_steuerpflichtig, "einheit": "EUR"},
+        {"name": "Ungenutzter Freibetrag", "wert": freibetrag, "einheit": "EUR"},
+        {"name": "Zu zahlende Steuer", "wert": steuer, "einheit": "EUR"},
+        {"name": "Netto ", "wert": netto, "einheit": "EUR"},
     ]
 
     return {
                 "success": True,
                 "kpis": ergebnis_kpis,
                 "tabelle": ergebnis_tabelle,
-                "pdf_data": pdf_base64  # 📦 Die PDF reist als Text getarnt mit!
+                "pdf_data": pdf_base64,  # 📦 Die PDF reist als Text getarnt mit!
+                "vorabpauschalen_ergebnis":vorabpauschalen.to_dict(orient="records"),  # Optional: Vorabpauschalen-Ergebnis zurückgeben
+                "warnings": aktuelle_warnungen
             }
 
-
-    # try:
-    #     # BEISPIEL-AUFRUF (Passe das an deine echten Funktionsnamen an!):
-    #     # Wenn deine Funktion z.B. alle Daten braucht, kannst du ihr 'payload' übergeben.
-        
-    #     if payload.rechen_ziel == "steuerfrei":
-    #         # ergebnis = {"nachricht": "Hier wird die Funktion für steuerfreie Anteile aufgerufen"}
-    #         ergebnis = funktionen.berechne_steuerfrei(payload, vorabpauschalen)
-            
-    #     elif payload.rechen_ziel == "wunschnetto":
-    #         # ergebnis = {"nachricht": f"Hier wird Wunschnetto für {payload.wert_wunschnetto}€ berechnet"}
-    #         ergebnis = funktionen.berechne_wunschnetto(payload, vorabpauschalen)
-            
-    #     else:
-    #         ergebnis = {"nachricht": f"Hier werden Steuern für {payload.wert_anteile} Anteile berechnet"}
-    #         # ergebnis = funktionen.berechne_anteile_steuer(payload, vorabpauschalen)  # Passe den Funktionsaufruf an
-
-    #     # Gib das mathematische Ergebnis als Dictionary zurück. FastAPI macht daraus automatisch JSON.
-    #     return ergebnis
-
-    # except Exception as e:
-    #     return {"error": f"Fehler bei der Berechnung: {str(e)}"}
-    
 
 @app.get("/api/search")
 async def search_etf(q: str = Query(..., min_length=2)):
@@ -222,7 +209,6 @@ async def get_etf_price(symbol: str):
         return {"success": False, "error": str(e)}
     
 
-from models import SparplanPayload
 
 @app.post("/api/generate-sparplan")
 async def generate_sparplan(payload: SparplanPayload):
@@ -347,13 +333,10 @@ async def upload_trade_republic(file: UploadFile = File(...)):
                 suche = yf.Search(isin, max_results=1)
                 if suche.quotes:
                     ticker_mapping[isin] = suche.quotes[0]['symbol']
-                    print(f"🎯 ISIN {isin} aufgelöst zu Ticker: {ticker_mapping[isin]}")
                 else:
                     ticker_mapping[isin] = isin  # Fallback
-                    print(f"⚠️ Keine direkte yfinance Zuordnung für ISIN {isin}.")
             except Exception as e:
                 ticker_mapping[isin] = isin
-                print(f"❌ Fehler bei ISIN-Suche {isin}: {str(e)}")
 
         return {
             "success": True,

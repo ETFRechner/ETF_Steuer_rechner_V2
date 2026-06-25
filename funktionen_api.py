@@ -86,7 +86,7 @@ def finde_anteile_ohne_steuer(max_anteile, aktueller_kurs, data, vorabpauschale,
     high = float(max_anteile)
 
     # prüfen ob überhaupt Steuern entstehen
-    gewinn, brutto, gesamte_vorabpauschale = bestimme_steuer(
+    gewinn, brutto, gesamte_vorabpauschale= bestimme_steuer(
         high, aktueller_kurs, data, vorabpauschale, bereits_verkauft, tagesgenau = tagesgeanue_berechnung
     )
 
@@ -95,20 +95,16 @@ def finde_anteile_ohne_steuer(max_anteile, aktueller_kurs, data, vorabpauschale,
     )
 
     for _ in range(100):
-        print(f"low: {low}, high: {high}")
 
         mid = (low + high) / 2
 
-        gewinn, brutto, gesamte_vorabpauschale = bestimme_steuer(
+        gewinn, brutto, gesamte_vorabpauschale= bestimme_steuer(
             mid, aktueller_kurs, data, vorabpauschale, bereits_verkauft, tagesgenau = tagesgeanue_berechnung
         )
-
-        # print(f"Gewinn: {gewinn}, Brutto: {brutto}, gesamte Vorabpauschale: {gesamte_vorabpauschale}")
 
         steuerpflichtiger_gewinn = bestimme_steuerpflichtigen_gewinn(
             gewinn, teilfreistellung_quote, gesamte_vorabpauschale, verlusttopf, freibetrag
         )
-        # print(steuerpflichtiger_gewinn)
 
         if abs(high - low) < 0.000001:
             return round(mid, 6)
@@ -124,7 +120,6 @@ def finde_anteile_ohne_steuer(max_anteile, aktueller_kurs, data, vorabpauschale,
 
 
 def bestimme_steuer(anzahl_verkaufen, aktueller_kurs, data, vorabpauschale, bereits_verkauft, tagesgenau=False):
-
     shares = data["anzahl"].to_numpy(dtype=float)
     prices = data["preis"].to_numpy(dtype=float)
     dates = pd.to_datetime(data["datum"]).to_numpy()
@@ -144,10 +139,12 @@ def bestimme_steuer(anzahl_verkaufen, aktueller_kurs, data, vorabpauschale, bere
             verkauft = 0
 
     cum_shares = np.cumsum(remaining)
-    print(f"cum_shares: {cum_shares}, anzahl_verkaufen: {anzahl_verkaufen}")
 
-    if cum_shares[-1] < anzahl_verkaufen - 1e-9:
-        print("Sie verfügen nicht über ausreichend Anteile für das gewünschte Netto.")
+    # print(anzahl_verkaufen, cum_shares[-1])
+
+    # if cum_shares[-1] < anzahl_verkaufen - 1e-9:
+    #     print("Warnung: Sie verfügen nicht über ausreichend Anteile für das gewünschte Netto. Es werden alle verfügbaren Anteile verkauft.")
+    #     warnungen.append("Sie verfügen nicht über ausreichend Anteile für das gewünschte Netto. Es werden alle verfügbaren Anteile verkauft.")
 
     idx = np.searchsorted(cum_shares, anzahl_verkaufen)
 
@@ -219,13 +216,6 @@ def bestimme_steuerpflichtigen_gewinn(gewinn, teilfreistellung_quote, gesamte_vo
     gewinn_nach_verlusttopf = max(0, gewinn_teilfreistellung - verlusttopf)
     gewinn_steuerpflichtig = max(0, gewinn_nach_verlusttopf - freibetrag)
 
-    # print(teilfreistellung_quote)
-    print(f"Gewinn: {gewinn}")
-    print(f"Gesamte Vorabpauschale: {gesamte_vorabpauschale}")
-    print(f"Gewinn nach Vorabpauschale: {gewinn_nach_vorabpauschale}")
-    print(f"Gewinn nach Teilfreistellung: {gewinn_teilfreistellung}")
-    print(f"Gewinn nach Verlusttopf: {gewinn_nach_verlusttopf}")
-    print(f"Steuerpflichtiger Gewinn: {gewinn_steuerpflichtig}")
     if all:
         return gewinn_nach_vorabpauschale, gewinn_teilfreistellung, gewinn_nach_verlusttopf, gewinn_steuerpflichtig
     else:
@@ -329,11 +319,6 @@ def berechne_steuerfrei(payload: CalculationPayload, vorabpauschalen: pd.DataFra
     anzahl_verkaufen = finde_anteile_ohne_steuer(max_anteile-bereits_verkauft, aktueller_kurs, data, vorabpauschalen, bereits_verkauft, steuersatz, teilfreistellung_quote, verlusttopf, freibetrag, tagesgeanue_berechnung)
     gewinn, brutto, gesamte_vorabpauschale = bestimme_steuer(anzahl_verkaufen, aktueller_kurs, data, vorabpauschalen, bereits_verkauft, tagesgenau = tagesgeanue_berechnung)
 
-    print(aktueller_kurs)
-    print(anzahl_verkaufen)
-    print(brutto)
-
-
     gewinn_nach_vorabpauschale, gewinn_teilfreistellung, gewinn_nach_verlusttopf, gewinn_steuerpflichtig = bestimme_steuerpflichtigen_gewinn(gewinn, teilfreistellung_quote, gesamte_vorabpauschale, verlusttopf, freibetrag, all=True)
     steuer = gewinn_steuerpflichtig * steuersatz
     netto = brutto - steuer
@@ -432,7 +417,6 @@ def create_pdf(
     etf_name, verlusttopf_nach_verkauf, gesamte_vorabpauschale, 
     teilfreistellung_quote, kirchensteuer
 ):
-    print("Erstelle PDF...")
 
     aktueller_besitz = max_anteile - bereits_verkauft
     gesamtwert = aktueller_besitz * aktueller_kurs
