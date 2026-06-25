@@ -23,25 +23,7 @@
 
     <h1>ETF Steuer Rechner</h1>
 
-    <div class="form-group">
-        <label for="teilfreistellung">Teilfreistellung des ETFs</label>
-        <select id="teilfreistellung">
-            <option value="30">Aktien-ETF / -Fonds (30% Teilfreistellung)</option>
-            <option value="15">Mischfonds (15% Teilfreistellung)</option>
-            <option value="0">Keine Teilfreistellung (z.B. Geldmarkt-/Anleihen-ETF)</option>
-            <option value="60">Immobilienfonds (60% Teilfreistellung)</option>
-        </select>
-    </div>
 
-    <!-- <div class="checkbox-group" style="margin-top: 10px; margin-bottom: 15px;">
-        <input type="checkbox" id="ist_thesaurierend" checked>
-        <label for="ist_thesaurierend">ETF ist thesaurierend (Erträge werden automatisch wiederangelegt)</label>
-    </div> -->
-
-    <div class="checkbox-group" style="margin-top: 10px; margin-bottom: 15px;">
-        <input type="checkbox" id="ist_thesaurierend" checked onchange="aktualisiereThesaurierungsAnsicht()">
-        <label for="ist_thesaurierend">ETF ist thesaurierend (Erträge werden automatisch wiederangelegt)</label>
-    </div>
 
 
 
@@ -62,7 +44,24 @@
         </select>
     </div>
 
-    <!-- einfügen teilfreistellung und thesaurierend -->
+    <div class="form-group">
+        <label for="teilfreistellung">Teilfreistellung des ETFs</label>
+        <select id="teilfreistellung">
+            <option value="30">Aktien-ETF / -Fonds (30% Teilfreistellung)</option>
+            <option value="15">Mischfonds (15% Teilfreistellung)</option>
+            <option value="0">Keine Teilfreistellung (z.B. Geldmarkt-/Anleihen-ETF)</option>
+            <option value="60">Immobilienfonds (60% Teilfreistellung)</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="ertragsverwendung">Ertragsverwendung des ETFs</label>
+        <select id="ertragsverwendung" onchange="aktualisiereThesaurierungsAnsicht()">
+            <option value="thesaurierend">Thesaurierend (Erträge werden automatisch wiederangelegt)</option>
+            <option value="ausschüttend">Ausschüttend (Erträge werden bar ausgezahlt)</option>
+        </select>
+    </div>
+
 
 
     
@@ -104,10 +103,17 @@
         
         <button class="btn-add" onclick="fuegeZeileHinzu()">+ Zeile hinzufügen</button>
 
-        <div class="form-group" style="margin-top: 25px;">
+        <!-- <div class="form-group" style="margin-top: 25px;">
             <label for="bereits_verkauft">Anzahl bereits verkaufter Anteile (für FIFO-Berechnung)</label>
             <input type="number" id="bereits_verkauft" value="0.00000" step="0.00001" min="0">
+        </div> -->
+
+        <div class="form-group">
+            <label for="bereits_verkauft_manuell">Bereits verkaufte Anteile (für FIFO-Ermittlung)</label>
+            <input type="number" id="bereits_verkauft_manuell" step="0.00001" min="0" value="0.0" placeholder="z.B. 12.345">
         </div>
+
+
 
         <div class="checkbox-group" style="margin-top: 15px;">
             <input type="checkbox" id="tagesgenau">
@@ -200,8 +206,17 @@
 
         <div id="suche_sub_sparplan" style="display: none; background: #f1f3f5; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
             <h4>Sparplan-Parameter hinzufügen</h4>
-            <div class="form-group"><label>Startdatum</label><input type="date" id="sparplan_start" value="2024-01-01"></div>
-            <div class="form-group"><label>Enddatum</label><input type="date" id="sparplan_ende" value="2024-06-01"></div>
+            <div class="form-group">
+                <label>Startdatum</label>
+                <input type="date" id="sparplan_start">
+            </div>
+            <div class="form-group">
+                <label>Enddatum</label>
+                <input type="date" id="sparplan_ende">
+            </div>
+
+            <!-- <div class="form-group"><label>Startdatum</label><input type="date" id="sparplan_start" value="2024-01-01"></div>
+            <div class="form-group"><label>Enddatum</label><input type="date" id="sparplan_ende" value="2024-06-01"></div> -->
             <div class="form-group">
                 <label>Ausführungstag</label>
                 <select id="sparplan_tag"><option value="1">1. des Monats</option><option value="15">15. des Monats</option></select>
@@ -236,9 +251,10 @@
         <hr style="margin: 25px 0; border: 0; border-top: 1px solid #ccc;">
 
         <div class="form-group">
-            <label for="bereits_verkauft_suche">Anzahl bereits verkaufter Anteile (für FIFO-Berechnung)</label>
-            <input type="number" id="bereits_verkauft_suche" value="0.00000" step="0.00001" min="0">
+            <label for="bereits_verkauft_suche">Bereits verkaufte Anteile (für FIFO-Ermittlung)</label>
+            <input type="number" id="bereits_verkauft_suche" step="0.00001" min="0" value="0.0" placeholder="z.B. 5.0">
         </div>
+
 
         <div class="checkbox-group" style="margin-top: 15px;">
             <input type="checkbox" id="tagesgenau_suche">
@@ -347,6 +363,29 @@
                 <label for="tagesgenau_tr">Tagesgenaue Berechnung der anteiligen Vorabpauschale für das Kaufjahr</label>
             </div>
 
+
+
+            <div class="checkbox-group" style="margin-top: 15px; margin-bottom: 10px;">
+                <input type="checkbox" id="haken_vorabpauschale_tr" onchange="toggleVorabpauschaleTR()">
+                <label for="haken_vorabpauschale_tr">Vorabpauschale manuell für die Vorjahre eingeben</label>
+            </div>
+
+            <div id="bereich_vorabpauschale_tr" class="box" style="display: none; background-color: #fafafa; margin-top: 15px;">
+                <h4>Vorabpauschalenhistorie (Trade Republic)</h4>
+                <p style="font-size: 0.9em; color: #666;">Geben Sie hier die Vorabpauschale pro Anteil für das jeweilige Kalenderjahr ein.</p>
+                <table style="width: 100%; margin-top: 10px;">
+                    <thead>
+                        <tr>
+                            <th>Jahr</th>
+                            <th>Vorabpauschale pro Anteil (€)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="vorab_tabelle_body_tr">
+                        </tbody>
+                </table>
+            </div>
+
+
             <hr style="margin: 25px 0; border: 0; border-top: 1px solid #ccc;">
             <h3>4. Berechnungs-Ziel (Trade Republic)</h3>
 
@@ -379,13 +418,51 @@
             </div>
         </div>
 
+    </div>
 
-        <!-- hier noch vorabpauschale genau wie bei suche und manuell als option -->
+
+
+    <div id="ergebnis_container" style="display: none; margin-top: 30px; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9;">
+        <h2>📊 Berechnungsergebnis</h2>
+        <hr>
+
+        <div style="display: flex; justify-content: space-between; gap: 20px; margin-bottom: 30px;">
+            <div style="flex: 1; background: white; padding: 20px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); text-align: center;">
+                <span id="kpi_label_1" style="font-size: 0.9rem; color: #666; font-weight: bold; display: block; margin-bottom: 5px;">Wert 1</span>
+                <span id="kpi_wert_1" style="font-size: 1.8rem; font-weight: bold; color: #2c3e50;">0,00 €</span>
+            </div>
+            <div style="flex: 1; background: white; padding: 20px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); text-align: center;">
+                <span id="kpi_label_2" style="font-size: 0.9rem; color: #666; font-weight: bold; display: block; margin-bottom: 5px;">Wert 2</span>
+                <span id="kpi_wert_2" style="font-size: 1.8rem; font-weight: bold; color: #27ae60;">0,00 €</span>
+            </div>
+            <div style="flex: 1; background: white; padding: 20px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); text-align: center;">
+                <span id="kpi_label_3" style="font-size: 0.9rem; color: #666; font-weight: bold; display: block; margin-bottom: 5px;">Wert 3</span>
+                <span id="kpi_wert_3" style="font-size: 1.8rem; font-weight: bold; color: #c0392b;">0,00 €</span>
+            </div>
+        </div>
+
+        <h3>📋 Detaillierte Aufschlüsselung</h3>
+        <table style="width: 100%; border-collapse: collapse; background: white; margin-bottom: 25px;">
+            <thead>
+                <tr style="background: #f2f2f2; border-bottom: 2px solid #ddd; text-align: left;">
+                    <th style="padding: 10px;">Posten / Kennzahl</th>
+                    <th style="padding: 10px; text-align: right;">Betrag</th>
+                </tr>
+            </thead>
+            <tbody id="ergebnis_tabelle_body">
+                </tbody>
+        </table>
+
+        <div style="text-align: right;">
+            <button id="btn_pdf_download" onclick="downloadeErgebnisPDF()" style="background: #e74c3c; color: white; border: none; padding: 12px 25px; font-size: 1rem; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                📄 PDF-Report herunterladen
+            </button>
+        </div>
     </div>
 
 
     <script>
-        // Beim Laden der Seite direkt 3 leere Zeilen anzeigen, falls keine CSV da ist
+        // Beim Laden der Seite direkt 1 leere Zeilen anzeigen, falls keine CSV da ist
         window.onload = function() {
             for(let i=0; i<1; i++) {
                 fuegeZeileHinzu();
@@ -545,9 +622,12 @@
                 kaeufe: kaeufe,
                 vorabpauschalen: vorabpauschalen,
                 teilfreistellung: parseFloat(document.getElementById("teilfreistellung").value),
-                ist_thesaurierend: document.getElementById("ist_thesaurierend").checked,
+                // RICHTIG (liest das neue Dropdown aus):
+                ist_thesaurierend: (document.getElementById("ertragsverwendung").value === "thesaurierend"),
+                bereits_verkaufte_anteile: parseFloat(document.getElementById("bereits_verkauft_manuell").value),
+                quelle: "manuell"
             };
-        
+
             console.log("Sende Daten an Backend:", payload);
         
             // 4. Per POST an FastAPI senden
@@ -558,13 +638,33 @@
             });
         
             let result = await response.json();
-        
-            // 5. Ergebnis auf der Website anzeigen
-            let ergebnisBox = document.getElementById("rechen_ergebnis");
-            let ergebnisText = document.getElementById("ergebnis_text");
 
-            ergebnisBox.style.display = "block";
-            ergebnisText.innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+            // 5. ERSETZT: Ergebnis schön visualisieren
+            if (result.success) {
+                // 🎯 HIER WIRD DIE FUNKTION AUFGERUFEN!
+                // Sie blendet das Dashboard ein, setzt die 3 KPIs und befüllt die Tabelle
+                zeigeErgebnisseImFrontend(result, payload.rechen_ziel);
+                
+                // Falls du deine alte rohe Textbox zur Sicherheit behalten willst, 
+                // kannst du diese zwei Zeilen drin lassen, ansonsten kannst du sie löschen:
+                if (document.getElementById("rechen_ergebnis_suche")) {
+                    document.getElementById("rechen_ergebnis_suche").style.display = "block";
+                    document.getElementById("ergebnis_text_suche").innerHTML = `<pre>Berechnung erfolgreich!</pre>`;
+                }
+            } else {
+                // Falls das Backend ein anderes Fehlerformat schickt, sehen wir jetzt das ganze Objekt
+                console.error("Kompletter Backend-Fehler:", result);
+                let fehlerText = result.error || result.detail || JSON.stringify(result);
+                alert("Fehler bei der Berechnung: " + fehlerText);
+            }
+
+        
+            // // 5. Ergebnis auf der Website anzeigen
+            // let ergebnisBox = document.getElementById("rechen_ergebnis");
+            // let ergebnisText = document.getElementById("ergebnis_text");
+
+            // ergebnisBox.style.display = "block";
+            // ergebnisText.innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
         }
 
         // NEU: Triggert die Live-Suche im Backend bei der Eingabe
@@ -663,31 +763,59 @@
         }
 
 
-        // Beim Laden der Seite auch hier 1 leere Zeile bereitstellen
         let alterOnload = window.onload;
         window.onload = function() {
             if (alterOnload) alterOnload();
-            fuegeZeileHinzuSuche();
+
+            // 1. Dynamische Default-Daten für den Sparplan berechnen (Letzte 12 Monate)
+            let heute = new Date();
+            let vorEinemJahr = new Date();
+            vorEinemJahr.setFullYear(heute.getFullYear() - 1);
+
+            // Hilfsfunktion zur Formatierung auf YYYY-MM-DD
+            let formatiertesDatum = (dateObj) => {
+                let j = dateObj.getFullYear();
+                let m = String(dateObj.getMonth() + 1).padStart(2, '0');
+                let t = String(dateObj.getDate()).padStart(2, '0');
+                return `${j}-${m}-${t}`;
+            };
+
+            // Felder befüllen, falls sie auf der Seite existieren
+            if (document.getElementById("sparplan_start")) {
+                document.getElementById("sparplan_start").value = formatiertesDatum(vorEinemJahr);
+            }
+            if (document.getElementById("sparplan_ende")) {
+                document.getElementById("sparplan_ende").value = formatiertesDatum(heute);
+            }
+
+            // 2. Leere Zeile NUR einfügen, wenn der manuelle Pfad gewählt ist
+            let kaufOption = document.getElementById("suche_kauf_option")?.value;
+            if (kaufOption === "suche_manuell") {
+                fuegeZeileHinzuSuche();
+            }
         };
 
-        // let alterOnload = window.onload;
-        // window.onload = function() {
-        //     if (alterOnload) alterOnload();
 
-        //     let kaufOption = document.getElementById("suche_kauf_option").value;
-        //     // Nur eine leere Zeile erzeugen, wenn der Nutzer NICHT im Sparplan-Modus startet
-        //     if (kaufOption === "suche_manuell") {
-        //         fuegeZeileHinzuSuche();
-        //     }
-        // };
-
-
-        // 1. Schaltet die Eingabemasken (CSV vs Sparplan) über der Tabelle um
         function toggleSucheKaufLogik() {
             let opt = document.getElementById("suche_kauf_option").value;
+            let tbody = document.getElementById("suche_tabelle_body_manuell");
+                
             document.getElementById("suche_sub_csv").style.display = (opt === "suche_manuell") ? "block" : "none";
             document.getElementById("suche_sub_sparplan").style.display = (opt === "suche_sparplan") ? "block" : "none";
+                
+            if (opt === "suche_sparplan") {
+                // Wenn der Nutzer auf Sparplan wechselt und die Tabelle enthält nur 1 leere Zeile, löschen wir sie direkt
+                if (tbody.rows.length === 1 && tbody.rows[0].querySelector(".row-datum-suche").value === "") {
+                    tbody.innerHTML = "";
+                }
+            } else if (opt === "suche_manuell") {
+                // Wenn er zurück auf manuell wechselt und die Tabelle ist komplett leer, spendieren wir wieder eine frische leere Zeile
+                if (tbody.rows.length === 0) {
+                    fuegeZeileHinzuSuche();
+                }
+            }
         }
+
 
         // 2. NEU: CSV-Upload speziell für den Suchpfad (leert die Tabelle nicht zwingend, sondern man kann importieren)
         async function uploadCSVSuche() {
@@ -838,7 +966,7 @@
             fAnteile.style.display = (ziel === "steuer_berechnen") ? "block" : "none";
         }
 
-        // NEU: Sammelt alle Daten aus dem Suchbereich und schickt sie an das Backend
+
         async function sendeBerechnungSuche() {
             let symbol = document.getElementById("etf_symbol_anzeige").innerText;
             if (symbol === "-") {
@@ -877,25 +1005,28 @@
                 });
             }
         
-            // 3. Das Daten-Paket schnüren (nutzt auch die geteilten steuerlichen Basisdaten von oben!)
+            // 3. Das Daten-Paket schnüren
             let payload = {
                 rechen_ziel: document.getElementById("rechen_ziel_suche").value,
                 wert_wunschnetto: parseFloat(document.getElementById("wert_wunschnetto_suche").value) || 0,
                 wert_anteile: parseFloat(document.getElementById("wert_anteile_suche").value) || 0,
                 verkaufskurs: parseFloat(document.getElementById("verkaufskurs_suche").value),
-                freibetrag: parseFloat(document.getElementById("freibetrag").value),       // Geteiltes Feld
-                verlusttopf: parseFloat(document.getElementById("verlusttopf").value),     // Geteiltes Feld
-                kirchensteuer: document.getElementById("kirchensteuer").value,             // Geteiltes Feld
+                freibetrag: parseFloat(document.getElementById("freibetrag").value),       
+                verlusttopf: parseFloat(document.getElementById("verlusttopf").value),     
+                kirchensteuer: document.getElementById("kirchensteuer").value,             
                 tagesgenau: document.getElementById("tagesgenau_suche").checked,
                 kaeufe: kaeufe,
                 vorabpauschalen: vorabpauschalen,
                 teilfreistellung: parseFloat(document.getElementById("teilfreistellung").value),
-                ist_thesaurierend: document.getElementById("ist_thesaurierend").checked,
+                ist_thesaurierend: (document.getElementById("ertragsverwendung").value === "thesaurierend"),
+                bereits_verkaufte_anteile: parseFloat(document.getElementById("bereits_verkauft_suche").value) || 0, // Fallback auf 0 hinzugefügt
+                ticker: document.getElementById("etf_symbol_anzeige")?.innerText || null,
+                quelle: "suche"
             };
         
             console.log("Sende Suchpfad-Daten an Backend:", payload);
         
-            // 4. Per POST an den existierenden FastAPI-Endpunkt senden
+            // 4. Per POST an den FastAPI-Endpunkt senden
             let response = await fetch("/api/calculate", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -904,137 +1035,193 @@
         
             let result = await response.json();
         
-            // 5. Ergebnis anzeigen
-            let ergebnisBox = document.getElementById("rechen_ergebnis_suche");
-            let ergebnisText = document.getElementById("ergebnis_text_suche");
+            // 5. ERSETZT: Ergebnis schön visualisieren
+            if (result.success) {
+                // 🎯 HIER WIRD DIE FUNKTION AUFGERUFEN!
+                // Sie blendet das Dashboard ein, setzt die 3 KPIs und befüllt die Tabelle
+                zeigeErgebnisseImFrontend(result, payload.rechen_ziel);
+                
+                // Falls du deine alte rohe Textbox zur Sicherheit behalten willst, 
+                // kannst du diese zwei Zeilen drin lassen, ansonsten kannst du sie löschen:
+                if (document.getElementById("rechen_ergebnis_suche")) {
+                    document.getElementById("rechen_ergebnis_suche").style.display = "block";
+                    document.getElementById("ergebnis_text_suche").innerHTML = `<pre>Berechnung erfolgreich!</pre>`;
+                }
+            } else {
+                // Falls das Backend ein anderes Fehlerformat schickt, sehen wir jetzt das ganze Objekt
+                console.error("Kompletter Backend-Fehler:", result);
+                let fehlerText = result.error || result.detail || JSON.stringify(result);
+                alert("Fehler bei der Berechnung: " + fehlerText);
+            }
 
-            ergebnisBox.style.display = "block";
-            ergebnisText.innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
         }
+
+        // NEU: Sammelt alle Daten aus dem Suchbereich und schickt sie an das Backend
+        // async function sendeBerechnungSuche() {
+        //     let symbol = document.getElementById("etf_symbol_anzeige").innerText;
+        //     if (symbol === "-") {
+        //         alert("Bitte wählen Sie zuerst einen ETF über die Suche aus!");
+        //         return;
+        //     }
+        
+        //     // 1. Daten aus der Suche-Kaufhistorie auslesen
+        //     let kaeufe = [];
+        //     let kaufZeilen = document.querySelectorAll("#suche_tabelle_body_manuell tr");
+        //     kaufZeilen.forEach(zeile => {
+        //         let datum = zeile.querySelector(".row-datum-suche")?.value;
+        //         let anzahl = parseFloat(zeile.querySelector(".row-anzahl-suche")?.value);
+        //         let preis = parseFloat(zeile.querySelector(".row-preis-suche")?.value);
+
+        //         if (datum && !isNaN(anzahl) && !isNaN(preis)) {
+        //             kaeufe.push({ datum: datum, anzahl: anzahl, preis: preis });
+        //         }
+        //     });
+        
+        //     // 2. Daten aus der Suche-Vorabpauschale auslesen (nur wenn Haken gesetzt)
+        //     let vorabpauschalen = [];
+        //     if (document.getElementById("haken_vorabpauschale_suche").checked) {
+        //         let vorabZeilen = document.querySelectorAll("#vorab_tabelle_body_suche tr");
+        //         vorabZeilen.forEach(zeile => {
+        //             let jahrField = zeile.querySelector(".vorab-jahr-suche");
+        //             let wertField = zeile.querySelector(".vorab-wert-suche");
+
+        //             if (jahrField && wertField) {
+        //                 let jahr = parseInt(jahrField.value);
+        //                 let wert = parseFloat(wertField.value);
+        //                 if (!isNaN(jahr) && !isNaN(wert)) {
+        //                     vorabpauschalen.push({ jahr: jahr, wert: wert });
+        //                 }
+        //             }
+        //         });
+        //     }
+        
+        //     // 3. Das Daten-Paket schnüren (nutzt auch die geteilten steuerlichen Basisdaten von oben!)
+        //     let payload = {
+        //         rechen_ziel: document.getElementById("rechen_ziel_suche").value,
+        //         wert_wunschnetto: parseFloat(document.getElementById("wert_wunschnetto_suche").value) || 0,
+        //         wert_anteile: parseFloat(document.getElementById("wert_anteile_suche").value) || 0,
+        //         verkaufskurs: parseFloat(document.getElementById("verkaufskurs_suche").value),
+        //         freibetrag: parseFloat(document.getElementById("freibetrag").value),       // Geteiltes Feld
+        //         verlusttopf: parseFloat(document.getElementById("verlusttopf").value),     // Geteiltes Feld
+        //         kirchensteuer: document.getElementById("kirchensteuer").value,             // Geteiltes Feld
+        //         tagesgenau: document.getElementById("tagesgenau_suche").checked,
+        //         kaeufe: kaeufe,
+        //         vorabpauschalen: vorabpauschalen,
+        //         teilfreistellung: parseFloat(document.getElementById("teilfreistellung").value),
+        //         // RICHTIG (liest das neue Dropdown aus):
+        //         ist_thesaurierend: (document.getElementById("ertragsverwendung").value === "thesaurierend"),
+        //         bereits_verkaufte_anteile: parseFloat(document.getElementById("bereits_verkauft_suche").value),
+        //         ticker: document.getElementById("etf_symbol_anzeige")?.innerText || null,
+        //         quelle: "suche"
+        //     };
+        
+        //     console.log("Sende Suchpfad-Daten an Backend:", payload);
+        
+        //     // 4. Per POST an den existierenden FastAPI-Endpunkt senden
+        //     let response = await fetch("/api/calculate", {
+        //         method: "POST",
+        //         headers: { "Content-Type": "application/json" },
+        //         body: JSON.stringify(payload)
+        //     });
+        
+        //     let result = await response.json();
+        
+        //     // 5. Ergebnis anzeigen
+        //     let ergebnisBox = document.getElementById("rechen_ergebnis_suche");
+        //     let ergebnisText = document.getElementById("ergebnis_text_suche");
+
+        //     ergebnisBox.style.display = "block";
+        //     ergebnisText.innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+        // }
 
 
         let aktuelleTRDaten = null;
         let aktuelleTRKurse = {}; // NEU: Speichert die vom Server gelieferten Kurse global
+        let aktuelleTRVerkaeufe = {};
+        let aktuellerTRTicker = null; // Speichert den aktuell aktiven Ticker für die Berechnung
+        let aktuelleTRTickerMapping = {}; // NEU: Merkt sich die Ticker-Übersetzungen
+        let aktuellerPdfBase64 = null;
 
-        // Aktualisiert: CSV hochladen und Kurse merken
         async function uploadTradeRepublicCSV() {
             let fileInput = document.getElementById("tr_csv_file");
             if (fileInput.files.length === 0) return;
-        
+
             let formData = new FormData();
             formData.append("file", fileInput.files[0]);
-        
+
             let response = await fetch("/api/upload-trade-republic", { method: "POST", body: formData });
             let result = await response.json();
-        
+
             if (result.success) {
                 aktuelleTRDaten = result.data; 
-                aktuelleTRKurse = result.kurse; // NEU: Kurse im Frontend merken
-
+                aktuelleTRKurse = result.kurse; 
+                aktuelleTRVerkaeufe = result.verkaufte_anteile;
+                aktuelleTRTickerMapping = result.ticker_mapping; // Merkt sich ISIN -> Ticker
+            
                 let dropdown = document.getElementById("tr_etf_dropdown");
                 dropdown.innerHTML = '<option value="">-- Bitte wählen --</option>';
+            
+                // Wir loopen durch das neue isin_name_mapping
+                for (let isin in result.isin_name_mapping) {
+                    let name = result.isin_name_mapping[isin];
 
-                result.etfs.forEach(etf => {
                     let opt = document.createElement("option");
-                    opt.value = etf;
-                    opt.innerText = etf;
+                    opt.value = isin;      // Im Hintergrund arbeitet JavaScript mit der ISIN!
+                    opt.innerText = name;  // Der Nutzer sieht weiterhin den schönen Klarnamen!
                     dropdown.appendChild(opt);
-                });
+                }
             
                 document.getElementById("tr_etf_auswahl_container").style.display = "block";
                 document.getElementById("tr_tabelle_container").style.display = "none";
             } else {
-                alert("Fehler beim Verarbeiten der Trade Republic Datei: " + result.error);
+                alert("Fehler: " + result.error);
             }
         }
 
-        // Aktualisiert: Beim Auswählen des ETFs auch direkt den ermittelten Kurs setzen
+
         function waehleTradeRepublicETF() {
-            let gewaehlterETF = document.getElementById("tr_etf_dropdown").value;
+            let gewaehlteISIN = document.getElementById("tr_etf_dropdown").value;
             let tableContainer = document.getElementById("tr_tabelle_container");
             let tbody = document.getElementById("tr_tabelle_body");
             let verkaufskursInput = document.getElementById("verkaufskurs_tr");
-
+                
             tbody.innerHTML = ""; 
-        
-            if (!gewaehlterETF || !aktuelleTRDaten) {
+                
+            if (!gewaehlteISIN) {
                 tableContainer.style.display = "none";
+                aktuellerTRTicker = null;
                 return;
             }
         
-            // NEU: Setze den vorermittelten Live-Kurs oder den Fallback (100)
-            if (aktuelleTRKurse && aktuelleTRKurse[gewaehlterETF]) {
-                verkaufskursInput.value = aktuelleTRKurse[gewaehlterETF];
+            // Live-Kurs setzen via ISIN-Schlüssel
+            if (aktuelleTRKurse && aktuelleTRKurse[gewaehlteISIN]) {
+                verkaufskursInput.value = aktuelleTRKurse[gewaehlteISIN];
             } else {
                 verkaufskursInput.value = "100.00";
             }
         
-            let gefilterteKaeufe = aktuelleTRDaten.filter(item => item.asset === gewaehlterETF);
+            // 🎯 HIER PASSIERT DIE MAGIE: 
+            // Wir setzen den Ticker für das Berechnungs-Backend auf das yfinance-Symbol, das zur ISIN gehört!
+            if (aktuelleTRTickerMapping && aktuelleTRTickerMapping[gewaehlteISIN]) {
+                aktuellerTRTicker = aktuelleTRTickerMapping[gewaehlteISIN];
+                console.log("🤖 Ticker erfolgreich über ISIN gesetzt auf:", aktuellerTRTicker);
+            } else {
+                aktuellerTRTicker = gewaehlteISIN; // Fallback
+            }
+        
+            // Käufe filtern (da 'item.asset' im neuen Backend nun die ISIN ist)
+            let gefilterteKaeufe = aktuelleTRDaten.filter(item => item.asset === gewaehlteISIN);
             gefilterteKaeufe.forEach(kauf => {
                 fuegeZeileHinzuTR(kauf.datum, kauf.anzahl, kauf.preis);
             });
         
             tableContainer.style.display = "block"; 
+
+            if (typeof toggleVorabpauschaleTR === "function") {
+                toggleVorabpauschaleTR();
+            }
         }
 
-        // // Variable speichert die kompletten TR-Daten global im Frontend, damit wir ohne erneuten Server-Call filtern können
-        // let aktuelleTRDaten = null;
-
-        // // 1. Sendet die CSV an FastAPI und baut das Dropdown der gefundenen ETFs auf
-        // async function uploadTradeRepublicCSV() {
-        //     let fileInput = document.getElementById("tr_csv_file");
-        //     if (fileInput.files.length === 0) return;
-        
-        //     let formData = new FormData();
-        //     formData.append("file", fileInput.files[0]);
-        
-        //     let response = await fetch("/api/upload-trade-republic", { method: "POST", body: formData });
-        //     let result = await response.json();
-        
-        //     if (result.success) {
-        //         aktuelleTRDaten = result.data; // Daten merken
-
-        //         // Dropdown füllen
-        //         let dropdown = document.getElementById("tr_etf_dropdown");
-        //         dropdown.innerHTML = '<option value="">-- Bitte wählen --</option>';
-
-        //         result.etfs.forEach(etf => {
-        //             let opt = document.createElement("option");
-        //             opt.value = etf;
-        //             opt.innerText = etf;
-        //             dropdown.appendChild(opt);
-        //         });
-            
-        //         // Dropdown-Container einblenden, Tabelle erst noch verstecken
-        //         document.getElementById("tr_etf_auswahl_container").style.display = "block";
-        //         document.getElementById("tr_tabelle_container").style.display = "none";
-        //     } else {
-        //         alert("Fehler beim Verarbeiten der Trade Republic Datei: " + result.error);
-        //     }
-        // }
-
-        // // 2. Filtert die globalen Daten, wenn der Nutzer einen ETF im Dropdown auswählt
-        // function waehleTradeRepublicETF() {
-        //     let gewaehlterETF = document.getElementById("tr_etf_dropdown").value;
-        //     let tableContainer = document.getElementById("tr_tabelle_container");
-        //     let tbody = document.getElementById("tr_tabelle_body");
-
-        //     tbody.innerHTML = ""; // Leeren
-        
-        //     if (!gewaehlterETF || !aktuelleTRDaten) {
-        //         tableContainer.style.display = "none";
-        //         return;
-        //     }
-        
-        //     // Filter alle Zeilen heraus, die zum ausgewählten ETF-Namen/Symbol gehören
-        //     let gefilterteKaeufe = aktuelleTRDaten.filter(item => item.asset === gewaehlterETF);
-        
-        //     gefilterteKaeufe.forEach(kauf => {
-        //         fuegeZeileHinzuTR(kauf.datum, kauf.anzahl, kauf.preis);
-        //     });
-        
-        //     tableContainer.style.display = "block"; // Zeige Tabelle und Berechnungs-Maske
-        // }
 
         // Helper: Fügt eine Zeile in die TR-Tabelle ein
         function fuegeZeileHinzuTR(datum = "", anzahl = "", preis = "") {
@@ -1057,10 +1244,10 @@
 
 
 
-
-
-        // Absenden-Logik für Trade Republic
         async function sendeBerechnungTR() {
+            // NEU: Welcher ETF ist aktuell im Dropdown ausgewählt?
+            let gewaehlterETF = document.getElementById("tr_etf_dropdown").value;
+        
             let kaeufe = [];
             document.querySelectorAll("#tr_tabelle_body tr").forEach(zeile => {
                 let datum = zeile.querySelector(".row-datum-tr")?.value;
@@ -1070,7 +1257,32 @@
                     kaeufe.push({ datum: datum, anzahl: anzahl, preis: preis });
                 }
             });
-
+        
+            // 1. Vorabpauschalen sauber auslesen
+            let vorabpauschalen = [];
+            if (document.getElementById("haken_vorabpauschale_tr").checked) {
+                let vorabZeilen = document.querySelectorAll("#vorab_tabelle_body_tr tr");
+                vorabZeilen.forEach(zeile => {
+                    let jahrField = zeile.querySelector(".vorab-jahr-tr");
+                    let wertField = zeile.querySelector(".vorab-wert-tr");
+                
+                    if (jahrField && wertField) {
+                        let jahr = parseInt(jahrField.value);
+                        let wert = parseFloat(wertField.value);
+                        if (!isNaN(jahr) && !isNaN(wert)) {
+                            vorabpauschalen.push({ jahr: jahr, wert: wert });
+                        }
+                    }
+                });
+            }
+        
+            // NEU: Bereits verkaufte Anteile für diesen spezifischen ETF ermitteln
+            let verkaufteAnteile = 0.0;
+            if (aktuelleTRVerkaeufe && aktuelleTRVerkaeufe[gewaehlterETF]) {
+                verkaufteAnteile = parseFloat(aktuelleTRVerkaeufe[gewaehlterETF]);
+            }
+        
+            // 2. Das Payload-Objekt schnüren
             let payload = {
                 rechen_ziel: document.getElementById("rechen_ziel_tr").value,
                 wert_wunschnetto: parseFloat(document.getElementById("wert_wunschnetto_tr").value) || 0,
@@ -1081,11 +1293,15 @@
                 kirchensteuer: document.getElementById("kirchensteuer").value,
                 tagesgenau: document.getElementById("tagesgenau_tr").checked,
                 kaeufe: kaeufe,
-                vorabpauschalen: [],
+                vorabpauschalen: vorabpauschalen,
                 teilfreistellung: parseFloat(document.getElementById("teilfreistellung").value),
-                ist_thesaurierend: document.getElementById("ist_thesaurierend").checked,
+                ist_thesaurierend: (document.getElementById("ertragsverwendung").value === "thesaurierend"),
+                bereits_verkaufte_anteile: verkaufteAnteile,
+                ticker: aktuellerTRTicker,
+                quelle: "tr"
             };
         
+            // 3. Daten senden
             let response = await fetch("/api/calculate", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -1093,30 +1309,107 @@
             });
         
             let result = await response.json();
-            document.getElementById("rechen_ergebnis_tr").style.display = "block";
-            document.getElementById("ergebnis_text_tr").innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+            
+            // 4. KORRIGIERT: Ergebnis im Dashboard anzeigen
+            if (result.success) {
+                // 🎯 HIER WIRD DIE DYNAMISCHE STRUKTUR AUFGERUFEN
+                zeigeErgebnisseImFrontend(result, payload.rechen_ziel);
+                
+                // Falls du die alte Textbox behalten willst, bleibt das hier aktiv.
+                // Ansonsten kannst du diese zwei Zeilen löschen.
+                if (document.getElementById("rechen_ergebnis_tr")) {
+                    document.getElementById("rechen_ergebnis_tr").style.display = "block";
+                    document.getElementById("ergebnis_text_tr").innerHTML = `<pre>Berechnung erfolgreich!</pre>`;
+                }
+            } else {
+                // Falls das Backend ein anderes Fehlerformat schickt, sehen wir jetzt das ganze Objekt
+                console.error("Kompletter Backend-Fehler:", result);
+                let fehlerText = result.error || result.detail || JSON.stringify(result);
+                alert("Fehler bei der Berechnung: " + fehlerText);
+            }
         }
 
-
-        function aktualisiereThesaurierungsAnsicht() {
-            let istThesaurierend = document.getElementById("ist_thesaurierend").checked;
-                
-            // 1. Manueller Pfad
-            let vorabManuell = document.getElementById("bereich_vorabpauschale");
-            if (vorabManuell) {
-                if (!istThesaurierend) {
-                    vorabManuell.style.display = "none"; // Tippfehler korrigiert (nur 1x .style)
-                } else {
-                    if (typeof aktualisiereVorabpauschaleTabelle === 'function') {
-                        aktualisiereVorabpauschaleTabelle();
-                    }
-                }
-            }
+        // Absenden-Logik für Trade Republic
+        // async function sendeBerechnungTR() {
+        //     // NEU: Welcher ETF ist aktuell im Dropdown ausgewählt?
+        //     let gewaehlterETF = document.getElementById("tr_etf_dropdown").value;
         
-            // 2. ETF-Suchpfad
+        //     let kaeufe = [];
+        //     document.querySelectorAll("#tr_tabelle_body tr").forEach(zeile => {
+        //         let datum = zeile.querySelector(".row-datum-tr")?.value;
+        //         let anzahl = parseFloat(zeile.querySelector(".row-anzahl-tr")?.value);
+        //         let preis = parseFloat(zeile.querySelector(".row-preis-tr")?.value);
+        //         if (datum && !isNaN(anzahl) && !isNaN(preis)) {
+        //             kaeufe.push({ datum: datum, anzahl: anzahl, preis: preis });
+        //         }
+        //     });
+        
+        //     // 1. Vorabpauschalen sauber auslesen
+        //     let vorabpauschalen = [];
+        //     if (document.getElementById("haken_vorabpauschale_tr").checked) {
+        //         let vorabZeilen = document.querySelectorAll("#vorab_tabelle_body_tr tr");
+        //         vorabZeilen.forEach(zeile => {
+        //             let jahrField = zeile.querySelector(".vorab-jahr-tr");
+        //             let wertField = zeile.querySelector(".vorab-wert-tr");
+                
+        //             if (jahrField && wertField) {
+        //                 let jahr = parseInt(jahrField.value);
+        //                 let wert = parseFloat(wertField.value);
+        //                 if (!isNaN(jahr) && !isNaN(wert)) {
+        //                     vorabpauschalen.push({ jahr: jahr, wert: wert });
+        //                 }
+        //             }
+        //         });
+        //     }
+        
+        //     // NEU: Bereits verkaufte Anteile für diesen spezifischen ETF ermitteln
+        //     let verkaufteAnteile = 0.0;
+        //     if (aktuelleTRVerkaeufe && aktuelleTRVerkaeufe[gewaehlterETF]) {
+        //         verkaufteAnteile = parseFloat(aktuelleTRVerkaeufe[gewaehlterETF]);
+        //     }
+        
+        //     // 2. Das Payload-Objekt schnüren
+        //     let payload = {
+        //         rechen_ziel: document.getElementById("rechen_ziel_tr").value,
+        //         wert_wunschnetto: parseFloat(document.getElementById("wert_wunschnetto_tr").value) || 0,
+        //         wert_anteile: parseFloat(document.getElementById("wert_anteile_tr").value) || 0,
+        //         verkaufskurs: parseFloat(document.getElementById("verkaufskurs_tr").value),
+        //         freibetrag: parseFloat(document.getElementById("freibetrag").value),
+        //         verlusttopf: parseFloat(document.getElementById("verlusttopf").value),
+        //         kirchensteuer: document.getElementById("kirchensteuer").value,
+        //         tagesgenau: document.getElementById("tagesgenau_tr").checked,
+        //         kaeufe: kaeufe,
+        //         vorabpauschalen: vorabpauschalen,
+        //         teilfreistellung: parseFloat(document.getElementById("teilfreistellung").value),
+        //         ist_thesaurierend: (document.getElementById("ertragsverwendung").value === "thesaurierend"),
+        //         // NEU: Das Match mit deinem neuen Pydantic-Feld im Backend!
+        //         bereits_verkaufte_anteile: verkaufteAnteile,
+        //         ticker: aktuellerTRTicker,
+        //         quelle: "tr"
+        //     };
+        
+        //     let response = await fetch("/api/calculate", {
+        //         method: "POST",
+        //         headers: { "Content-Type": "application/json" },
+        //         body: JSON.stringify(payload)
+        //     });
+        
+        //     let result = await response.json();
+        //     document.getElementById("rechen_ergebnis_tr").style.display = "block";
+        //     document.getElementById("ergebnis_text_tr").innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+        // }
+
+
+        // Suche diese Funktion im Code und füge den "3. Trade Republic Pfad" hinzu:
+        function aktualisiereThesaurierungsAnsicht() {
+            let istThesaurierend = (document.getElementById("ertragsverwendung").value === "thesaurierend");
+
+            // 1. Manueller Pfad steuern
+            aktualisiereVorabpauschaleTabelle();
+        
+            // 2. ETF-Suchpfad steuern
             let vorabHakenSucheContainer = document.getElementById("haken_vorabpauschale_suche")?.parentNode;
             let vorabTabelleSuche = document.getElementById("bereich_vorabpauschale_suche");
-
             if (!istThesaurierend) {
                 if (vorabHakenSucheContainer) vorabHakenSucheContainer.style.display = "none";
                 if (vorabTabelleSuche) vorabTabelleSuche.style.display = "none";
@@ -1124,7 +1417,269 @@
             } else {
                 if (vorabHakenSucheContainer) vorabHakenSucheContainer.style.display = "block";
             }
+        
+            // 3. NEU: Trade Republic Pfad steuern
+            let vorabHakenTRContainer = document.getElementById("haken_vorabpauschale_tr")?.parentNode;
+            let vorabTabelleTR = document.getElementById("bereich_vorabpauschale_tr");
+            if (!istThesaurierend) {
+                if (vorabHakenTRContainer) vorabHakenTRContainer.style.display = "none";
+                if (vorabTabelleTR) vorabTabelleTR.style.display = "none";
+                document.getElementById("haken_vorabpauschale_tr").checked = false;
+            } else {
+                if (vorabHakenTRContainer) vorabHakenTRContainer.style.display = "block";
+            }
         }
+
+        function toggleVorabpauschaleTR() {
+            let istThesaurierend = (document.getElementById("ertragsverwendung").value === "thesaurierend");
+            let haken = document.getElementById("haken_vorabpauschale_tr").checked;
+            let vorabBereich = document.getElementById("bereich_vorabpauschale_tr");
+            let tbody = document.getElementById("vorab_tabelle_body_tr");
+                
+            tbody.innerHTML = ""; // Vorherige Zeilen leeren
+                
+            // Wenn nicht thesaurierend oder Haken nicht gesetzt -> verstecken
+            if (!haken || !istThesaurierend) {
+                vorabBereich.style.display = "none";
+                return;
+            }
+        
+            // Ältestes Jahr aus den importierten TR-Käufen ermitteln
+            let datumsFelder = document.querySelectorAll(".row-datum-tr");
+            let MindestJahr = 2018;
+            let aktuellesJahr = 2026; 
+            let aeltestesJahr = aktuellesJahr;
+        
+            datumsFelder.forEach(feld => {
+                if (feld.value) {
+                    let kaufJahr = new Date(feld.value).getFullYear();
+                    if (kaufJahr < aeltestesJahr) {
+                        aeltestesJahr = kaufJahr;
+                    }
+                }
+            });
+        
+            if (aeltestesJahr < MindestJahr) {
+                aeltestesJahr = MindestJahr;
+            }
+        
+            if (aeltestesJahr < aktuellesJahr) {
+                vorabBereich.style.display = "block";
+                for (let jahr = aeltestesJahr; jahr < aktuellesJahr; jahr++) {
+                    let row = tbody.insertRow();
+                    row.innerHTML = `
+                        <td><input type="number" class="vorab-jahr-tr" value="${jahr}" disabled style="background: #eee;"></td>
+                        <td><input type="number" class="vorab-wert-tr" value="0.00000000" step="0.00000001" min="0"></td>
+                    `;
+                }
+            } else {
+                vorabBereich.style.display = "block";
+                let row = tbody.insertRow();
+                row.innerHTML = `<td colspan="2" style="color: #666; text-align: center;">Keine Käufe aus Vorjahren in der Tabelle gefunden.</td>`;
+            }
+        }
+
+        // Variable, um die ID der aktuellen Berechnung für den PDF-Export zu speichern
+        let aktuelleBerechnungsId = null;
+
+        function zeigeErgebnisseImFrontend(result, rechenZiel) {
+            if (!result.success) return;
+                
+            // 🎯 NEU & WICHTIG: Die PDF-Daten für die Funktion downloadeErgebnisPDF() merken
+            // Ohne diese Zeile weiß der Download-Button nicht, was er herunterladen soll!
+            aktuellerPdfBase64 = result.pdf_data || null;
+                
+            // Speicher die Berechnungs-ID (falls vorhanden)
+            aktuelleBerechnungsId = result.calculation_id || null;
+                
+            // 1. Abhängig vom Rechenziel die KPIs unterschiedlich benennen und befüllen
+            let kpi1 = document.getElementById("kpi_label_1");
+            let kpi2 = document.getElementById("kpi_label_2");
+            let kpi3 = document.getElementById("kpi_label_3");
+                
+            // Kleine Absicherung: Nur umbenennen, wenn die HTML-Elemente auch existieren
+            if (kpi1 && kpi2 && kpi3) {
+                if (rechenZiel === "wunschnetto") {
+                    kpi1.innerText = "Benötigte Anteile";
+                    kpi2.innerText = "Bruttoerlös";
+                    kpi3.innerText = "Nettoerlös";
+                } else if (rechenZiel === "steuerfrei") {
+                    kpi1.innerText = "Max. steuerfrei verkaufbare Anteile";
+                    kpi2.innerText = "Nettoerlös";
+                    kpi3.innerText = "Verbleibender Freibetrag";
+                } else {
+                    kpi1.innerText = "Bruttoerlös";
+                    kpi2.innerText = "Nettoerlös";
+                    kpi3.innerText = "Steuerabzug";
+                }
+            }
+        
+            // Werte eintragen (schön formatiert als Währung)
+            if (document.getElementById("kpi_wert_1")) {
+                document.getElementById("kpi_wert_1").innerText = formatiereWaehrung(result.kpis.wert1);
+            }
+            if (document.getElementById("kpi_wert_2")) {
+                document.getElementById("kpi_wert_2").innerText = formatiereWaehrung(result.kpis.wert2);
+            }
+            if (document.getElementById("kpi_wert_3")) {
+                document.getElementById("kpi_wert_3").innerText = formatiereWaehrung(result.kpis.wert3);
+            }
+        
+            // 2. Tabelle befüllen
+            let tbody = document.getElementById("ergebnis_tabelle_body");
+            if (tbody) {
+                tbody.innerHTML = ""; // Altes Ergebnis löschen
+            
+                if (result.tabelle && Array.isArray(result.tabelle)) {
+                    result.tabelle.forEach(posten => {
+                        let tr = document.createElement("tr");
+                        tr.style.borderBottom = "1px solid #eee";
+                    
+                        tr.innerHTML = `
+                            <td style="padding: 10px; color: #555;">${posten.name}</td>
+                            <td style="padding: 10px; text-align: right; font-weight: bold;">${formatiereWaehrung(posten.wert)}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+            }
+        
+            // Ergebnis-Container sichtbar machen
+            let ergebnisContainer = document.getElementById("ergebnis_container");
+            if (ergebnisContainer) {
+                ergebnisContainer.style.display = "block";
+
+                // Automatisch zum Ergebnis scrollen
+                ergebnisContainer.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+
+        // function zeigeErgebnisseImFrontend(result, rechenZiel) {
+        //     if (!result.success) return;
+        
+        //     // Speicher die Berechnungs-ID (falls dein Backend eine generiert), um das PDF zu holen
+        //     aktuelleBerechnungsId = result.calculation_id || null;
+        
+        //     // 1. Abhängig vom Rechenziel die KPIs unterschiedlich benennen und befüllen
+        //     let kpi1 = document.getElementById("kpi_label_1");
+        //     let kpi2 = document.getElementById("kpi_label_2");
+        //     let kpi3 = document.getElementById("kpi_label_3");
+        
+        //     if (rechenZiel === "wunschnetto") {
+        //         kpi1.innerText = "Nötiger Brutto-Verkauf";
+        //         kpi2.innerText = "Erhaltenes Netto (Wunsch)";
+        //         kpi3.innerText = "Anfallende Steuern";
+        //     } else if (rechenZiel === "steuerfrei") {
+        //         kpi1.innerText = "Max. steuerfreier Verkauf";
+        //         kpi2.innerText = "Ausgenutzter Freibetrag";
+        //         kpi3.innerText = "Verbleibender Freibetrag";
+        //     } else {
+        //         kpi1.innerText = "Gesamt-Bruttowert";
+        //         kpi2.innerText = "Reingewinn (Netto)";
+        //         kpi3.innerText = "Steuerabzug";
+        //     }
+        
+        //     // Werte eintragen (schön formatiert als Währung)
+        //     document.getElementById("kpi_wert_1").innerText = formatiereWaehrung(result.kpis.wert1);
+        //     document.getElementById("kpi_wert_2").innerText = formatiereWaehrung(result.kpis.wert2);
+        //     document.getElementById("kpi_wert_3").innerText = formatiereWaehrung(result.kpis.wert3);
+        
+        //     // 2. Tabelle befüllen
+        //     let tbody = document.getElementById("ergebnis_tabelle_body");
+        //     tbody.innerHTML = ""; // Altes Ergebnis löschen
+        
+        //     result.tabelle.forEach(posten => {
+        //         let tr = document.createElement("tr");
+        //         tr.style.borderBottom = "1px solid #eee";
+
+        //         tr.innerHTML = `
+        //             <td style="padding: 10px; color: #555;">${posten.name}</td>
+        //             <td style="padding: 10px; text-align: right; font-weight: bold;">${formatiereWaehrung(posten.wert)}</td>
+        //         `;
+        //         tbody.appendChild(tr);
+        //     });
+        
+        //     // Ergebnis-Container sichtbar machen
+        //     document.getElementById("ergebnis_container").style.display = "block";
+
+        //     // Automatisch zum Ergebnis scrollen
+        //     document.getElementById("ergebnis_container").scrollIntoView({ behavior: 'smooth' });
+        // }
+
+        // Hilfsfunktion zur Währungsformatierung
+        function formatiereWaehrung(wert) {
+            return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(wert);
+        }
+
+
+        // // 🎯 DIESE FUNKTION MUSS FREI STEHEN:
+        // function downloadeErgebnisPDF() {
+        //     if (!aktuellerPdfBase64) {
+        //         alert("Keine PDF-Daten verfügbar. Bitte starte die Berechnung erneut.");
+        //         return;
+        //     }
+        
+        //     console.log("🤖 Starte PDF-Download...");
+        
+        //     // Erstelle einen unsichtbaren Download-Link
+        //     let link = document.createElement("a");
+        //     link.href = "data:application/pdf;base64," + aktuellerPdfBase64;
+        //     link.download = `Steuerreport_${aktuellerTRTicker || "ETF"}.pdf`;
+
+        //     // Klick simulieren, um den Download zu starten
+        //     document.body.appendChild(link);
+        //     link.click();
+        //     document.body.removeChild(link);
+        // }
+
+        function downloadeErgebnisPDF() {
+            if (!aktuellerPdfBase64) {
+                alert("Keine PDF-Daten verfügbar. Bitte starte die Berechnung erneut.");
+                return;
+            }
+        
+            console.log("🤖 Starte PDF-Download via Blob-Konvertierung...");
+        
+            try {
+                // 1. Base64-String in rohe Binärdaten umwandeln
+                let byteCharacters = atob(aktuellerPdfBase64);
+                let byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                let byteArray = new Uint8Array(byteNumbers);
+
+                // 2. Ein echtes Blob-Objekt für ein PDF erstellen
+                let blob = new Blob([byteArray], { type: "application/pdf" });
+
+                // 3. Eine temporäre Browser-URL für dieses Blob erzeugen
+                let blobUrl = URL.createObjectURL(blob);
+            
+                // 4. Den unsichtbaren Download-Link erstellen
+                let link = document.createElement("a");
+                link.href = blobUrl;
+                link.download = `Steuerreport_${aktuellerTRTicker || "ETF"}.pdf`;
+
+                // WICHTIG: Das Element MUSS im DOM sein, damit einige Browser den Klick erlauben
+                document.body.appendChild(link);
+                link.click();
+
+                // 5. Aufräumen (Link löschen und Speicher freigeben)
+                document.body.removeChild(link);
+                URL.revokeObjectURL(blobUrl);
+
+                console.log("🎉 Download-Befehl an Browser übergeben!");
+            
+            } catch (error) {
+                console.error("❌ Fehler beim PDF-Download:", error);
+                alert("Fehler beim Generieren der PDF-Datei im Browser: " + error.message);
+            }
+        }
+
+
+
+
 
 
 

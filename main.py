@@ -4,11 +4,19 @@ from fastapi.templating import Jinja2Templates
 import pandas as pd
 import io
 from models import CalculationPayload
-import funktionen  # Deine bereits existierende Datei
+import funktionen_api as funktionen  # Deine bereits existierende Datei
 import requests
 from fastapi import Query
 import yfinance as yf
 from fastapi import HTTPException
+import csv
+# from fastapi import app, UploadFile, File
+import re  # Oben bei den Importen hinzufügen, falls noch nicht da
+from fastapi.responses import StreamingResponse
+import base64
+
+########## TERMINAL EINGABE 
+# uvicorn main:app --reload
 
 app = FastAPI(title="ETF Steuer Rechner")
 templates = Jinja2Templates(directory="templates")
@@ -56,33 +64,113 @@ async def upload_csv(file: UploadFile = File(...)):
 
 @app.post("/api/calculate")
 async def calculate_steuer(payload: CalculationPayload):
-    # Zum Testen drucken wir die empfangenen Daten einmal sauber in der Server-Konsole aus
-    print(f"Ziel: {payload.rechen_ziel}")
-    print(f"Anzahl Käufe übermittelt: {len(payload.kaeufe)}")
 
-    # Hier verknüpfst du deine funktionen.py. 
-    # Du kannst entweder das ganze 'payload'-Objekt übergeben oder die Werte einzeln:
-    try:
-        # BEISPIEL-AUFRUF (Passe das an deine echten Funktionsnamen an!):
-        # Wenn deine Funktion z.B. alle Daten braucht, kannst du ihr 'payload' übergeben.
+    # if payload.quelle == "tr" or payload.quelle == "suche":
+    if (payload.quelle == "tr" or payload.quelle == "suche") and not payload.vorabpauschalen:
+
+        # bestimme startjahr für vorabpauschale
+        # payoad.kaeufe.sort(key=lambda x: x.datum)  # Sortiere die Käufe nach Datum
+        startjahr = payload.kaeufe[0].datum.year if payload.kaeufe else None
+        print(startjahr)
+
+        # vorabpauschale berechnen
+        kursdaten = funktionen.lade_kursdaten(payload.ticker,startjahr)
+        vorabpauschalen = funktionen.berechne_vorabpauschalen(kursdaten)
+
+        etf_name = payload.ticker
+    else:
+        vorab_liste = [v.model_dump() for v in payload.vorabpauschalen]
+
+        # 2. Das DataFrame daraus erstellen
+        vorabpauschalen = pd.DataFrame(vorab_liste)
+
+        etf_name = "unbekannt"
+
+
+
+    if payload.rechen_ziel == "steuerfrei":
+        # ergebnis = {"nachricht": "Hier wird die Funktion für steuerfreie Anteile aufgerufen"}
+        anzahl_verkaufen, max_anteile, bereits_verkauft, brutto, gewinn, gewinn_teilfreistellung, gewinn_nach_vorabpauschale, gewinn_nach_verlusttopf, gewinn_steuerpflichtig, steuer, netto, gesamtkosten, aktueller_kurs, freibetrag, verlusttopf_nach_verkauf, gesamte_vorabpauschale, teilfreistellung_quote, kirchensteuer = funktionen.berechne_steuerfrei(payload, vorabpauschalen)
+        ergebnis_kpis = {
+            "wert1": anzahl_verkaufen,  # Als Float oder Integer (kein String!)
+            "wert2": netto,
+            "wert3": freibetrag
+        }
+    elif payload.rechen_ziel == "wunschnetto":
+        # ergebnis = {"nachricht": f"Hier wird Wunschnetto für {payload.wert_wunschnetto}€ berechnet"}
+        anzahl_verkaufen, max_anteile, bereits_verkauft, brutto, gewinn, gewinn_teilfreistellung, gewinn_nach_vorabpauschale, gewinn_nach_verlusttopf, gewinn_steuerpflichtig, steuer, netto, gesamtkosten, aktueller_kurs, freibetrag, verlusttopf_nach_verkauf, gesamte_vorabpauschale, teilfreistellung_quote, kirchensteuer = funktionen.berechne_wunschnetto(payload, vorabpauschalen)
+        ergebnis_kpis = {
+            "wert1": anzahl_verkaufen,  # Als Float oder Integer (kein String!)
+            "wert2": brutto,
+            "wert3": netto
+        }
+    else:
+        # ergebnis = {"nachricht": f"Hier werden Steuern für {payload.wert_anteile} Anteile berechnet"}
+        anzahl_verkaufen, max_anteile, bereits_verkauft, brutto, gewinn, gewinn_teilfreistellung, gewinn_nach_vorabpauschale, gewinn_nach_verlusttopf, gewinn_steuerpflichtig, steuer, netto, gesamtkosten, aktueller_kurs, freibetrag, verlusttopf_nach_verkauf, gesamte_vorabpauschale, teilfreistellung_quote, kirchensteuer = funktionen.berechne_anteile_steuer(payload, vorabpauschalen)  # Passe den Funktionsaufruf an
+        ergebnis_kpis = {
+            "wert1": brutto,  # Als Float oder Integer (kein String!)
+            "wert2": netto,
+            "wert3": steuer
+        }
+        # hier vielleicht lieber iregndeine form gewinn aufführen
+
+
+    pdf_buffer = funktionen.create_pdf(anzahl_verkaufen, max_anteile, bereits_verkauft, brutto, gewinn, gewinn_teilfreistellung, gewinn_nach_vorabpauschale, gewinn_nach_verlusttopf, gewinn_steuerpflichtig, steuer, netto, gesamtkosten, vorabpauschalen, aktueller_kurs, freibetrag,  etf_name, verlusttopf_nach_verkauf, gesamte_vorabpauschale,  teilfreistellung_quote, kirchensteuer)
+
+    pdf_bytes = pdf_buffer.getvalue()
+    pdf_buffer.close()  # Buffer sauber schließen
+
+    # 3. 🎯 DIE WICHTIGE ZEILE: Erst b64encode, DANN als utf-8 Text decodieren!
+    pdf_base64 = base64.b64encode(pdf_bytes).decode("utf-8")
+
+    
+    
+    ergebnis_tabelle = [
+        {"name": "Anzahl zu verkaufender Anteile", "wert": anzahl_verkaufen},
+        {"name": "Kurs bei Verkauf", "wert": aktueller_kurs},
+        {"name": "Brutto Verkaufserlös", "wert": brutto},
+        {"name": "Kosten bei Kauf", "wert": gesamtkosten},
+        {"name": "Gewinn vor Steuer", "wert": gewinn},
+        {"name": "Abzuziehende Vorabpauschale", "wert": gesamte_vorabpauschale},
+        {"name": "Gewinn nach Vorabpauschale", "wert": gewinn_nach_vorabpauschale},
+        {"name": "Gewinn nach Teilfreistellung", "wert": gewinn_teilfreistellung},
+        {"name": "Gewinn nach Verlusttopf", "wert": gewinn_nach_verlusttopf},
+        {"name": "Neuer Verlusttopf", "wert": verlusttopf_nach_verkauf},
+        {"name": "Gewinn nach Sparerpauschbetrag", "wert": gewinn_steuerpflichtig},
+        {"name": "Ungenutzter Freibetrag", "wert": freibetrag},
+        {"name": "Zu zahrende Steuer", "wert": steuer},
+        {"name": "Netto ", "wert": netto},
+    ]
+
+    return {
+                "success": True,
+                "kpis": ergebnis_kpis,
+                "tabelle": ergebnis_tabelle,
+                "pdf_data": pdf_base64  # 📦 Die PDF reist als Text getarnt mit!
+            }
+
+
+    # try:
+    #     # BEISPIEL-AUFRUF (Passe das an deine echten Funktionsnamen an!):
+    #     # Wenn deine Funktion z.B. alle Daten braucht, kannst du ihr 'payload' übergeben.
         
-        if payload.rechen_ziel == "steuerfrei":
-            # ergebnis = {"nachricht": "Hier wird die Funktion für steuerfreie Anteile aufgerufen"}
-            ergebnis = funktionen.berechne_steuerfrei(payload)
+    #     if payload.rechen_ziel == "steuerfrei":
+    #         # ergebnis = {"nachricht": "Hier wird die Funktion für steuerfreie Anteile aufgerufen"}
+    #         ergebnis = funktionen.berechne_steuerfrei(payload, vorabpauschalen)
             
-        elif payload.rechen_ziel == "wunschnetto":
-            ergebnis = {"nachricht": f"Hier wird Wunschnetto für {payload.wert_wunschnetto}€ berechnet"}
-            # ergebnis = funktionen.berechne_wunschnetto(payload)
+    #     elif payload.rechen_ziel == "wunschnetto":
+    #         # ergebnis = {"nachricht": f"Hier wird Wunschnetto für {payload.wert_wunschnetto}€ berechnet"}
+    #         ergebnis = funktionen.berechne_wunschnetto(payload, vorabpauschalen)
             
-        else:
-            ergebnis = {"nachricht": f"Hier werden Steuern für {payload.wert_anteile} Anteile berechnet"}
-            # ergebnis = funktionen.berechne_anteile_steuer(payload)
+    #     else:
+    #         ergebnis = {"nachricht": f"Hier werden Steuern für {payload.wert_anteile} Anteile berechnet"}
+    #         # ergebnis = funktionen.berechne_anteile_steuer(payload, vorabpauschalen)  # Passe den Funktionsaufruf an
 
-        # Gib das mathematische Ergebnis als Dictionary zurück. FastAPI macht daraus automatisch JSON.
-        return ergebnis
+    #     # Gib das mathematische Ergebnis als Dictionary zurück. FastAPI macht daraus automatisch JSON.
+    #     return ergebnis
 
-    except Exception as e:
-        return {"error": f"Fehler bei der Berechnung: {str(e)}"}
+    # except Exception as e:
+    #     return {"error": f"Fehler bei der Berechnung: {str(e)}"}
     
 
 @app.get("/api/search")
@@ -182,150 +270,119 @@ async def generate_sparplan(payload: SparplanPayload):
         return {"success": False, "error": str(e)}
     
 
-import re  # Oben bei den Importen hinzufügen, falls noch nicht da
-
 @app.post("/api/upload-trade-republic")
 async def upload_trade_republic(file: UploadFile = File(...)):
     try:
-        contents = await file.read()
-        entry_df = pd.read_csv(io.BytesIO(contents), decimal=".")
+        content = await file.read()
+        decoded_content = content.decode("utf-8")
+        csv_file = io.StringIO(decoded_content)
         
-        erforderliche_spalten = ["datetime", "type", "symbol", "shares", "price"]
-        if not set(erforderliche_spalten).issubset(entry_df.columns):
-            return {
-                "success": False, 
-                "error": "Die CSV entspricht nicht dem erwarteten Format (Spalten datetime, type, symbol, shares, price fehlen)."
-            }
+        sample = decoded_content[:2048]
+        delimiter = ";" if ";" in sample else ","
+        reader = csv.DictReader(csv_file, delimiter=delimiter)
+        headers = reader.fieldnames
+        
+        if not headers:
+            return {"success": False, "error": "Die CSV-Datei ist leer."}
             
-        entry_df["datetime"] = pd.to_datetime(entry_df["datetime"], errors="coerce")
-        kaeufe = entry_df[entry_df["type"] == "BUY"].copy()
-        
-        if "asset_class" in kaeufe.columns:
-            kaeufe = kaeufe[kaeufe["asset_class"].isin(["ETF", "STOCK", "FUND"])]
+        def find_column(options: list, available_headers: list):
+            for opt in options:
+                for header in available_headers:
+                    if opt.lower() == header.strip().lower():
+                        return header
+            return None
+
+        col_type = find_column(["type", "typ", "transaktionsart"], headers)
+        col_isin = find_column(["symbol", "isin", "isin-nummer", "wertpapiernummer"], headers)
+        col_name = find_column(["name", "wertpapier", "asset", "bezeichnung"], headers)
+        col_datum = find_column(["date", "datum", "zeitstempel"], headers)
+        col_anzahl = find_column(["shares", "anzahl", "menge", "styk", "stücke"], headers)
+        col_preis = find_column(["price", "preis", "kurs", "wert"], headers)
+
+        if not col_type or not col_isin or not col_name:
+            return {"success": False, "error": f"Erforderliche Spalten (Typ, ISIN, Name) fehlen."}
+
+        gefilterte_daten = []
+        isin_name_mapping = {} # Merkt sich, welcher Name zu welcher ISIN gehört {"IE00B4L5Y983": "Core S&P 500 USD (Acc)"}
+        kurse = {}
+        verkaufte_anteile_pro_etf = {}
+        ticker_mapping = {}  # Übersetzt ISIN -> Ticker {"IE00B4L5Y983": "SXR8.DE"}
+
+        for row in reader:
+            isin = row[col_isin].strip() if row[col_isin] else None
+            name = row[col_name].strip() if row[col_name] else None
+            order_type = row[col_type].strip().upper() if row[col_type] else ""
             
-        if kaeufe.empty:
-            return {"success": False, "error": "In der CSV wurden keine ETF- oder Aktienkäufe (BUY) gefunden."}
-            
-        kaeufe["datum_formatiert"] = kaeufe["datetime"].dt.strftime('%Y-%m-%d')
-        
-        # 4. Wertpapier-Liste & Live-Kurse ermitteln
-        optionen = []
-        ticker_kurse = {}  # Speichert den Kurs für jedes gefundene Ticker-Symbol
-        
-        if "name" in kaeufe.columns:
-            etf_liste = kaeufe[["symbol", "name"]].dropna(subset=["symbol"]).drop_duplicates()
-            for _, row in etf_liste.iterrows():
-                display_name = f"{row['name']} ({row['symbol']})"
-                optionen.append(display_name)
+            if not isin or not name:
+                continue
                 
-                # Live-Kurs via yfinance versuchen zu laden
-                try:
-                    ticker_obj = yf.Ticker(row['symbol'])
-                    preis = ticker_obj.fast_info.get("lastPrice")
-                    if preis is None:
-                        preis = ticker_obj.history(period="1d")["Close"].iloc[-1]
-                    ticker_kurse[display_name] = round(preis, 2)
-                except Exception:
-                    ticker_kurse[display_name] = 100.00  # Fallback
-                    
-            kaeufe["asset_key"] = kaeufe["name"] + " (" + kaeufe["symbol"] + ")"
-        else:
-            einzigartige_symbole = kaeufe["symbol"].dropna().unique().tolist()
-            optionen = einzigartige_symbole
-            for sym in einzigartige_symbole:
-                try:
-                    ticker_obj = yf.Ticker(sym)
-                    preis = ticker_obj.fast_info.get("lastPrice")
-                    if preis is None:
-                        preis = ticker_obj.history(period="1d")["Close"].iloc[-1]
-                    ticker_kurse[sym] = round(preis, 2)
-                except Exception:
-                    ticker_kurse[sym] = 100.00  # Fallback
-            kaeufe["asset_key"] = kaeufe["symbol"]
+            # Name zur ISIN merken
+            isin_name_mapping[isin] = name
+                
+            try:
+                anzahl = float(row[col_anzahl].replace(",", ".")) if row[col_anzahl] else 0.0
+                preis = float(row[col_preis].replace(",", ".")) if row[col_preis] else 0.0
+                datum = row[col_datum].strip() if row[col_datum] else ""
+            except (ValueError, TypeError):
+                continue
 
-        all_data = []
-        for _, row in kaeufe.iterrows():
-            all_data.append({
-                "asset": str(row["asset_key"]),
-                "datum": str(row["datum_formatiert"]) if pd.notna(row["datum_formatiert"]) else "",
-                "anzahl": float(row["shares"]),
-                "preis": float(row["price"])
-            })
-            
+            if order_type == "BUY":
+                gefilterte_daten.append({
+                    "asset": isin,  # WICHTIG: Wir filtern im Frontend jetzt auf Basis der ISIN!
+                    "datum": datum,
+                    "anzahl": anzahl,
+                    "preis": preis
+                })
+                kurse[isin] = str(preis)
+
+            elif order_type == "SELL":
+                if isin not in verkaufte_anteile_pro_etf:
+                    verkaufte_anteile_pro_etf[isin] = 0.0
+                verkaufte_anteile_pro_etf[isin] += abs(anzahl)
+
+        # Nun suchen wir für jede eindeutige ISIN den yfinance-Ticker
+        for isin in isin_name_mapping.keys():
+            try:
+                # yfinance Search funktioniert hervorragend mit 12-stelligen ISINs!
+                suche = yf.Search(isin, max_results=1)
+                if suche.quotes:
+                    ticker_mapping[isin] = suche.quotes[0]['symbol']
+                    print(f"🎯 ISIN {isin} aufgelöst zu Ticker: {ticker_mapping[isin]}")
+                else:
+                    ticker_mapping[isin] = isin  # Fallback
+                    print(f"⚠️ Keine direkte yfinance Zuordnung für ISIN {isin}.")
+            except Exception as e:
+                ticker_mapping[isin] = isin
+                print(f"❌ Fehler bei ISIN-Suche {isin}: {str(e)}")
+
         return {
-            "success": True, 
-            "etfs": optionen, 
-            "kurse": ticker_kurse,  # NEU: Wir senden die Live-Kurse direkt mit!
-            "data": all_data
+            "success": True,
+            "data": gefilterte_daten,
+            "kurse": kurse,
+            "verkaufte_anteile": verkaufte_anteile_pro_etf,
+            "ticker_mapping": ticker_mapping,
+            "isin_name_mapping": isin_name_mapping  # NEU: Schickt die Klarnamen mit
         }
-        
+
     except Exception as e:
-        return {"success": False, "error": f"Fehler beim Verarbeiten: {str(e)}"}
-
-# @app.post("/api/upload-trade-republic")
-# async def upload_trade_republic(file: UploadFile = File(...)):
-#     try:
-#         contents = await file.read()
-#         # Datei einlesen (wie in deinem Streamlit-Code)
-#         entry_df = pd.read_csv(io.BytesIO(contents), decimal=".")
-        
-#         # 1. Spalten-Validierung aus deinem Streamlit-Code
-#         erforderliche_spalten = ["datetime", "type", "symbol", "shares", "price"]
-#         # Falls 'name' oder 'asset_class' nicht zwingend in jeder TR-Version sind, 
-#         # prüfen wir hier die Kernspalten
-#         if not set(erforderliche_spalten).issubset(entry_df.columns):
-#             return {
-#                 "success": False, 
-#                 "error": "Die CSV entspricht nicht dem erwarteten Format (Spalten datetime, type, symbol, shares, price fehlen)."
-#             }
-            
-#         # 2. Datum konvertieren (Fehler abgefangen)
-#         entry_df["datetime"] = pd.to_datetime(entry_df["datetime"], errors="coerce")
-        
-#         # 3. Filterung exakt wie in deinem Streamlit-Code (BUY)
-#         # Falls 'asset_class' fehlt, filtern wir nur nach BUY, um flexibel zu bleiben
-#         kaeufe = entry_df[entry_df["type"] == "BUY"].copy()
-        
-#         if "asset_class" in kaeufe.columns:
-#             kaeufe = kaeufe[kaeufe["asset_class"].isin(["ETF", "STOCK", "FUND"])]
-            
-#         if kaeufe.empty:
-#             return {"success": False, "error": "In der CSV wurden keine ETF- oder Aktienkäufe (BUY) gefunden."}
-            
-#         # Formatierung des Datums für das HTML-Inputfeld (YYYY-MM-DD)
-#         kaeufe["datum_formatiert"] = kaeufe["datetime"].dt.strftime('%Y-%m-%d')
-        
-#         # 4. Wertpapier-Liste für das Dropdown generieren
-#         # Wenn die Spalte 'name' existiert, nutzen wir sie, sonst nur das Symbol
-#         optionen = []
-#         if "name" in kaeufe.columns:
-#             # Duplikate entfernen und Liste bauen
-#             etf_liste = kaeufe[["symbol", "name"]].dropna(subset=["symbol"]).drop_duplicates()
-#             for _, row in etf_liste.iterrows():
-#                 optionen.append(f"{row['name']} ({row['symbol']})")
-#             # Wir merken uns im JSON nachher das 'name (symbol)' als Schlüssel
-#             kaeufe["asset_key"] = kaeufe["name"] + " (" + kaeufe["symbol"] + ")"
-#         else:
-#             einzigartige_symbole = kaeufe["symbol"].dropna().unique().tolist()
-#             optionen = einzigartige_symbole
-#             kaeufe["asset_key"] = kaeufe["symbol"]
-
-#         # 5. Daten für das Frontend strukturieren
-#         all_data = []
-#         for _, row in kaeufe.iterrows():
-#             all_data.append({
-#                 "asset": str(row["asset_key"]),
-#                 "datum": str(row["datum_formatiert"]) if pd.notna(row["datum_formatiert"]) else "",
-#                 "anzahl": float(row["shares"]),
-#                 "preis": float(row["price"])
-#             })
-            
-#         return {
-#             "success": True, 
-#             "etfs": optionen, 
-#             "data": all_data
-#         }
-        
-#     except Exception as e:
-#         return {"success": False, "error": f"Fehler beim Verarbeiten: {str(e)}"}
+        return {"success": False, "error": str(e)}
     
+
+@app.get("/api/download-pdf")
+def download_pdf(ticker: str, ziel: str, netto: float):
+    try:
+        # 1. Rufe deine Funktion auf, die den Buffer zurückgibt
+        # (Passe die Argumente so an, wie deine Funktion sie braucht)
+        pdf_buffer = funktionen.deine_pdf_funktion(ticker, ziel, netto) 
+        
+        # 2. Die StreamingResponse schickt den Inhalt des Buffers direkt zum Browser
+        return StreamingResponse(
+            pdf_buffer, 
+            media_type="application/pdf",
+            headers={
+                # "attachment" erzwingt den Download im Browser direkt als Datei
+                "Content-Disposition": f'attachment; filename="Steuerreport_{ticker}.pdf"'
+            }
+        )
+    except Exception as e:
+        return {"success": False, "error": str(e)}

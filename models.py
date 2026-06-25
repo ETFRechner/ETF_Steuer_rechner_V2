@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from typing import List
 from datetime import date
+from typing import List, Optional
 
 # Ein einzelner Kauf aus der Tabelle
 class KaufEintrag(BaseModel):
@@ -12,19 +13,6 @@ class KaufEintrag(BaseModel):
 class VorabEintrag(BaseModel):
     jahr: int
     wert: float
-
-# # Das gesamte Paket, das vom "Berechnen"-Button gesendet wird
-# class CalculationPayload(BaseModel):
-#     rechen_ziel: str
-#     wert_wunschnetto: float
-#     wert_anteile: float
-#     verkaufskurs: float
-#     freibetrag: float
-#     verlusttopf: float
-#     kirchensteuer: str
-#     tagesgenau: bool
-#     kaeufe: List[KaufEintrag]
-#     vorabpauschalen: List[VorabEintrag]
 
 class CalculationPayload(BaseModel):
     rechen_ziel: str
@@ -39,9 +27,12 @@ class CalculationPayload(BaseModel):
     freibetrag: float
     verlusttopf: float
     kirchensteuer: str
+    bereits_verkaufte_anteile: float
     tagesgenau: bool
     kaeufe: List[KaufEintrag]
     vorabpauschalen: List[VorabEintrag]
+    quelle: str
+    ticker: Optional[str] = None
 
 class SparplanPayload(BaseModel):
     symbol: str
