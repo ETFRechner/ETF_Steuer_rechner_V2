@@ -18,6 +18,7 @@ from models import SparplanPayload
 from fastapi.staticfiles import StaticFiles
 import uvicorn
 import os
+from fastapi.responses import FileResponse
 
 ########## TERMINAL EINGABE 
 # uvicorn main:app --reload
@@ -26,6 +27,14 @@ app = FastAPI(title="ETF Steuer Rechner")
 # Mountet den Ordner "static" für CSS, Bilder oder JS-Dateien
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
+
+@app.get("/sitemap.xml", include_in_schema=False)
+def get_sitemap():
+    return FileResponse("static/sitemap.xml", media_type="application/xml")
+
+@app.get("/robots.txt", include_in_schema=False)
+def get_robots():
+    return FileResponse("static/robots.txt", media_type="text/plain")
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
