@@ -1,24 +1,3 @@
-<!-- <!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ETF Steuer Rechner</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 40px; max-width: 900px; line-height: 1.6; }
-        .box { padding: 20px; background: #f9f9f9; margin-top: 15px; border-radius: 8px; border: 1px solid #eee; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; }
-        input[type="number"], input[type="date"], select { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
-        
-        /* Tabellen-Styling */
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        .btn-add { background-color: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; margin-top: 10px; }
-        .btn-delete { background-color: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
-    </style>
-</head> -->
 
 <!DOCTYPE html>
 <html lang="de">
@@ -116,35 +95,50 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
 
 
     <div class="form-group">
-        <label for="freibetrag">Verfügbarer Sparerpauschbetrag (€)</label>
+        <label 
+        for="freibetrag">Verfügbarer Sparerpauschbetrag (€)
+        <span class="tooltip-icon" data-tooltip="Noch verfügbarer Sparerpauschbetrag für das aktuelle Kalenderjahr. Kapitalerträge bis zu diesem Betrag bleiben steuerfrei. In Deutschland beträgt der maximale Sparerpauschbetrag derzeit 1000€ pro Person, bzw. 2000€ pro Ehepaar. Um diesen Betrag zu nutzen müssen Sie ihn einmalig in ihrem Broker aktivieren. Wenn dies gemacht ist können Sie dort unter Steuern den übrigen Betrtag einsehen.">?</span>
+        </label>
+        
         <input type="number" id="freibetrag" value="1000.00" step="0.01" min="0" max="2000.00" onchange="if(this.value !== '') { if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min; if(parseFloat(this.value) > parseFloat(this.max)) this.value = this.max; }">
     </div>
     <div class="form-group">
-        <label for="verlusttopf">Allgemeiner Verlusttopf (€)</label>
+        <label 
+        for="verlusttopf">Allgemeiner Verlusttopf (€)
+        <span class="tooltip-icon" data-tooltip="Der Allgemeine Verlusttopf wird durch Verluste durch aufgefüllt, die nicht in den Aktien-Verlusttopf fließen, dazu zählen auch Fonds. Sie können diesen Betrag in Ihrem Broker einsehen.">?</span>
+        </label>
         <input type="number" id="verlusttopf" value="0.00" step="0.01" min="0" onchange="if(this.value !== '') { if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min; }">
     </div>
     <div class="form-group">
-        <label for="kirchensteuer">Kirchensteuer</label>
+        <label 
+        for="kirchensteuer">Kirchensteuer
+        <span class="tooltip-icon" data-tooltip="Die Kirchensteuer wird in Deutschland auf die Kapitalertragssteuer erhoben. Wenn Sie kein Mitglied der Kirche sind, entfällt die Zahlung der Kirchensteuer.">?</span>
+        </label>
         <select id="kirchensteuer">
             <option value="keine">Keine Kirchensteuer</option>
-            <option value="8">Bayern / Baden-Württemberg (8%)</option>
-            <option value="9">Andere Bundesländer (9%)</option>
+            <option value="8">8% (In Bayern / Baden-Württemberg)</option>
+            <option value="9">9% (In anderen Bundesländern)</option>
         </select>
     </div>
 
     <div class="form-group">
-        <label for="teilfreistellung">Teilfreistellung des ETFs</label>
+        <label for="teilfreistellung">Teilfreistellung des ETFs
+            <span class="tooltip-icon" data-tooltip="Die Teilfreistellung bezieht sich auf den Anteil der Erträge, der steuerfrei bleibt. Sie können diesen Wert Ihrem ETF entnehmen. Die größten ETF sind üblicherweise Aktien-ETF.">?</span>
+        </label>
         <select id="teilfreistellung">
-            <option value="0">Keine Teilfreistellung (z.B. Geldmarkt-/Anleihen-ETF)</option>
+            <option value="0">Keine Teilfreistellung (z.B. Geldmarkt-/Anleihen-ETF, Aktien)</option>
             <option value="15">Mischfonds (15% Teilfreistellung)</option>
-            <option value="30">Aktien-ETF / -Fonds (30% Teilfreistellung)</option>
+            <option value="30" selected>Aktien-ETF / -Fonds (30% Teilfreistellung)</option>
             <option value="60">Inlands-Immobilienfonds (60% Teilfreistellung)</option>
             <option value="80">Auslands-Immobilienfonds (80% Teilfreistellung)</option>
         </select>
     </div>
 
     <div class="form-group">
-        <label for="ertragsverwendung">Ertragsverwendung des ETFs</label>
+        <label 
+            for="ertragsverwendung">Ertragsverwendung des ETFs
+            <span class="tooltip-icon" data-tooltip="Die Ertragsverwendung bestimmt, wie die Erträge des ETFs verarbeitet werden. Thesaurierende ETFs (acc.) legen die Erträge automatisch wieder an, während ausschüttende ETFs (dist.) die Erträge an die Anleger auszahlen. Diese Info können Sie in den Details des ETFs finden.">?</span>
+        </label>
         <select id="ertragsverwendung" onchange="aktualisiereThesaurierungsAnsicht()">
             <option value="thesaurierend">Thesaurierend (Erträge werden automatisch wiederangelegt)</option>
             <option value="ausschüttend">Ausschüttend (Erträge werden ausgezahlt)</option>
@@ -152,24 +146,39 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
     </div>
 
     <div class="form-group">
-        <label for="eingabe_option">Wie möchten Sie Ihre Daten eingeben?</label>
+        <label for="eingabe_option">Wie möchten Sie Ihre Kaufdaten eingeben?</label>
         <select id="eingabe_option" onchange="toggleEingabeOptionen()">
             <option value="manuell">Manuelle Eingabe</option>
-            <option value="suche">ETF Suche</option>
+            <option value="suche" selected>ETF Suche</option>
             <option value="trade">CSV upload von Trade Republic</option>
         </select>
     </div>
 
     <div id="bereich_manuell">
         <div class="form-group">
-            <label for="verkaufskurs">Verkaufskurs pro Anteil (€)</label>
+            <label 
+            for="verkaufskurs">Verkaufskurs pro Anteil (€)
+            <span class="tooltip-icon" data-tooltip="Der Verkaufskurs pro Anteil ist der Preis, zu dem Sie die Anteile verkaufen möchten.">?</span>
+            </label>
             <input type="number" id="verkaufskurs" value="100.00" step="0.01" min="0" onchange="if(this.value !== '') { if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min; }">
         </div>
 
         <div class="form-group">
-            <label for="csv_file">Kaufdaten aus CSV-Datei importieren (optional):</label>
-            <input type="file" id="csv_file" accept=".csv" onchange="uploadCSV()">
+            <label>
+                CSV-Kaufhistorie hochladen (optional)
+                <span class="tooltip-icon" data-tooltip="Laden Sie eine CSV-Datei mit Ihren Kaufdaten hoch, um diese automatisch in die Tabelle einzufügen. Sie können Ihre Kaufdaten aber auch manuell eingeben.">?</span>
+            </label>
+
+            <div id="dropzone" class="upload-dropzone" onclick="document.getElementById('csv_file').click()">
+                <div class="dropzone-content">
+                    <span class="dropzone-icon">📥</span>
+                    <p class="dropzone-text">Datei hierher ziehen oder <strong>durchsuchen</strong></p>
+                    <span id="file_name_display" class="file-name-preview">Keine Datei ausgewählt</span>
+                </div>
+                <input type="file" id="csv_file" accept=".csv" onchange="handleFileSelect(this)" style="display: none;">
+            </div>
         </div>
+
 
         <table>
             <thead>
@@ -181,15 +190,21 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
                 </tr>
             </thead>
             <tbody id="tabelle_body">
-                </tbody>
+            </tbody>
         </table>
-        
-        <button class="btn-add" onclick="fuegeZeileHinzu()">+ Zeile hinzufügen</button>
+
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button class="btn-add" onclick="fuegeZeileHinzu()">+ Zeile hinzufügen</button>
+            <button class="btn-add" onclick="downloadCSVFromTable()">📥 Tabelle als CSV herunterladen</button>
+        </div>
 
         <hr>
 
         <div class="form-group">
-            <label for="bereits_verkauft_manuell">Bereits verkaufte Anteile (für FIFO-Ermittlung)</label>
+            <label 
+                for="bereits_verkauft_manuell">Bereits verkaufte Anteile (für FIFO-Ermittlung)
+                <span class="tooltip-icon" data-tooltip="Geben Sie die Anzahl der bereits verkaufte Anteile ein. Es gilt das First-In-First-Out-Prinzip, weshalb bekannt sein muss wie viele Anteile zum jetztigen Zeitpunkt bereits verkauft wurden. Dies können Sie Ihren Abrechnungen in Ihrem Broker entnehmen">?</span>
+            </label>
             <input type="number" 
                    id="bereits_verkauft_manuell" 
                    step="0.00001" 
@@ -220,18 +235,22 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
                    ">
         </div>
 
-
-        <div class="checkbox-group" style="margin-top: 15px;">
-            <input type="checkbox" id="tagesgenau">
-            <label for="tagesgenau">Tagesgenaue Berechnung der anteiligen Vorabpauschale für das Kaufjahr</label>
+        <div class="form-group" style="margin-top: 15px;">
+            <label 
+            for="tagesgenau">Berechnungsgenauigkeit der Vorabpauschale für das Kaufjahr
+            <span class="tooltip-icon" data-tooltip="Wählen Sie aus, ob die Vorabpauschale tagesgenau oder monatsgenau berechnet werden soll. Dies kann zwischen verschiedenen Brokern variieren, amcht aber nur einen kleinen UNterschied bei der Vorabpauschale des Kaufjahres.">?</span>
+        </label>
+            <select id="tagesgenau">
+                <option value="true">Tagesgenaue Berechnung</option>
+                <option value="false" selected>Monatsgenaue Berechnung</option>
+            </select>
         </div>
-
 
 
         <div id="bereich_vorabpauschale" style="display: none; margin-top: 25px; padding-top: 15px;">
             <h4>Vorabpauschale manuell eingeben</h4>
-            <p style="font-size: 0.9em; color: #666;">
-                Bitte geben Sie die Vorabpauschale pro Anteil für jedes Jahr ein. Jahre, die älter als 2018 sind, werden ignoriert, da es die Vorabpauschale erst seit 2018 gibt.
+            <p style="font-size: 0.9em;">
+                Bitte geben Sie die Vorabpauschale pro Anteil für jedes Jahr ein. Da die Vorabpauschale erst 2018 eingeführt wurde, startet die Tabelle erst ab dort.
             </p>
             <table>
                 <thead>
@@ -257,16 +276,22 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
         </div>
 
         <div class="form-group" id="feld_wunschnetto" style="display: none;">
-            <label for="wert_wunschnetto">Gewünschter Netto-Auszahlungsbetrag (€)</label>
+            <label 
+            for="wert_wunschnetto">Gewünschter Netto-Auszahlungsbetrag (€)
+            <span class="tooltip-icon" data-tooltip="Basierend auf dem gewünschten Netto-Auszahlungsbetrag wird berechnet, wie viele Anteile verkauft werden müssen.">?</span>
+        </label>
             <input type="number" id="wert_wunschnetto" value="1000.00" step="0.01" min="0" onchange="if(this.value !== '') { if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min; }">
         </div>
 
         <div class="form-group" id="feld_anteile" style="display: none;">
-            <label for="wert_anteile">Anzahl der zu verkaufenden Anteile</label>
+            <label 
+            for="wert_anteile">Anzahl der zu verkaufenden Anteile
+                <span class="tooltip-icon" data-tooltip="Geben Sie die Anzahl der Anteile ein, die Sie verkaufen möchten.">?</span>
+            </label>
             <input type="number" id="wert_anteile" value="10.00000" step="0.00001" min="0" onchange="if(this.value !== '') { if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min; }">
         </div>
 
-        <button class="btn-add" style="background-color: #007bff; width: 100%; padding: 12px; font-size: 1.1em; margin-top: 20px;" onclick="sendeBerechnung()">
+        <button class="btn-add" style="width: 100%; padding: 12px; font-size: 1.1em; margin-top: 20px;" onclick="sendeBerechnung()">
             Berechnen
         </button>
 
@@ -275,17 +300,23 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
     <div id="bereich_suche" style="display: none;">
         <h3>ETF Suche</h3>
         <div class="form-group" style="position: relative;">
-            <label for="etf_suche_input">ETF suchen (Name, ISIN oder Ticker):</label>
+            <label 
+            for="etf_suche_input">ETF suchen (Name, ISIN oder Ticker)
+            <span class="tooltip-icon" data-tooltip="Falls der Name Ihres ETF nicht gefunden wird, können Sie auch die ISIN als verlässliche Alternative verwenden.">?</span>
+            </label>
             <input type="text" id="etf_suche_input" placeholder="z.B. MSCI World..." oninput="liveSuche(this.value)" autocomplete="off">
-            <div id="such_ergebnisse" style="display: none; position: absolute; width: 100%; background: white; border: 1px solid #ccc; max-height: 200px; overflow-y: auto; z-index: 1000; box-shadow: 0px 4px 6px rgba(0,0,0,0.1); border-radius: 4px;"></div>
+             <div id="such_ergebnisse"></div>
         </div>
 
-        <div id="ausgewählter_etf_box" class="box" style="display: none; background-color: #e3f2fd; border-left: 5px solid #2196f3;">
+        <div id="ausgewählter_etf_box" class="box" style="display: none; border-left: 5px solid #2196f3;">
             Gewählter ETF: <strong id="etf_name_anzeige">-</strong> (<span id="etf_symbol_anzeige">-</span>)
         </div>
 
         <div class="form-group" style="margin-top: 15px;">
-            <label for="verkaufskurs_suche">Verkaufskurs pro Anteil (€) <span id="kurs_lade_status" style="font-weight: normal; font-size: 0.9em; color: #666;"></span></label>
+            <label for="verkaufskurs_suche">Verkaufskurs pro Anteil (€) 
+                <span class="tooltip-icon" data-tooltip="Geben Sie den Verkaufskurs pro Anteil in Euro ein.">?</span>
+                <span id="kurs_lade_status" style="font-weight: normal; font-size: 0.9em;"></span>
+            </label>
             <input type="number" id="verkaufskurs_suche" value="100.00" step="0.01" min="0" onchange="if(this.value !== '') { if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min; }">
         </div>
 
@@ -293,21 +324,39 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
             <label for="suche_kauf_option">Wie möchten Sie Kaufdaten hinzufügen?</label>
             <select id="suche_kauf_option" onchange="toggleSucheKaufLogik()">
                 <option value="suche_manuell">Käufe manuell erfassen / CSV Import</option>
-                <option value="suche_sparplan">Sparplan historisch berechnen (Hinzufügen)</option>
+                <option value="suche_sparplan">Sparplan erfassen</option>
             </select>
         </div>
 
-        <div id="suche_sub_csv" class="form-group" style="display: block;">
+        <!-- <div id="suche_sub_csv" class="form-group" style="display: block;">
             <label for="csv_file_suche">Kaufdaten aus CSV-Datei in diese Tabelle importieren:</label>
             <input type="file" id="csv_file_suche" accept=".csv" onchange="uploadCSVSuche()">
+        </div> -->
+
+        <div id="suche_sub_csv" class="form-group" style="display: block;">
+            <label>Kaufdaten aus CSV-Datei in diese Tabelle importieren
+            <span class="tooltip-icon" data-tooltip="Sie können eine CSV-Datei mit Kaufdaten hochladen, um diese in die Tabelle zu importieren. Die Datein muss die Spalten `Kaufdatum`, `Preis` und `Anzahl` enthalten.">?</span>
+            </label>
+            <div id="dropzone_suche" class="upload-dropzone" onclick="document.getElementById('csv_file_suche').click()">
+                <div class="dropzone-content">
+                    <span class="dropzone-icon">📥</span>
+                    <p class="dropzone-text">Datei hierher ziehen oder <strong>durchsuchen</strong></p>
+                    <span id="file_name_display_suche" class="file-name-preview">Keine Datei ausgewählt</span>
+                </div>
+                <input type="file" id="csv_file_suche" accept=".csv" onchange="handleFileSelectSuche(this)" style="display: none;">
+            </div>
         </div>
 
-        <div id="suche_sub_sparplan" style="display: none; background: #f1f3f5; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+
+        <div id="suche_sub_sparplan" style="display: none;">
             <h4>Sparplan-Parameter hinzufügen</h4>
 
 
             <div class="form-group">
-                <label for="sparplan_start">Startdatum</label>
+                <label 
+                for="sparplan_start">Startdatum
+                <span class="tooltip-icon" data-tooltip="Wann haben Sie mit dem Sparplan begonnen?">?</span>
+                </label>
                 <input type="date" 
                        id="sparplan_start" 
                        onchange="
@@ -324,12 +373,15 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
             </div>
 
             <div class="form-group">
-                <label for="sparplan_ende">Enddatum</label>
+                <label for="sparplan_ende">
+                Enddatum
+                <span class="tooltip-icon" data-tooltip="Wann endete der Sparplan? Wenn er noch aktiv ist, wählen Sie heute aus.">?</span>
+                </label>
                 <input type="date" 
                        id="sparplan_ende" 
                        onchange="
                            // Das Enddatum darf maximal HEUTE sein (nicht in der Zukunft)
-                           const heute = new Date().toISOString().split('T')[0];
+                        //    const heute = new Date().toISOString().split('T')[0];
                            if(this.value > heute) {
                                this.value = heute;
                            }
@@ -343,7 +395,10 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
 
 
             <div class="form-group">
-                <label for="sparplan_tag">Ausführungstag (1 - 28)</label>
+                <label 
+                for="sparplan_tag">Ausführungstag (1 - 28)
+                <span class="tooltip-icon" data-tooltip="An welchem Tag des Monats wird der Sparplan ausgeführt?">?</span>
+                </label>
                 <input type="number" 
                        id="sparplan_tag" 
                        value="1" 
@@ -359,8 +414,20 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
                        ">
             </div>
 
-            <div class="form-group"><label>Sparrate pro Monat (€)</label><input type="number" id="sparplan_rate" value="100.00" step="10" min="0" onchange="if(this.value !== '') { if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min; }"></div>
-            <button class="btn-add" style="background-color: #6f42c1; width: 100%;" onclick="generiereSparplan()">
+            <div class="form-group">
+                <label 
+                for="sparplan_rate">Sparrate pro Monat (€)
+                <span class="tooltip-icon" data-tooltip="Wie viel Geld wird pro Monat für diesen Sparplan eingezahlt?">?</span>
+                </label>
+                <input type="number" 
+                       id="sparplan_rate" 
+                       value="100.00" 
+                       step="10" 
+                       min="0" 
+                       onchange="if(this.value !== '') { if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min; }">
+            </div>
+
+            <button class="btn-add" width: 100%;" onclick="generiereSparplan()">
                 + Diese Sparplan-Käufe der Tabelle unten hinzufügen
             </button>
         </div>
@@ -382,14 +449,17 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
 
             <div style="display: flex; gap: 10px; margin-top: 10px;">
                 <button class="btn-add" onclick="fuegeZeileHinzuSuche()">+ Manuelle Zeile hinzufügen</button>
-                <button class="btn-add" style="background-color: #6c757d;" onclick="downloadCSVFromTable()">📥 Tabelle als CSV herunterladen</button>
+                <button class="btn-add" onclick="downloadCSVFromTable()">📥 Tabelle als CSV herunterladen</button>
             </div>
         </div>
 
         <hr>
 
         <div class="form-group">
-            <label for="bereits_verkauft_suche">Bereits verkaufte Anteile (für FIFO-Ermittlung)</label>
+            <label 
+                for="bereits_verkauft_suche">Bereits verkaufte Anteile (für FIFO-Ermittlung)
+                <span class="tooltip-icon" data-tooltip="Geben Sie die Anzahl der bereits verkaufte Anteile ein. Es gilt das First-In-First-Out-Prinzip, weshalb bekannt sein muss wie viele Anteile zum jetztigen Zeitpunkt bereits verkauft wurden. Dies können Sie Ihren Abrechnungen in Ihrem Broker entnehmen">?</span>
+            </label>
             <input type="number" 
                    id="bereits_verkauft_suche" 
                    step="0.00001" 
@@ -420,19 +490,27 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
                    ">
         </div>
 
-
-        <div class="checkbox-group" style="margin-top: 15px;">
-            <input type="checkbox" id="tagesgenau_suche">
-            <label for="tagesgenau_suche">Tagesgenaue Berechnung der anteiligen Vorabpauschale für das Kaufjahr</label>
+        <div class="form-group" style="margin-top: 15px;">
+            <label 
+            for="tagesgenau_suche">Berechnungsgenauigkeit der Vorabpauschale für das Kaufjahr
+            <span class="tooltip-icon" data-tooltip="Wählen Sie aus, ob die Vorabpauschale tagesgenau oder monatsgenau berechnet werden soll. Dies kann zwischen verschiedenen Brokern variieren, amcht aber nur einen kleinen UNterschied bei der Vorabpauschale des Kaufjahres.">?</span>
+        </label>
+            <select id="tagesgenau_suche">
+                <option value="true">Tagesgenaue Berechnung</option>
+                <option value="false" selected>Monatsgenaue Berechnung</option>
+            </select>
         </div>
 
         <div class="checkbox-group" style="margin-top: 15px;">
             <input type="checkbox" id="haken_vorabpauschale_suche" onchange="toggleVorabpauschaleSuche()">
-            <label for="haken_vorabpauschale_suche">Vorabpauschale manuell eingeben</label>
+            <label 
+                for="haken_vorabpauschale_suche">Vorabpauschale manuell eingeben
+                <span class="tooltip-icon" data-tooltip="Die Vorabpauschale wird in diesem rechner über mittelwerte der Kurse an Jahresbeginn geschätzt. Für eine genauere Ergebnisse können Sie die Werte manuell eingeben.">?</span>
+            </label>
         </div>
 
         <div id="bereich_vorabpauschale_suche" style="display: none; margin-top: 25px; padding-top: 15px; border-top: 1px dashed #ccc;">
-            <h4>Vorabpauschale für gewählten ETF manuell eingeben</h4>
+            <h4>Vorabpauschale für gewählten ETF manuell eingeben <span class="tooltip-icon" data-tooltip="Geben Sie die Vorabpauschale pro Anteil für alle relevanten Jahre ein. Die Werte können Sie aus Ertragsabrechnungen entnehmen, die Sie üblicherweise zu Jahresbeginn erhalten.">?</span> </h4>
             <table>
                 <thead>
                     <tr>
@@ -445,9 +523,9 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
             </table>
         </div>
 
-        <hr style="margin: 25px 0; border: 0; border-top: 1px solid #ccc;">
+        <hr>
 
-        <h3>4. Berechnungs-Ziel (ETF Suche)</h3>
+        <h3>Berechnungs-Ziel (ETF Suche)</h3>
 
         <div class="form-group">
             <label for="rechen_ziel_suche">Was möchten Sie berechnen?</label>
@@ -459,16 +537,22 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
         </div>
 
         <div class="form-group" id="feld_wunschnetto_suche" style="display: none;">
-            <label for="wert_wunschnetto_suche">Gewünschter Netto-Auszahlungsbetrag (€)</label>
+            <label 
+            for="wert_wunschnetto_suche">Gewünschter Netto-Auszahlungsbetrag (€)
+            <span class="tooltip-icon" data-tooltip="Basierend auf dem gewünschten Netto-Auszahlungsbetrag wird berechnet, wie viele Anteile verkauft werden müssen.">?</span>
+            </label>
             <input type="number" id="wert_wunschnetto_suche" value="1000.00" step="0.01" min="0" onchange="if(this.value !== '') { if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min; }">
         </div>
 
         <div class="form-group" id="feld_anteile_suche" style="display: none;">
-            <label for="wert_anteile_suche">Anzahl der zu verkaufenden Anteile</label>
+            <label 
+                for="wert_anteile_suche">Anzahl der zu verkaufenden Anteile
+                <span class="tooltip-icon" data-tooltip="Geben Sie die Anzahl der Anteile ein, die Sie verkaufen möchten.">?</span>
+            </label>
             <input type="number" id="wert_anteile_suche" value="10.00000" step="0.00001" min="0" onchange="if(this.value !== '') { if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min; }">
         </div>
 
-        <button class="btn-add" style="background-color: #007bff; width: 100%; padding: 12px; font-size: 1.1em; margin-top: 20px;" onclick="sendeBerechnungSuche()">
+        <button class="btn-add" style="width: 100%; padding: 12px; font-size: 1.1em; margin-top: 20px;" onclick="sendeBerechnungSuche()">
             Berechnen
         </button>
 
@@ -478,23 +562,36 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
 
     <div id="bereich_csv" style="display: none;">
         <h3>Trade Republic CSV Import</h3>
-        <p style="font-size: 0.9em; color: #666;">Laden Sie hier Ihren Depotauszug/Umsatzexport als CSV hoch.</p>
+        <p style="font-size: 0.9em;">Laden Sie hier Ihren Depotauszug/Umsatzexport als CSV hoch.</p>
+
 
         <div class="form-group">
-            <label for="tr_csv_file">Trade Republic CSV-Datei auswählen:</label>
-            <input type="file" id="tr_csv_file" accept=".csv" onchange="uploadTradeRepublicCSV()">
+            <label>
+                Trade Republic CSV-Datei importieren
+                <span class="tooltip-icon" data-tooltip="Laden Sie die CSV-Datei hoch, die Sie von Trade Republic exportiert haben. Diese Datei enthält Ihre Kaufhistorie und wird automatisch in die Tabelle übernommen.">?</span>
+            </label>
+
+            <div id="dropzone_tr" class="upload-dropzone" onclick="document.getElementById('tr_csv_file').click()">
+                <div class="dropzone-content">
+                    <span class="dropzone-icon">📥</span>
+                    <p class="dropzone-text">Datei hierher ziehen oder <strong>durchsuchen</strong></p>
+                    <span id="file_name_display_tr" class="file-name-preview">Keine Datei ausgewählt</span>
+                </div>
+                <input type="file" id="tr_csv_file" accept=".csv" onchange="handleFileSelectTR(this)" style="display: none;">
+            </div>
         </div>
 
-        <div class="form-group" id="tr_etf_auswahl_container" style="display: none; background: #e8f5e9; padding: 15px; border-radius: 6px; border-left: 5px solid #4caf50;">
-            <label for="tr_etf_dropdown" style="color: #2e7d32;">In der Datei gefundene ETFs/Aktien:</label>
+
+        <div class="form-group" id="tr_etf_auswahl_container">
+            <label for="tr_etf_dropdown" >In der Datei gefundene ETFs/Aktien:</label>
             <select id="tr_etf_dropdown" onchange="waehleTradeRepublicETF()">
                 </select>
-            <p style="font-size: 0.85em; margin-top: 5px; color: #555;">Wählen Sie ein Wertpapier aus, um dessen Kaufhistorie in die Tabelle unten zu laden.</p>
+            <p style="font-size: 0.85em; margin-top: 5px;">Wählen Sie ein Wertpapier aus, um dessen Kaufhistorie zu laden.</p>
         </div>
 
         <div id="tr_tabelle_container" style="display: none; margin-top: 20px;">
             <!-- <hr style="margin: 20px 0; border: 0; border-top: 1px dashed #ccc;"> -->
-            <h4>Generierte Kaufhistorie aus Trade Republic</h4>
+            <!-- <h4>Generierte Kaufhistorie aus Trade Republic</h4> -->
 
             <div class="form-group">
                 <label for="verkaufskurs_tr">Verkaufskurs pro Anteil für dieses Wertpapier (€)</label>
@@ -518,21 +615,31 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
                 <button class="btn-add" onclick="fuegeZeileHinzuTR()">+ Manuelle Zeile hinzufügen</button>
             </div>
 
-            <div class="checkbox-group" style="margin-top: 15px;">
-                <input type="checkbox" id="tagesgenau_tr">
-                <label for="tagesgenau_tr">Tagesgenaue Berechnung der anteiligen Vorabpauschale für das Kaufjahr</label>
+
+            <div class="form-group" style="margin-top: 15px;">
+                <label 
+                for="tagesgenau_tr">Berechnungsgenauigkeit der Vorabpauschale für das Kaufjahr
+                <span class="tooltip-icon" data-tooltip="Wählen Sie aus, ob die Vorabpauschale tagesgenau oder monatsgenau berechnet werden soll. Dies kann zwischen verschiedenen Brokern variieren, amcht aber nur einen kleinen UNterschied bei der Vorabpauschale des Kaufjahres.">?</span>
+            </label>
+                <select id="tagesgenau_tr">
+                    <option value="true">Tagesgenaue Berechnung</option>
+                    <option value="false" selected>Monatsgenaue Berechnung</option>
+                </select>
             </div>
 
 
 
             <div class="checkbox-group" style="margin-top: 15px; margin-bottom: 10px;">
                 <input type="checkbox" id="haken_vorabpauschale_tr" onchange="toggleVorabpauschaleTR()">
-                <label for="haken_vorabpauschale_tr">Vorabpauschale manuell für die Vorjahre eingeben</label>
+                <label 
+                for="haken_vorabpauschale_tr">Vorabpauschale manuell für die Vorjahre eingeben
+                <span class="tooltip-icon" data-tooltip="Die Vorabpauschale wird in diesem Rechner über Mittelwerte der Kurse an Jahresbeginn geschätzt. Für eine genauere Ergebnisse können Sie die Werte manuell eingeben.">?</span>
+                </label>
             </div>
 
-            <div id="bereich_vorabpauschale_tr" class="box" style="display: none; background-color: #fafafa; margin-top: 15px;">
+            <div id="bereich_vorabpauschale_tr" class="box" style="display: none; margin-top: 15px;">
                 <h4>Vorabpauschalenhistorie (Trade Republic)</h4>
-                <p style="font-size: 0.9em; color: #666;">Geben Sie hier die Vorabpauschale pro Anteil für das jeweilige Kalenderjahr ein.</p>
+                <p style="font-size: 0.9em;">Geben Sie hier die Vorabpauschale pro Anteil für das jeweilige Kalenderjahr ein. <span class="tooltip-icon" data-tooltip="Geben Sie hier die Vorabpauschale pro Anteil für das jeweilige Kalenderjahr ein. Sie können die Werte auf den Ertragserrechnungen Ihres Brokers sehen, die Sie üblicherweise zum Jahresbeginn erhalten.">?</span></p>
                 <table style="width: 100%; margin-top: 10px;">
                     <thead>
                         <tr>
@@ -546,7 +653,8 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
             </div>
 
 
-            <hr style="margin: 25px 0; border: 0; border-top: 1px solid #ccc;">
+            <hr>
+
             <h3>4. Berechnungs-Ziel (Trade Republic)</h3>
 
             <div class="form-group">
@@ -559,16 +667,22 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
             </div>
 
             <div class="form-group" id="feld_wunschnetto_tr" style="display: none;">
-                <label for="wert_wunschnetto_tr">Gewünschter Netto-Auszahlungsbetrag (€)</label>
+                <label 
+                for="wert_wunschnetto_tr">Gewünschter Netto-Auszahlungsbetrag (€)
+                <span class="tooltip-icon" data-tooltip="Basierend auf dem gewünschten Netto-Auszahlungsbetrag wird berechnet, wie viele Anteile verkauft werden müssen.">?</span>
+                </label>
                 <input type="number" id="wert_wunschnetto_tr" value="1000.00" step="0.01" min="0" onchange="if(this.value !== '') { if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min; }">
             </div>
 
             <div class="form-group" id="feld_anteile_tr" style="display: none;">
-                <label for="wert_anteile_tr">Anzahl der zu verkaufenden Anteile</label>
+                <label 
+                for="wert_anteile_tr">Anzahl der zu verkaufenden Anteile
+                <span class="tooltip-icon" data-tooltip="Geben Sie hier die Anzahl der zu verkaufenden Anteile ein.">?</span>
+                </label>
                 <input type="number" id="wert_anteile_tr" value="10.00000" step="0.00001" min="0" onchange="if(this.value !== '') { if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min; }">
             </div>
 
-            <button class="btn-add" style="background-color: #007bff; width: 100%; padding: 12px; font-size: 1.1em; margin-top: 20px;" onclick="sendeBerechnungTR()">
+            <button class="btn-add" style="width: 100%; padding: 12px; font-size: 1.1em; margin-top: 20px;" onclick="sendeBerechnungTR()">
                 Berechnen
             </button>
 
@@ -1152,19 +1266,7 @@ Nein. Alle Berechnungen erfolgen direkt im Browser beziehungsweise innerhalb des
             document.getElementById("bereich_csv").style.display = (option === "trade") ? "block" : "none";
         }
 
-        // // Funktion fügt eine bearbeitbare Zeile in die Tabelle ein
-        // function fuegeZeileHinzu(datum = "", anzahl = "", preis = "") {
-        //     let tbody = document.getElementById("tabelle_body");
-        //     let row = tbody.insertRow();
-        
-        //     // HIER WURDE NUR DIE ZEILE MIT DEM "row-datum" GEÄNDERT:
-        //     row.innerHTML = `
-        //         <td><input type="date" class="row-datum" value="${datum}" onchange="aktualisiereVorabpauschaleTabelle()"></td>
-        //         <td><input type="number" class="row-anzahl" step="0.00001" placeholder="z.B. 10.5" value="${anzahl}"></td>
-        //         <td><input type="number" class="row-preis" step="0.01" placeholder="z.B. 54.30" value="${preis}"></td>
-        //         <td><button class="btn-delete" onclick="loescheZeile(this)">🗑️</button></td>
-        //     `;
-        // }
+
 
         // 1. Parameter (mit Standardwerten) zur Funktion hinzufügen!
         function fuegeZeileHinzu(datum = "", anzahl = "", preis = "") {
@@ -1242,7 +1344,7 @@ Nein. Alle Berechnungen erfolgen direkt im Browser beziehungsweise innerhalb des
                     aktualisiereVorabpauschaleTabelle();
                 }
             } else {
-                alert("Fehler beim Laden der CSV: " + result.error);
+                alert("Fehler beim Laden der CSV: Die hochgeladene Datei muss die Spalten 'datum', 'anzahl' und 'preis' enthalten.");
             }
 
             // Feld zurücksetzen, damit man dieselbe Datei erneut hochladen kann
@@ -1250,79 +1352,127 @@ Nein. Alle Berechnungen erfolgen direkt im Browser beziehungsweise innerhalb des
         }
 
 
-        // function fuegeZeileHinzu() {
-        //     let tbody = document.getElementById("tabelle_body");
-        //     let tr = document.createElement("tr");
+        document.addEventListener("DOMContentLoaded", () => {
+            // Beide Dropzones registrieren
+            einrichtenDropzone("dropzone", "csv_file", handleFileSelect);
+            einrichtenDropzone("dropzone_suche", "csv_file_suche", handleFileSelectSuche);
+            einrichtenDropzone("dropzone_tr", "tr_csv_file", handleFileSelectTR);
+        });
 
-        //     tr.innerHTML = `
-        //         <td>
-        //             <input type="date" class="row-datum" max="${heute}" onchange="
-        //                 if(this.value > this.max) { 
-        //                     this.value = this.max; 
-        //                 }
-        //             ">
-        //         </td>
-        //         <td>
-        //             <input type="number" class="row-anzahl" step="0.00001" min="0.00001" placeholder="0.0" onchange="
-        //                 if(this.value !== '') {
-        //                     if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min;
-        //                 }
-        //             ">
-        //         </td>
-        //         <td>
-        //             <input type="number" class="row-preis" step="0.01" min="0.01" placeholder="0.00" onchange="
-        //                 if(this.value !== '') {
-        //                     if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min;
-        //                 }
-        //             ">
-        //         </td>
-        //         <td>
-        //             <button type="button" class="btn-delete" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #dc3545;" onclick="loescheZeile(this)">🗑️</button>
-        //         </td>
-        //     `;
+        // Allgemeine Hilfsfunktion, um doppelten Code für die Drag & Drop Events zu vermeiden
+        function einrichtenDropzone(dropzoneId, inputId, selectCallback) {
+            const dropzone = document.getElementById(dropzoneId);
+            const fileInput = document.getElementById(inputId);
+        
+            if (!dropzone || !fileInput) return;
+        
+            ["dragenter", "dragover", "dragleave", "drop"].forEach(eventName => {
+                dropzone.addEventListener(eventName, (e) => e.preventDefault(), false);
+            });
+        
+            ["dragenter", "dragover"].forEach(eventName => {
+                dropzone.addEventListener(eventName, () => dropzone.classList.add("dragover"), false);
+            });
+        
+            ["dragleave", "drop"].forEach(eventName => {
+                dropzone.addEventListener(eventName, () => dropzone.classList.remove("dragover"), false);
+            });
+        
+            dropzone.addEventListener("drop", (e) => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
             
-        //     tbody.appendChild(tr);
-        // }
+                if (files.length > 0 && files[0].name.endsWith(".csv")) {
+                    fileInput.files = files;
+                    selectCallback(fileInput); // Ruft die jeweilige Funktion auf
+                } else {
+                    alert("Bitte lade eine gültige .csv Datei hoch.");
+                }
+            });
+        }
+
+        // 🎯 NEU: Hilfsfunktion für die Suche-Dropzone
+        function handleFileSelectSuche(input) {
+            const displaySpan = document.getElementById("file_name_display_suche");
+            if (input.files.length > 0) {
+                const dateiName = input.files[0].name;
+                displaySpan.innerText = `Ausgewählt: ${dateiName}`;
+
+                // Startet direkt deine bestehende Upload-Logik für die Suche!
+                uploadCSVSuche();
+            } else {
+                displaySpan.innerText = "Keine Datei ausgewählt";
+            }
+        }
+
+        function handleFileSelectTR(input) {
+            const displaySpan = document.getElementById("file_name_display_tr");
+            if (input.files.length > 0) {
+                const dateiName = input.files[0].name;
+                displaySpan.innerText = `Ausgewählt: ${dateiName}`;
+
+                // Startet direkt deine bestehende Upload-Logik für Trade Republic!
+                uploadTradeRepublicCSV();
+            } else {
+                displaySpan.innerText = "Keine Datei ausgewählt";
+            }
+        }
 
 
-        // function loescheZeile(button) {
-        //     let row = button.parentNode.parentNode;
-        //     row.parentNode.removeChild(row);
-        //     aktualisiereVorabpauschaleTabelle(); // <-- NEU HIER
-        // }
 
-
-        // // ASYNC FUNCTION: Kommuniziert mit FastAPI beim CSV Upload
-        // async function uploadCSV() {
-        //     let fileInput = document.getElementById("csv_file");
-        //     if (fileInput.files.length === 0) return;
-
-        //     let file = fileInput.files[0];
-        //     let formData = new FormData();
-        //     formData.append("file", file);
-
-        //     // Sende Datei via POST an FastAPI
-        //     let response = await fetch("/api/upload-csv", {
-        //         method: "POST",
-        //         body: formData
+        // // Registriert die Drag & Drop Events, sobald die Seite geladen ist
+        // document.addEventListener("DOMContentLoaded", () => {
+        //     const dropzone = document.getElementById("dropzone");
+        //     const fileInput = document.getElementById("csv_file");
+        
+        //     if (!dropzone) return;
+        
+        //     // Verhindert das Standardverhalten des Browsers (Datei im Tab öffnen)
+        //     ["dragenter", "dragover", "dragleave", "drop"].forEach(eventName => {
+        //         dropzone.addEventListener(eventName, (e) => e.preventDefault(), false);
         //     });
+        
+        //     // Visuelle Effekte beim Drüberziehen aktivieren
+        //     ["dragenter", "dragover"].forEach(eventName => {
+        //         dropzone.addEventListener(eventName, () => dropzone.classList.add("dragover"), false);
+        //     });
+        
+        //     // Visuelle Effekte beim Verlassen/Droppen deaktivieren
+        //     ["dragleave", "drop"].forEach(eventName => {
+        //         dropzone.addEventListener(eventName, () => dropzone.classList.remove("dragover"), false);
+        //     });
+        
+        //     // Wenn die Datei in die Box fallen gelassen wird
+        //     dropzone.addEventListener("drop", (e) => {
+        //         const dt = e.dataTransfer;
+        //         const files = dt.files;
+            
+        //         if (files.length > 0 && files[0].name.endsWith(".csv")) {
+        //             fileInput.files = files; // Schreibt die Datei ins unsichtbare Input
+        //             handleFileSelect(fileInput); // Startet Verarbeitung und Anzeige
+        //         } else {
+        //             alert("Bitte lade eine gültige .csv Datei hoch.");
+        //         }
+        //     });
+        // });
 
-        //     let result = await response.json();
+        // // Hilfsfunktion: Aktualisiert den Text der Box und startet deinen Upload
+        function handleFileSelect(input) {
+            const displaySpan = document.getElementById("file_name_display");
+            if (input.files.length > 0) {
+                const dateiName = input.files[0].name;
+                displaySpan.innerText = `Ausgewählt: ${dateiName}`;
+                displaySpan.style.color = "#2563eb"; // Highlightet den Dateinamen blau
 
-        //     if (result.success) {
-        //         // Tabelle leeren
-        //         document.getElementById("tabelle_body").innerHTML = "";
-                
-        //         // Gefundene Zeilen in die Tabelle eintragen
-        //         result.data.forEach(kauf => {
-        //             fuegeZeileHinzu(kauf.datum, kauf.anzahl, kauf.preis);
-        //         });
+                // Startet direkt deine bestehende Upload-Logik!
+                uploadCSV();
+            } else {
+                displaySpan.innerText = "Keine Datei ausgewählt";
+                displaySpan.style.color = "";
+            }
+        }
 
-        //         aktualisiereVorabpauschaleTabelle();
-        //     } else {
-        //         alert("Fehler beim Laden der CSV: " + result.error);
-        //     }
-        // }
+
 
         // NEU: Berechnet die benötigten Jahre für die Vorabpauschale
         function aktualisiereVorabpauschaleTabelle() {
@@ -1358,7 +1508,7 @@ Nein. Alle Berechnungen erfolgen direkt im Browser beziehungsweise innerhalb des
                 for (let jahr = aeltestesJahr; jahr < aktuellesJahr; jahr++) {
                     let row = tbody.insertRow();
                     row.innerHTML = `
-                        <td><input type="number" class="vorab-jahr" value="${jahr}" disabled style="background: #eee;"></td>
+                        <td><input type="number" class="vorab-jahr" value="${jahr}" disabled ></td>
                         <td><input type="number" class="vorab-wert" value="0.00000000" step="0.00000001" min="0"></td>
                     `;
                 }
@@ -1422,7 +1572,8 @@ Nein. Alle Berechnungen erfolgen direkt im Browser beziehungsweise innerhalb des
                 freibetrag: parseFloat(document.getElementById("freibetrag").value),
                 verlusttopf: parseFloat(document.getElementById("verlusttopf").value),
                 kirchensteuer: document.getElementById("kirchensteuer").value,
-                tagesgenau: document.getElementById("tagesgenau").checked,
+                // tagesgenau: document.getElementById("tagesgenau").checked,
+                tagesgenau: (document.getElementById("tagesgenau").value === "true"),
                 kaeufe: kaeufe,
                 vorabpauschalen: vorabpauschalen,
                 teilfreistellung: parseFloat(document.getElementById("teilfreistellung").value),
@@ -1501,112 +1652,6 @@ Nein. Alle Berechnungen erfolgen direkt im Browser beziehungsweise innerhalb des
         }
 
 
-        // NEU: Sammelt alle Daten und schickt sie an das Backend
-        // async function sendeBerechnung() {
-        //     // 1. Daten aus der Kaufhistorie-Tabelle auslesen
-        //     let kaeufe = [];
-        //     let kaufZeilen = document.querySelectorAll("#tabelle_body tr");
-        //     kaufZeilen.forEach(zeile => {
-        //         let datum = zeile.querySelector(".row-datum").value;
-        //         let anzahl = parseFloat(zeile.querySelector(".row-anzahl").value);
-        //         let preis = parseFloat(zeile.querySelector(".row-preis").value);
-
-        //         // Nur hinzufügen, wenn die Zeile vollständig ausgefüllt ist
-        //         if (datum && !isNaN(anzahl) && !isNaN(preis)) {
-        //             kaeufe.push({ datum: datum, anzahl: anzahl, preis: preis });
-        //         }
-        //     });
-        
-        //     // 2. Daten aus der Vorabpauschale-Tabelle auslesen
-        //     let vorabpauschalen = [];
-        //     let vorabZeilen = document.querySelectorAll("#vorab_tabelle_body tr");
-        //     vorabZeilen.forEach(zeile => {
-        //         let jahr = parseInt(zeile.querySelector(".vorab-jahr").value);
-        //         let wert = parseFloat(zeile.querySelector(".vorab-wert").value);
-        //         if (!isNaN(jahr) && !isNaN(wert)) {
-        //             vorabpauschalen.push({ jahr: jahr, wert: wert });
-        //         }
-        //     });
-        
-        //     // 3. Das gesamte Daten-Paket (Payload) schnüren
-        //     let payload = {
-        //         rechen_ziel: document.getElementById("rechen_ziel").value,
-        //         wert_wunschnetto: parseFloat(document.getElementById("wert_wunschnetto").value) || 0,
-        //         wert_anteile: parseFloat(document.getElementById("wert_anteile").value) || 0,
-        //         verkaufskurs: parseFloat(document.getElementById("verkaufskurs").value),
-        //         freibetrag: parseFloat(document.getElementById("freibetrag").value),
-        //         verlusttopf: parseFloat(document.getElementById("verlusttopf").value),
-        //         kirchensteuer: document.getElementById("kirchensteuer").value,
-        //         tagesgenau: document.getElementById("tagesgenau").checked,
-        //         kaeufe: kaeufe,
-        //         vorabpauschalen: vorabpauschalen,
-        //         teilfreistellung: parseFloat(document.getElementById("teilfreistellung").value),
-        //         ist_thesaurierend: (document.getElementById("ertragsverwendung").value === "thesaurierend"),
-        //         bereits_verkaufte_anteile: parseFloat(document.getElementById("bereits_verkauft_manuell").value),
-        //         quelle: "manuell"
-        //     };
-
-        //     // --- VALIDIERUNG START ---
-        //     versteckeHinweis(); // Alte Meldungen löschen
-
-        //     // 🛑 KRITISCHER FEHLER: Verkaufskurs fehlt oder ist <= 0
-        //     if (!payload.verkaufskurs || payload.verkaufskurs <= 0) {
-        //         zeigeHinweis("🛑 Berechnung gestoppt: Der Verkaufskurs muss größer als 0 sein!", "error");
-        //         return; // BRICHT DIE FUNKTION AB, kein Fetch ans Backend!
-        //     }
-
-        //     // 🛑 KRITISCHER FEHLER: Keine Käufe eingetragen
-        //     if (!payload.kaeufe || payload.kaeufe.length === 0) {
-        //         zeigeHinweis("🛑 Berechnung gestoppt: Bitte tragen Sie mindestens eine Kaufhistorie-Zeile ein!", "error");
-        //         return; 
-        //     }
-
-        //     // 🛑 KRITISCHER FEHLER: Wunschnetto gewählt, aber Betrag ist 0
-        //     if (payload.rechen_ziel === "wunschnetto" && payload.wert_wunschnetto <= 0) {
-        //         zeigeHinweis("🛑 Berechnung gestoppt: Für das Rechenziel 'Wunschnetto' muss ein Betrag größer als 0 eingegeben werden!", "error");
-        //         return;
-        //     }
-
-        //     // ⚠️ WARNUNG: Verlusttopf unrealistisch hoch (nur als netter Hinweis, wir rechnen weiter)
-        //     if (payload.verlusttopf > 50000) {
-        //         zeigeHinweis("⚠️ Hinweis: Der eingegebene Verlusttopf ist sehr hoch. Die Berechnung läuft normal weiter.", "warning");
-        //     }
-        //     // --- VALIDIERUNG ENDE ---
-
-        //     // Hier drunter folgt dein normaler let response = await fetch(...)
-
-        
-        //     // 4. Per POST an FastAPI senden
-        //     let response = await fetch("/api/calculate", {
-        //         method: "POST",
-        //         headers: { "Content-Type": "application/json" },
-        //         body: JSON.stringify(payload)
-        //     });
-        
-        //     let result = await response.json();
-
-        //     // 5. ERSETZT: Ergebnis schön visualisieren
-        //     if (result.success) {
-        //         // 🎯 HIER WIRD DIE FUNKTION AUFGERUFEN!
-        //         // Sie blendet das Dashboard ein, setzt die 3 KPIs und befüllt die Tabelle
-        //         zeigeErgebnisseImFrontend(result, payload.rechen_ziel);
-                
-        //         // Falls du deine alte rohe Textbox zur Sicherheit behalten willst, 
-        //         // kannst du diese zwei Zeilen drin lassen, ansonsten kannst du sie löschen:
-        //         if (document.getElementById("rechen_ergebnis_suche")) {
-        //             document.getElementById("rechen_ergebnis_suche").style.display = "block";
-        //             document.getElementById("ergebnis_text_suche").innerHTML = `<pre>Berechnung erfolgreich!</pre>`;
-        //         }
-        //     } else {
-        //         // Falls das Backend ein anderes Fehlerformat schickt, sehen wir jetzt das ganze Objekt
-        //         console.error("Kompletter Backend-Fehler:", result);
-        //         let fehlerText = result.error || result.detail || JSON.stringify(result);
-        //         alert("Fehler bei der Berechnung: " + fehlerText);
-        //     }
-
-        // }
-
-        // NEU: Triggert die Live-Suche im Backend bei der Eingabe
         async function liveSuche(suchbegriff) {
             let ergebnisDiv = document.getElementById("such_ergebnisse");
 
@@ -1615,7 +1660,6 @@ Nein. Alle Berechnungen erfolgen direkt im Browser beziehungsweise innerhalb des
                 return;
             }
         
-            // Abfrage an unseren neuen FastAPI-Endpunkt
             let response = await fetch(`/api/search?q=${encodeURIComponent(suchbegriff)}`);
             let treffer = await response.json();
         
@@ -1623,21 +1667,17 @@ Nein. Alle Berechnungen erfolgen direkt im Browser beziehungsweise innerhalb des
         
             if (treffer && treffer.length > 0 && !treffer.error) {
                 ergebnisDiv.style.display = "block";
-
+            
                 treffer.forEach(item => {
                     let eintrag = document.createElement("div");
-                    eintrag.style.padding = "10px";
-                    eintrag.style.cursor = "pointer";
-                    eintrag.style.borderBottom = "1px solid #eee";
+
+                    // 🎯 HIER DIE KLASSE SETZEN STATT HARDCODED STYLES:
+                    eintrag.className = "search-suggestion";
                     eintrag.innerText = `${item.name} (${item.symbol})`;
-
-                    // Hover-Effekt mit JS (simples CSS)
-                    eintrag.onmouseover = () => eintrag.style.backgroundColor = "#f5f5f5";
-                    eintrag.onmouseout = () => eintrag.style.backgroundColor = "white";
-
+                
                     // Wenn der Nutzer auf einen Vorschlag klickt
                     eintrag.onclick = () => waehleETF(item.name, item.symbol);
-
+                
                     ergebnisDiv.appendChild(eintrag);
                 });
             } else {
@@ -1645,13 +1685,14 @@ Nein. Alle Berechnungen erfolgen direkt im Browser beziehungsweise innerhalb des
             }
         }
 
+
         // AKTUALISIERT: Wird aufgerufen, wenn ein ETF angeklickt wurde
         function waehleETF(name, symbol) {
             document.getElementById("such_ergebnisse").style.display = "none";
             document.getElementById("etf_suche_input").value = `${name} (${symbol})`;
 
             // Infobox einblenden
-            document.getElementById("ausgewählter_etf_box").style.display = "block";
+            // document.getElementById("ausgewählter_etf_box").style.display = "block";
             document.getElementById("etf_name_anzeige").innerText = name;
             document.getElementById("etf_symbol_anzeige").innerText = symbol;
 
@@ -1664,7 +1705,7 @@ Nein. Alle Berechnungen erfolgen direkt im Browser beziehungsweise innerhalb des
             let statusSpan = document.getElementById("kurs_lade_status");
             let kursInput = document.getElementById("verkaufskurs_suche");
 
-            statusSpan.innerText = "(Kurs wird geladen...)";
+            // statusSpan.innerText = "(Kurs wird geladen...)";
             statusSpan.style.color = "#666";
         
             try {
@@ -1675,14 +1716,14 @@ Nein. Alle Berechnungen erfolgen direkt im Browser beziehungsweise innerhalb des
                 if (result.success) {
                     // Wert als Default in das Input-Feld eintragen
                     kursInput.value = result.price;
-                    statusSpan.innerText = "(Live-Kurs erfolgreich geladen!)";
+                    // statusSpan.innerText = "(Live-Kurs erfolgreich geladen!)";
                     statusSpan.style.color = "#28a745";
                 } else {
-                    statusSpan.innerText = "(Fehler beim Laden des Live-Kurses)";
+                    // statusSpan.innerText = "(Fehler beim Laden des Live-Kurses)";
                     statusSpan.style.color = "#dc3545";
                 }
             } catch (e) {
-                statusSpan.innerText = "(Netzwerkfehler beim Kursladen)";
+                // statusSpan.innerText = "(Netzwerkfehler beim Kursladen)";
                 statusSpan.style.color = "#dc3545";
             }
         }
@@ -1722,19 +1763,6 @@ Nein. Alle Berechnungen erfolgen direkt im Browser beziehungsweise innerhalb des
                 </td>
             `;
         }
-
-        // function fuegeZeileHinzuSuche(datum = "", anzahl = "", preis = "") {
-        //     let tbody = document.getElementById("suche_tabelle_body_manuell");
-        //     let row = tbody.insertRow();
-
-
-        //     row.innerHTML = `
-        //         <td><input type="date" class="row-datum-suche" value="${datum}" onchange="toggleVorabpauschaleSuche()"></td>
-        //         <td><input type="number" class="row-anzahl-suche" step="0.00001" value="${anzahl}"></td>
-        //         <td><input type="number" class="row-preis-suche" step="0.01" value="${preis}"></td>
-        //         <td><button class="btn-delete" onclick="this.parentNode.parentNode.remove(); toggleVorabpauschaleSuche();">🗑️</button></td>
-        //     `;
-        // }
 
 
         let alterOnload = window.onload;
@@ -1810,7 +1838,7 @@ Nein. Alle Berechnungen erfolgen direkt im Browser beziehungsweise innerhalb des
                 });
                 toggleVorabpauschaleSuche();
             } else {
-                alert("Fehler beim Laden der CSV: " + result.error);
+                alert("Fehler beim Laden der CSV: Die hochgeladene Datei muss die Spalten 'datum', 'anzahl' und 'preis' enthalten.");
             }
         }
 
@@ -1850,23 +1878,36 @@ Nein. Alle Berechnungen erfolgen direkt im Browser beziehungsweise innerhalb des
             }
         }
 
-        // 4. NEU: Funktion generiert eine CSV-Datei direkt aus den Tabellenzeilen im Browser und startet den Download
+        // 4. AKTUALISIERT: Generiert eine CSV-Datei direkt aus der aktuell aktiven Tabelle
         function downloadCSVFromTable() {
-            let kaufZeilen = document.querySelectorAll("#suche_tabelle_body_manuell tr");
+            // 1. Herausfinden, welche Option ausgewählt ist
+            const eingabeOption = document.getElementById("eingabe_option");
+            let istSuche = (eingabeOption && eingabeOption.value === "suche");
+        
+            // Den richtigen Tabellen-Body ansteuern
+            let selector = istSuche ? "#suche_tabelle_body_manuell tr" : "#tabelle_body tr";
+            let kaufZeilen = document.querySelectorAll(selector);
+
             if(kaufZeilen.length === 0) {
                 alert("Die Tabelle ist leer. Es gibt nichts herunterzuladen.");
                 return;
             }
         
-            let csvContent = "data:text/csv;charset=utf-8,Kaufdatum,Anzahl,Preis\n";
-
+            // Für deutsche Excel-Versionen nutzen wir ein Semikolon (;) als Trennzeichen
+            let csvContent = "data:text/csv;charset=utf-8,Kaufdatum;Anzahl;Preis\n";
+        
             kaufZeilen.forEach(zeile => {
-                let datum = zeile.querySelector(".row-datum-suche").value;
-                let anzahl = zeile.querySelector(".row-anzahl-suche").value;
-                let preis = zeile.querySelector(".row-preis-suche").value;
+                // Holt alle Input-Felder der aktuellen Zeile (0 = Datum, 1 = Anzahl, 2 = Preis)
+                let inputs = zeile.querySelectorAll("input");
 
-                if(datum || anzahl || preis) {
-                    csvContent += `${datum},${anzahl},${preis}\n`;
+                if(inputs.length >= 3) {
+                    let datum = inputs[0].value;
+                    let anzahl = inputs[1].value;
+                    let preis = inputs[2].value;
+                
+                    if(datum || anzahl || preis) {
+                        csvContent += `${datum};${anzahl};${preis}\n`;
+                    }
                 }
             });
         
@@ -1874,11 +1915,46 @@ Nein. Alle Berechnungen erfolgen direkt im Browser beziehungsweise innerhalb des
             let encodedUri = encodeURI(csvContent);
             let link = document.createElement("a");
             link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "etf_kaufhistorie_export.csv");
+
+            // Dynamischer Dateiname je nachdem, welche Tabelle exportiert wurde
+            let dateiName = istSuche ? "etf_kaufhistorie_suche.csv" : "etf_kaufhistorie_manuell.csv";
+            link.setAttribute("download", dateiName);
+
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
         }
+
+
+        // // 4. NEU: Funktion generiert eine CSV-Datei direkt aus den Tabellenzeilen im Browser und startet den Download
+        // function downloadCSVFromTable() {
+        //     let kaufZeilen = document.querySelectorAll("#suche_tabelle_body_manuell tr");
+        //     if(kaufZeilen.length === 0) {
+        //         alert("Die Tabelle ist leer. Es gibt nichts herunterzuladen.");
+        //         return;
+        //     }
+        
+        //     let csvContent = "data:text/csv;charset=utf-8,Kaufdatum,Anzahl,Preis\n";
+
+        //     kaufZeilen.forEach(zeile => {
+        //         let datum = zeile.querySelector(".row-datum-suche").value;
+        //         let anzahl = zeile.querySelector(".row-anzahl-suche").value;
+        //         let preis = zeile.querySelector(".row-preis-suche").value;
+
+        //         if(datum || anzahl || preis) {
+        //             csvContent += `${datum},${anzahl},${preis}\n`;
+        //         }
+        //     });
+        
+        //     // Erzeuge einen unsichtbaren Download-Link und klicke ihn via JS an
+        //     let encodedUri = encodeURI(csvContent);
+        //     let link = document.createElement("a");
+        //     link.setAttribute("href", encodedUri);
+        //     link.setAttribute("download", "etf_kaufhistorie_export.csv");
+        //     document.body.appendChild(link);
+        //     link.click();
+        //     document.body.removeChild(link);
+        // }
 
         // NEU: Blendet die Vorabpauschalen-Tabelle im Suchbereich ein/aus und berechnet die Jahre
         function toggleVorabpauschaleSuche() {
@@ -1918,7 +1994,7 @@ Nein. Alle Berechnungen erfolgen direkt im Browser beziehungsweise innerhalb des
                 for (let jahr = aeltestesJahr; jahr < aktuellesJahr; jahr++) {
                     let row = tbody.insertRow();
                     row.innerHTML = `
-                        <td><input type="number" class="vorab-jahr-suche" value="${jahr}" disabled style="background: #eee;"></td>
+                        <td><input type="number" class="vorab-jahr-suche" value="${jahr}" disabled ></td>
                         <td><input type="number" class="vorab-wert-suche" value="0.00000000" step="0.00000001" min="0"></td>
                     `;
                 }
@@ -1926,7 +2002,7 @@ Nein. Alle Berechnungen erfolgen direkt im Browser beziehungsweise innerhalb des
                 vorabBereich.style.display = "block";
                 // Falls kein älteres Jahr gefunden wurde, dem Nutzer einen Hinweiszeile geben
                 let row = tbody.insertRow();
-                row.innerHTML = `<td colspan="2" style="color: #666; text-align: center;">Keine Käufe aus Vorjahren in der Tabelle gefunden.</td>`;
+                row.innerHTML = `<td colspan="2" style="color: #666; text-align: center;">Es gibt keine Käufe aus abgelaufenen Kalenderjahren, weshalb keine Vorabpauschalen berechnet werden müssen.</td>`;
             }
         }
 
@@ -1947,7 +2023,7 @@ Nein. Alle Berechnungen erfolgen direkt im Browser beziehungsweise innerhalb des
             let symbol = document.getElementById("etf_symbol_anzeige").innerText;
             // 🛑 VOR-VALIDIERUNG: Wurde überhaupt ein ETF gesucht? (Ersetzt das alte alert)
             if (symbol === "-") {
-                zeigeHinweis("🛑 Bitte wählen Sie zuerst einen ETF über die Suche aus!", "error");
+                zeigeHinweis("🛑 Bitte wählen Sie zuerst einen gültigen ETF über die Suche aus! Probieren Sie die ISIN oder den Ticker falls Ihr ETF nicht über den Namen gefunden wird. Ansonsten nutzen Sie bite die manuelle Eingabe.", "error");
                 return;
             }
         
@@ -1991,7 +2067,8 @@ Nein. Alle Berechnungen erfolgen direkt im Browser beziehungsweise innerhalb des
                 freibetrag: parseFloat(document.getElementById("freibetrag").value),       
                 verlusttopf: parseFloat(document.getElementById("verlusttopf").value),     
                 kirchensteuer: document.getElementById("kirchensteuer").value,             
-                tagesgenau: document.getElementById("tagesgenau_suche").checked,
+                // tagesgenau: document.getElementById("tagesgenau_suche").checked,
+                tagesgenau: (document.getElementById("tagesgenau_suche").value === "true"),
                 kaeufe: kaeufe,
                 vorabpauschalen: vorabpauschalen,
                 teilfreistellung: parseFloat(document.getElementById("teilfreistellung").value),
@@ -2070,122 +2147,6 @@ Nein. Alle Berechnungen erfolgen direkt im Browser beziehungsweise innerhalb des
             }
         }
 
-        // async function sendeBerechnungSuche() {
-        //     let symbol = document.getElementById("etf_symbol_anzeige").innerText;
-        //     if (symbol === "-") {
-        //         alert("Bitte wählen Sie zuerst einen ETF über die Suche aus!");
-        //         return;
-        //     }
-        
-        //     // 1. Daten aus der Suche-Kaufhistorie auslesen
-        //     let kaeufe = [];
-        //     let kaufZeilen = document.querySelectorAll("#suche_tabelle_body_manuell tr");
-        //     kaufZeilen.forEach(zeile => {
-        //         let datum = zeile.querySelector(".row-datum-suche")?.value;
-        //         let anzahl = parseFloat(zeile.querySelector(".row-anzahl-suche")?.value);
-        //         let preis = parseFloat(zeile.querySelector(".row-preis-suche")?.value);
-
-        //         if (datum && !isNaN(anzahl) && !isNaN(preis)) {
-        //             kaeufe.push({ datum: datum, anzahl: anzahl, preis: preis });
-        //         }
-        //     });
-        
-        //     // 2. Daten aus der Suche-Vorabpauschale auslesen (nur wenn Haken gesetzt)
-        //     let vorabpauschalen = [];
-        //     if (document.getElementById("haken_vorabpauschale_suche").checked) {
-        //         let vorabZeilen = document.querySelectorAll("#vorab_tabelle_body_suche tr");
-        //         vorabZeilen.forEach(zeile => {
-        //             let jahrField = zeile.querySelector(".vorab-jahr-suche");
-        //             let wertField = zeile.querySelector(".vorab-wert-suche");
-
-        //             if (jahrField && wertField) {
-        //                 let jahr = parseInt(jahrField.value);
-        //                 let wert = parseFloat(wertField.value);
-        //                 if (!isNaN(jahr) && !isNaN(wert)) {
-        //                     vorabpauschalen.push({ jahr: jahr, wert: wert });
-        //                 }
-        //             }
-        //         });
-        //     }
-        
-        //     // 3. Das Daten-Paket schnüren
-        //     let payload = {
-        //         rechen_ziel: document.getElementById("rechen_ziel_suche").value,
-        //         wert_wunschnetto: parseFloat(document.getElementById("wert_wunschnetto_suche").value) || 0,
-        //         wert_anteile: parseFloat(document.getElementById("wert_anteile_suche").value) || 0,
-        //         verkaufskurs: parseFloat(document.getElementById("verkaufskurs_suche").value),
-        //         freibetrag: parseFloat(document.getElementById("freibetrag").value),       
-        //         verlusttopf: parseFloat(document.getElementById("verlusttopf").value),     
-        //         kirchensteuer: document.getElementById("kirchensteuer").value,             
-        //         tagesgenau: document.getElementById("tagesgenau_suche").checked,
-        //         kaeufe: kaeufe,
-        //         vorabpauschalen: vorabpauschalen,
-        //         teilfreistellung: parseFloat(document.getElementById("teilfreistellung").value),
-        //         ist_thesaurierend: (document.getElementById("ertragsverwendung").value === "thesaurierend"),
-        //         bereits_verkaufte_anteile: parseFloat(document.getElementById("bereits_verkauft_suche").value) || 0, // Fallback auf 0 hinzugefügt
-        //         ticker: document.getElementById("etf_symbol_anzeige")?.innerText || null,
-        //         quelle: "suche"
-        //     };
-
-        //     // --- VALIDIERUNG START ---
-        //     versteckeHinweis(); // Alte Meldungen löschen
-
-        //     // 🛑 KRITISCHER FEHLER: Verkaufskurs fehlt oder ist <= 0
-        //     if (!payload.verkaufskurs || payload.verkaufskurs <= 0) {
-        //         zeigeHinweis("🛑 Berechnung gestoppt: Der Verkaufskurs muss größer als 0 sein!", "error");
-        //         return; // BRICHT DIE FUNKTION AB, kein Fetch ans Backend!
-        //     }
-
-        //     // 🛑 KRITISCHER FEHLER: Keine Käufe eingetragen
-        //     if (!payload.kaeufe || payload.kaeufe.length === 0) {
-        //         zeigeHinweis("🛑 Berechnung gestoppt: Bitte tragen Sie mindestens eine Kaufhistorie-Zeile ein!", "error");
-        //         return; 
-        //     }
-
-        //     // 🛑 KRITISCHER FEHLER: Wunschnetto gewählt, aber Betrag ist 0
-        //     if (payload.rechen_ziel === "wunschnetto" && payload.wert_wunschnetto <= 0) {
-        //         zeigeHinweis("🛑 Berechnung gestoppt: Für das Rechenziel 'Wunschnetto' muss ein Betrag größer als 0 eingegeben werden!", "error");
-        //         return;
-        //     }
-
-        //     // ⚠️ WARNUNG: Verlusttopf unrealistisch hoch (nur als netter Hinweis, wir rechnen weiter)
-        //     if (payload.verlusttopf > 50000) {
-        //         zeigeHinweis("⚠️ Hinweis: Der eingegebene Verlusttopf ist sehr hoch. Die Berechnung läuft normal weiter.", "warning");
-        //     }
-        //     // --- VALIDIERUNG ENDE ---
-
-        //     // Hier drunter folgt dein normaler let response = await fetch(...)
-
-        
-        //     // 4. Per POST an den FastAPI-Endpunkt senden
-        //     let response = await fetch("/api/calculate", {
-        //         method: "POST",
-        //         headers: { "Content-Type": "application/json" },
-        //         body: JSON.stringify(payload)
-        //     });
-        
-        //     let result = await response.json();
-        
-        //     // 5. ERSETZT: Ergebnis schön visualisieren
-        //     if (result.success) {
-        //         // 🎯 HIER WIRD DIE FUNKTION AUFGERUFEN!
-        //         // Sie blendet das Dashboard ein, setzt die 3 KPIs und befüllt die Tabelle
-        //         zeigeErgebnisseImFrontend(result, payload.rechen_ziel);
-                
-        //         // Falls du deine alte rohe Textbox zur Sicherheit behalten willst, 
-        //         // kannst du diese zwei Zeilen drin lassen, ansonsten kannst du sie löschen:
-        //         if (document.getElementById("rechen_ergebnis_suche")) {
-        //             document.getElementById("rechen_ergebnis_suche").style.display = "block";
-        //             document.getElementById("ergebnis_text_suche").innerHTML = `<pre>Berechnung erfolgreich!</pre>`;
-        //         }
-        //     } else {
-        //         // Falls das Backend ein anderes Fehlerformat schickt, sehen wir jetzt das ganze Objekt
-        //         console.error("Kompletter Backend-Fehler:", result);
-        //         let fehlerText = result.error || result.detail || JSON.stringify(result);
-        //         alert("Fehler bei der Berechnung: " + fehlerText);
-        //     }
-
-        // }
 
         let aktuelleTRDaten = null;
         let aktuelleTRKurse = {}; // NEU: Speichert die vom Server gelieferten Kurse global
@@ -2273,18 +2234,6 @@ Nein. Alle Berechnungen erfolgen direkt im Browser beziehungsweise innerhalb des
             }
         }
 
-
-        // Helper: Fügt eine Zeile in die TR-Tabelle ein
-        // function fuegeZeileHinzuTR(datum = "", anzahl = "", preis = "") {
-        //     let tbody = document.getElementById("tr_tr_tabelle_body") || document.getElementById("tr_tabelle_body");
-        //     let row = tbody.insertRow();
-        //     row.innerHTML = `
-        //         <td><input type="date" class="row-datum-tr" value="${datum}"></td>
-        //         <td><input type="number" class="row-anzahl-tr" step="0.00001" value="${anzahl}"></td>
-        //         <td><input type="number" class="row-preis-tr" step="0.01" value="${preis}"></td>
-        //         <td><button class="btn-delete" onclick="this.parentNode.parentNode.remove()">🗑️</button></td>
-        //     `;
-        // }
 
         function fuegeZeileHinzuTR(datum = "", anzahl = "", preis = "") {
             let tbody = document.getElementById("tr_tr_tabelle_body") || document.getElementById("tr_tabelle_body");
@@ -2378,7 +2327,8 @@ Nein. Alle Berechnungen erfolgen direkt im Browser beziehungsweise innerhalb des
                 freibetrag: parseFloat(document.getElementById("freibetrag").value),
                 verlusttopf: parseFloat(document.getElementById("verlusttopf").value),
                 kirchensteuer: document.getElementById("kirchensteuer").value,
-                tagesgenau: document.getElementById("tagesgenau_tr").checked,
+                // tagesgenau: document.getElementById("tagesgenau_tr").checked,
+                tagesgenau: (document.getElementById("tagesgenau_tr").value === "true"),
                 kaeufe: kaeufe,
                 vorabpauschalen: vorabpauschalen,
                 teilfreistellung: parseFloat(document.getElementById("teilfreistellung").value),
@@ -2461,121 +2411,6 @@ Nein. Alle Berechnungen erfolgen direkt im Browser beziehungsweise innerhalb des
         }
 
 
-        // async function sendeBerechnungTR() {
-        //     // NEU: Welcher ETF ist aktuell im Dropdown ausgewählt?
-        //     let gewaehlterETF = document.getElementById("tr_etf_dropdown").value;
-        
-        //     let kaeufe = [];
-        //     document.querySelectorAll("#tr_tabelle_body tr").forEach(zeile => {
-        //         let datum = zeile.querySelector(".row-datum-tr")?.value;
-        //         let anzahl = parseFloat(zeile.querySelector(".row-anzahl-tr")?.value);
-        //         let preis = parseFloat(zeile.querySelector(".row-preis-tr")?.value);
-        //         if (datum && !isNaN(anzahl) && !isNaN(preis)) {
-        //             kaeufe.push({ datum: datum, anzahl: anzahl, preis: preis });
-        //         }
-        //     });
-        
-        //     // 1. Vorabpauschalen sauber auslesen
-        //     let vorabpauschalen = [];
-        //     if (document.getElementById("haken_vorabpauschale_tr").checked) {
-        //         let vorabZeilen = document.querySelectorAll("#vorab_tabelle_body_tr tr");
-        //         vorabZeilen.forEach(zeile => {
-        //             let jahrField = zeile.querySelector(".vorab-jahr-tr");
-        //             let wertField = zeile.querySelector(".vorab-wert-tr");
-                
-        //             if (jahrField && wertField) {
-        //                 let jahr = parseInt(jahrField.value);
-        //                 let wert = parseFloat(wertField.value);
-        //                 if (!isNaN(jahr) && !isNaN(wert)) {
-        //                     vorabpauschalen.push({ jahr: jahr, wert: wert });
-        //                 }
-        //             }
-        //         });
-        //     }
-        
-        //     // NEU: Bereits verkaufte Anteile für diesen spezifischen ETF ermitteln
-        //     let verkaufteAnteile = 0.0;
-        //     if (aktuelleTRVerkaeufe && aktuelleTRVerkaeufe[gewaehlterETF]) {
-        //         verkaufteAnteile = parseFloat(aktuelleTRVerkaeufe[gewaehlterETF]);
-        //     }
-        
-        //     // 2. Das Payload-Objekt schnüren
-        //     let payload = {
-        //         rechen_ziel: document.getElementById("rechen_ziel_tr").value,
-        //         wert_wunschnetto: parseFloat(document.getElementById("wert_wunschnetto_tr").value) || 0,
-        //         wert_anteile: parseFloat(document.getElementById("wert_anteile_tr").value) || 0,
-        //         verkaufskurs: parseFloat(document.getElementById("verkaufskurs_tr").value),
-        //         freibetrag: parseFloat(document.getElementById("freibetrag").value),
-        //         verlusttopf: parseFloat(document.getElementById("verlusttopf").value),
-        //         kirchensteuer: document.getElementById("kirchensteuer").value,
-        //         tagesgenau: document.getElementById("tagesgenau_tr").checked,
-        //         kaeufe: kaeufe,
-        //         vorabpauschalen: vorabpauschalen,
-        //         teilfreistellung: parseFloat(document.getElementById("teilfreistellung").value),
-        //         ist_thesaurierend: (document.getElementById("ertragsverwendung").value === "thesaurierend"),
-        //         bereits_verkaufte_anteile: verkaufteAnteile,
-        //         ticker: aktuellerTRTicker,
-        //         quelle: "tr"
-        //     };
-
-        //     // --- VALIDIERUNG START ---
-        //     versteckeHinweis(); // Alte Meldungen löschen
-
-        //     // 🛑 KRITISCHER FEHLER: Verkaufskurs fehlt oder ist <= 0
-        //     if (!payload.verkaufskurs || payload.verkaufskurs <= 0) {
-        //         zeigeHinweis("🛑 Berechnung gestoppt: Der Verkaufskurs muss größer als 0 sein!", "error");
-        //         return; // BRICHT DIE FUNKTION AB, kein Fetch ans Backend!
-        //     }
-
-        //     // 🛑 KRITISCHER FEHLER: Keine Käufe eingetragen
-        //     if (!payload.kaeufe || payload.kaeufe.length === 0) {
-        //         zeigeHinweis("🛑 Berechnung gestoppt: Bitte tragen Sie mindestens eine Kaufhistorie-Zeile ein!", "error");
-        //         return; 
-        //     }
-
-        //     // 🛑 KRITISCHER FEHLER: Wunschnetto gewählt, aber Betrag ist 0
-        //     if (payload.rechen_ziel === "wunschnetto" && payload.wert_wunschnetto <= 0) {
-        //         zeigeHinweis("🛑 Berechnung gestoppt: Für das Rechenziel 'Wunschnetto' muss ein Betrag größer als 0 eingegeben werden!", "error");
-        //         return;
-        //     }
-
-        //     // ⚠️ WARNUNG: Verlusttopf unrealistisch hoch (nur als netter Hinweis, wir rechnen weiter)
-        //     if (payload.verlusttopf > 50000) {
-        //         zeigeHinweis("⚠️ Hinweis: Der eingegebene Verlusttopf ist sehr hoch. Die Berechnung läuft normal weiter.", "warning");
-        //     }
-        //     // --- VALIDIERUNG ENDE ---
-
-        //     // Hier drunter folgt dein normaler let response = await fetch(...)
-
-        
-        //     // 3. Daten senden
-        //     let response = await fetch("/api/calculate", {
-        //         method: "POST",
-        //         headers: { "Content-Type": "application/json" },
-        //         body: JSON.stringify(payload)
-        //     });
-        
-        //     let result = await response.json();
-            
-        //     // 4. KORRIGIERT: Ergebnis im Dashboard anzeigen
-        //     if (result.success) {
-        //         // 🎯 HIER WIRD DIE DYNAMISCHE STRUKTUR AUFGERUFEN
-        //         zeigeErgebnisseImFrontend(result, payload.rechen_ziel);
-                
-        //         // Falls du die alte Textbox behalten willst, bleibt das hier aktiv.
-        //         // Ansonsten kannst du diese zwei Zeilen löschen.
-        //         if (document.getElementById("rechen_ergebnis_tr")) {
-        //             document.getElementById("rechen_ergebnis_tr").style.display = "block";
-        //             document.getElementById("ergebnis_text_tr").innerHTML = `<pre>Berechnung erfolgreich!</pre>`;
-        //         }
-        //     } else {
-        //         // Falls das Backend ein anderes Fehlerformat schickt, sehen wir jetzt das ganze Objekt
-        //         console.error("Kompletter Backend-Fehler:", result);
-        //         let fehlerText = result.error || result.detail || JSON.stringify(result);
-        //         alert("Fehler bei der Berechnung: " + fehlerText);
-        //     }
-        // }
-
         // Suche diese Funktion im Code und füge den "3. Trade Republic Pfad" hinzu:
         function aktualisiereThesaurierungsAnsicht() {
             let istThesaurierend = (document.getElementById("ertragsverwendung").value === "thesaurierend");
@@ -2644,7 +2479,7 @@ Nein. Alle Berechnungen erfolgen direkt im Browser beziehungsweise innerhalb des
                 for (let jahr = aeltestesJahr; jahr < aktuellesJahr; jahr++) {
                     let row = tbody.insertRow();
                     row.innerHTML = `
-                        <td><input type="number" class="vorab-jahr-tr" value="${jahr}" disabled style="background: #eee;"></td>
+                        <td><input type="number" class="vorab-jahr-tr" value="${jahr}" disabled ></td>
                         <td><input type="number" class="vorab-wert-tr" value="0.00000000" step="0.00000001" min="0"></td>
                     `;
                 }
@@ -2841,6 +2676,78 @@ Nein. Alle Berechnungen erfolgen direkt im Browser beziehungsweise innerhalb des
         function versteckeHinweis() {
             document.getElementById("validation_alert").style.display = "none";
         }
+
+        toggleEingabeOptionen();
+
+
+
+        document.addEventListener("DOMContentLoaded", function () {
+                
+          const rechnerContainer = document.getElementById("rechner") || document.querySelector(".tool");
+          const button = document.querySelector(".mobile-tool-button");
+                
+          if (!rechnerContainer || !button) return;
+                
+          // 1. Der Observer (steuert das Ein- und Ausblenden des Knopfs)
+          const observer = new IntersectionObserver(
+            (entries) => {
+              entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                  button.classList.remove("visible"); 
+                } else {
+                  button.classList.add("visible");    
+                }
+              });
+            },
+            {
+              threshold: 0.1 
+            }
+          );
+        
+          observer.observe(rechnerContainer);
+        
+          // 2. NEU: Die Klick-Funktion für den weichen Bildlauf zum Rechner
+          button.addEventListener("click", function (e) {
+            e.preventDefault(); // Verhindert unschöne Sprünge in der URL
+
+            rechnerContainer.scrollIntoView({ 
+              behavior: "smooth", // Aktiviert das weiche, flüssige Scrollen
+              block: "start"      // Richtet den Rechner exakt an der Oberkante des Handys aus
+            });
+          });
+      
+        });
+
+
+        // document.addEventListener("DOMContentLoaded", function () {
+                    
+        //   // Sucht jetzt nach deinem echten Rechner-Kasten statt nach einem Iframe
+        //   // Falls dein großer Kasten id="rechner" hat, bleibt das so. 
+        //   // Falls er die Klasse .tool nutzt, kannst du auch document.querySelector(".tool") nehmen.
+        //   const rechnerContainer = document.getElementById("rechner") || document.querySelector(".tool");
+        //   const button = document.querySelector(".mobile-tool-button");
+                
+        //   // Sicherheitscheck: Nur ausführen, wenn beide Elemente auf der Seite existieren
+        //   if (!rechnerContainer || !button) return;
+                
+        //   const observer = new IntersectionObserver(
+        //     (entries) => {
+        //       entries.forEach(entry => {
+        //         if (entry.isIntersecting) {
+        //           button.classList.remove("visible"); // Rechner im Bild -> Button verstecken
+        //         } else {
+        //           button.classList.add("visible");    // Rechner weggescrollt -> Button zeigen
+        //         }
+        //       });
+        //     },
+        //     {
+        //       threshold: 0.1 // Reagiert, sobald noch 10% des Rechners zu sehen sind
+        //     }
+        //   );
+        
+        //   observer.observe(rechnerContainer);
+        // });
+
 
 
     </script>

@@ -1,7 +1,3 @@
-/* -------------------------------------------------- */
-/* Grundlayout */
-/* -------------------------------------------------- */
-
 /* ==========================================================================
    1. BASIS-STYLING (Global & Layout)
    ========================================================================== */
@@ -112,8 +108,10 @@ label {
   font-size: 0.95rem;
 }
 
+/* 🎯 Textfeld (Suchfeld) komplett mit den anderen Eingaben gleichgestellt */
 input[type="number"], 
 input[type="date"], 
+input[type="text"], 
 select { 
   width: 100%; 
   padding: 10px 12px; 
@@ -127,14 +125,191 @@ select {
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
+/* 🎯 Focus-Effekt gilt nun für alle Felder gleichermaßen */
 input[type="number"]:focus, 
 input[type="date"]:focus, 
+input[type="text"]:focus, 
 select:focus {
   outline: none;
   border-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
+/* ☀️ Suchergebnisse-Container (Dropdown-Optik im Light Mode) */
+#such_ergebnisse {
+  display: none;
+  position: absolute;
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+  border: 1px solid #cbd5e1; 
+  border-radius: 6px;
+  background-color: #ffffff !important; 
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.08) !important;
+  margin-top: 4px;
+}
+
+/* ☀️ Die einzelnen Optionen in der Box (Gleiches Schriftbild wie Eingabefelder) */
+.search-suggestion {
+  padding: 10px 12px; 
+  cursor: pointer;
+  background-color: #ffffff;
+  color: #1f2937; 
+  font-family: inherit;
+  font-size: 1rem; 
+}
+
+/* 🌟 Hover-Effekt: Das native Blau deines Fokus-Rahmens (#2563eb) */
+.search-suggestion:hover {
+  background-color: #2563eb !important; 
+  color: #ffffff !important;
+}
+
+.upload-dropzone {
+  border: 2px dashed #cbd5e1;
+  border-radius: 6px;
+  /* 🎯 Kleiner gemacht: Weniger Innenabstand */
+  padding: 12px 20px; 
+  text-align: center;
+  background-color: #ffffff;
+  cursor: pointer;
+  transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s;
+}
+
+.upload-dropzone.dragover {
+  border-color: #2563eb;
+  background-color: rgba(37, 99, 235, 0.05);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.dropzone-content {
+  display: flex;
+  /* 🎯 Auf Zeile (row) umgestellt, damit es kompakter untereinander oder nebeneinander steht */
+  flex-direction: row; 
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap; /* Verhindert Probleme auf kleinen Bildschirmen */
+}
+
+.dropzone-icon {
+  font-size: 1.3rem; /* 🎯 Icon verkleinert */
+}
+
+.dropzone-text {
+  margin: 0;
+  color: #475569;
+  font-size: 0.9rem; /* 🎯 Schrift minimal verkleinert */
+}
+
+.dropzone-text strong {
+  color: #2563eb;
+}
+
+/* 🎯 Hier steuern wir nun die ausgewählte Datei deutlich an */
+.file-name-preview {
+  font-size: 0.95rem;
+  font-weight: 700;        /* 🎯 Fett gedruckt, damit es sofort auffällt */
+  color: #1f2937;         /* 🎯 Deine normale, dunkle Light-Mode Schriftfarbe */
+  font-style: normal;     /* Nicht mehr kursiv */
+  border-left: 2px solid #cbd5e1; /* Ein kleiner Trennstrich zur Info links */
+  padding-left: 15px;
+}
+
+/* 🎯 Bringt Checkbox und Label perfekt in eine Reihe */
+.checkbox-group {
+  display: flex;
+  align-items: center; /* Zentriert Box und Text vertikal auf eine Linie */
+  gap: 8px;            /* Angenehmer Abstand zwischen Box und Text */
+  margin-top: 15px;
+}
+
+/* 🎯 Hebelt das "display: block" für Labels innerhalb von Checkbox-Gruppen aus */
+.checkbox-group label {
+  display: inline;     /* Erlaubt dem Text, neben der Box zu stehen */
+  margin-bottom: 0;    /* Entfernt den Abstand nach unten, den normale Labels haben */
+  cursor: pointer;     /* Macht auch den Text anklickbar */
+}
+
+/* 🎯 Optionaler Feinschliff für die Checkbox selbst */
+.checkbox-group input[type="checkbox"] {
+  width: auto;         /* Verhindert, dass die Checkbox 100% Breite einnimmt */
+  cursor: pointer;
+  margin: 0;           /* Entfernt Browser-Standard-Abstände */
+}
+
+/* ☀️ Das Fragezeichen-Symbol selbst */
+.tooltip-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  background-color: #cbd5e1; /* Dezentes Grau */
+  color: #475569;
+  font-size: 0.75rem;
+  font-weight: bold;
+  border-radius: 50%; /* Macht es kreisrund */
+  margin-left: 6px;
+  cursor: help; /* Ändert den Mauszeiger zu einem Fragezeichen mit Pfeil */
+  position: relative; /* Wichtig für die Positionierung des Textes */
+  vertical-align: middle;
+}
+
+/* ☀️ Das eigentliche Infokästchen (Standardmäßig unsichtbar) */
+.tooltip-icon::after {
+  content: attr(data-tooltip); /* Holt sich den Text aus dem HTML-Attribut */
+  position: absolute;
+  bottom: 130%; /* Platziert das Kästchen über dem Symbol */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 220px; /* Breite des Infokästchens */
+  padding: 8px 12px;
+  background-color: #1e293b; /* Dunkler, moderner Hintergrund */
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: normal;
+  line-height: 1.4;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  
+  /* Unsichtbar-Zustand für eine weiche Animation */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+/* ☀️ Der kleine Pfeil unten am Infokästchen */
+.tooltip-icon::before {
+  content: "";
+  position: absolute;
+  bottom: 110%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: #1e293b transparent transparent transparent; /* Erzeugt ein Dreieck */
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+/* 🌟 EINBLENDEN bei Hover (Desktop) und Focus/Active (Mobilgeräte) */
+.tooltip-icon:hover::after,
+.tooltip-icon:hover::before {
+  opacity: 1;
+}
+
+/* 📱 Trick für Handys: Wenn man draufdrückt, bleibt es kurz sichtbar */
+@media (max-width: 600px) {
+  .tooltip-icon:active::after,
+  .tooltip-icon:active::before {
+    opacity: 1;
+  }
+}
 
 /* ==========================================================================
    5. TABELLEN (Modernisiert & Clean)
@@ -147,10 +322,9 @@ table {
 }
 
 th, td { 
-
   padding: 12px 10px; 
   text-align: left; 
-  color: #1f2937; /* <--- HIER! Erzwingt die gleiche dunkle Schriftfarbe für Namen und Werte */
+  color: #1f2937; 
 }
 
 th { 
@@ -169,7 +343,7 @@ td {
    6. BUTTONS
    ========================================================================== */
 .btn-add { 
-  background-color: #007bff; /* Angenehmeres Emerald-Grün */
+  background-color: #2563eb; /* 🎯 Auf dein primäres Markenblau angepasst */
   color: white; 
   border: none; 
   padding: 10px 20px; 
@@ -179,7 +353,7 @@ td {
   margin-top: 10px; 
   transition: background 0.2s;
 }
-.btn-add:hover { background-color: #007bff; }
+.btn-add:hover { background-color: #1d4ed8; }
 
 .btn-delete { 
   background-color: #ef4444; /* Modernes Rot */
@@ -238,7 +412,7 @@ summary:hover { color: #2563eb; }
 }
 
 /* ==========================================================================
-   8. DARK MODE ADJUSTMENTS (Formulare & Tabellen integriert!)
+   8. DARK MODE ADJUSTMENTS (Formulare & Tabellen sauber vereint)
    ========================================================================== */
 @media (prefers-color-scheme: dark) {
   body { background: #0f172a; color: #e5e7eb; }
@@ -247,37 +421,95 @@ summary:hover { color: #2563eb; }
   footer, .disclaimer { color: #cbd5f5; }
   summary:hover { color: #60a5fa; }
   
-  /* Formulare im Dark Mode */
-  input[type="number"], input[type="date"], select {
-    background-color: #334155;
-    border-color: #475569;
-    color: #f8fafc;
+  /* 🎯 Formulare im Dark Mode – Gilt jetzt exakt so für ALLE Inputs inkl. Textfeld */
+  input[type="number"], 
+  input[type="date"], 
+  input[type="text"], 
+  select {
+    background-color: #334155 !important;
+    border-color: #475569 !important;
+    color: #f8fafc !important;
   }
-  input[type="number"]:focus, input[type="date"]:focus, select:focus {
-    border-color: #60a5fa;
+  
+  input[type="number"]:focus, 
+  input[type="date"]:focus, 
+  input[type="text"]:focus, 
+  select:focus {
+    border-color: #60a5fa !important;
   }
   
   /* Tabellen im Dark Mode */
-th { 
+  th { 
     background-color: #334155; 
     color: #cbd5e1; 
   }
   
-  /* th, td { 
-    border-bottom-color: #334155; 
-  } */
-  
   /* Überschreibt das Schwarz aus dem Lightmode mit leuchtendem Weiß */
   td { 
-    color: #ffffff !important; /* !important sorgt dafür, dass das Lightmode-Schwarz sicher überschrieben wird */
+    color: #ffffff !important; 
   }
 
   hr.trennlinie {
-    border-top-color: #334155; /* Ein perfekt abgestimmtes, sichtbares Grau auf dunklem Grund */
+    border-top-color: #334155; 
+  }
+  
+  /* 🎯 Die Vorschlagsbox im Dark Mode nutzt exakt die gleichen Farben wie die Inputs */
+  #such_ergebnisse {
+    background-color: #334155 !important;
+    border: 1px solid #475569 !important;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.4) !important;
   }
 
-}
+  .search-suggestion {
+    background-color: #334155 !important;
+    color: #f8fafc !important;
+  }
 
+  /* Hover-Effekt bleibt im Dark Mode schön kräftig Blau */
+  .search-suggestion:hover {
+    background-color: #2563eb !important;
+    color: #ffffff !important;
+  }
+
+  .upload-dropzone {
+    background-color: #334155 !important;
+    border-color: #475569 !important;
+  }
+  
+  .upload-dropzone.dragover {
+    border-color: #60a5fa !important;
+    background-color: rgba(96, 165, 250, 0.08) !important;
+  }
+  
+  .dropzone-text {
+    color: #cbd5e1;
+  }
+  
+  .dropzone-text strong {
+    color: #60a5fa;
+  }
+  
+  /* 🎯 Dateiname im Dark Mode deutlich sichtbar machen */
+  .file-name-preview {
+    color: #e5e7eb !important; /* 🎯 Deine normale, helle Dark-Mode Schriftfarbe */
+    border-left-color: #475569;
+  }
+
+  .tooltip-icon {
+    background-color: #475569; /* Dunkleres Grau */
+    color: #cbd5e1;
+  }
+  
+  /* Optional: Infokästchen im Dark Mode mit feinem Rahmen versehen */
+  .tooltip-icon::after {
+    background-color: #0f172a;
+    border: 1px solid #334155;
+  }
+  .tooltip-icon::before {
+    border-color: #0f172a transparent transparent transparent;
+  }
+  
+}
 
 /* ==========================================================================
    9. RESPONSIVE / MOBILE DESIGN
@@ -341,17 +573,14 @@ th {
   .mobile-tool-button.visible { display: block; }
 }
 
-
 /* ==========================================================================
    10. BERECHNUNGSERGEBNIS CONTAINER & DETAILS
    ========================================================================== */
-/* Der Hauptcontainer nutzt bereits das .faq / .hero Design */
 #ergebnis_container h2 {
   margin-top: 0;
-  color: #2563eb; /* Blaues Highlight für die Überschrift */
+  color: #2563eb; 
 }
 
-/* Flexbox-Layout für die drei KPI-Karten oben */
 .kpi-wrapper {
   display: flex; 
   justify-content: space-between; 
@@ -359,13 +588,12 @@ th {
   margin-bottom: 30px;
 }
 
-/* Die einzelnen KPI-Karten (Wert 1, 2, 3) */
 .kpi-card {
   flex: 1; 
-  background: #f8fafc; /* Heller, moderner Grauton passend zur .box */
+  background: #f8fafc; 
   padding: 20px; 
   border-radius: 8px; 
-  box-shadow: inset 0 0 0 1px #e2e8f0; /* Subtiler Innenrahmen statt harter Schatten */
+  box-shadow: inset 0 0 0 1px #e2e8f0; 
   text-align: center;
 }
 
@@ -375,7 +603,7 @@ th {
   font-weight: 700; 
   display: block; 
   margin-bottom: 8px;
-  text-transform: uppercase; /* Lässt Labels wie 'STEUER' professioneller wirken */
+  text-transform: uppercase; 
   letter-spacing: 0.05em;
 }
 
@@ -385,14 +613,12 @@ th {
   letter-spacing: -0.02em;
 }
 
-/* Farbliche Akzente für die KPI-Werte (Grün = Positiv/Netto, Rot = Steuer) */
 .kpi-green { color: #10b981; }
 .kpi-red { color: #ef4444; }
 .kpi-neutral { color: #1e293b; }
 
-/* PDF-Button Styling */
 #btn_pdf_download {
-  background: #ef4444; 
+  background: #2563eb; 
   color: white; 
   border: none; 
   padding: 12px 25px; 
@@ -403,57 +629,39 @@ th {
   transition: background 0.2s, transform 0.1s;
 }
 
-#btn_pdf_download:hover {
-  background: #dc2626;
-}
-
-#btn_pdf_download:active {
-  transform: scale(0.98);
-}
+#btn_pdf_download:hover { background: #1d4ed8; }
+#btn_pdf_download:active { transform: scale(0.98); }
 
 /* ==========================================================================
    11. ERGEBNIS DARK MODE ADJUSTMENTS
    ========================================================================== */
 @media (prefers-color-scheme: dark) {
-  #ergebnis_container h2 {
-    color: #60a5fa;
-  }
+  #ergebnis_container h2 { color: #60a5fa; }
   
   .kpi-card {
     background: #1e293b;
     box-shadow: inset 0 0 0 1px #334155;
   }
   
-  .kpi-label {
-    color: #94a3b8;
-  }
-  
-  .kpi-neutral {
-    color: #f8fafc;
-  }
+  .kpi-label { color: #94a3b8; }
+  .kpi-neutral { color: #f8fafc; }
 }
 
 /* ==========================================================================
    12. ERGEBNIS RESPONSIVE DESIGN (MOBIL)
    ========================================================================== */
 @media (max-width: 600px) {
-  /* Auf dem Smartphone stehen die KPI-Karten untereinander */
   .kpi-wrapper {
     flex-direction: column;
     gap: 12px;
     margin-bottom: 20px;
   }
   
-  .kpi-card {
-    padding: 15px;
-  }
-  
-  .kpi-wert {
-    font-size: 1.5rem;
-  }
+  .kpi-card { padding: 15px; }
+  .kpi-wert { font-size: 1.5rem; }
   
   #btn_pdf_download {
-    width: 100%; /* Button nimmt auf dem Handy die volle Breite ein */
+    width: 100%; 
     text-align: center;
   }
 }

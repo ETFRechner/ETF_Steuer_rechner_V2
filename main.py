@@ -37,7 +37,8 @@ async def upload_csv(file: UploadFile = File(...)):
         contents = await file.read()
         
         # Mit Pandas einlesen (wie in deinem Streamlit-Code)
-        df = pd.read_csv(io.BytesIO(contents), decimal=".")
+        # df = pd.read_csv(io.BytesIO(contents), decimal=".")
+        df = pd.read_csv(io.BytesIO(contents), sep=None, engine='python', decimal=".")
         
         # Spaltennamen normalisieren (Groß-/Kleinschreibung ignorieren für Flexibilität)
         df.columns = [c.lower() for c in df.columns]
@@ -100,7 +101,7 @@ async def calculate_steuer(payload: CalculationPayload):
         ergebnis_kpis = {
             "wert1": anzahl_verkaufen,  # Als Float oder Integer (kein String!)
             "wert2": netto,
-            "wert3": freibetrag
+            "wert3": freibetrag - (gewinn_nach_verlusttopf - gewinn_steuerpflichtig)
         }
     elif payload.rechen_ziel == "wunschnetto":
         # ergebnis = {"nachricht": f"Hier wird Wunschnetto für {payload.wert_wunschnetto}€ berechnet"}
@@ -110,8 +111,8 @@ async def calculate_steuer(payload: CalculationPayload):
             "wert2": brutto,
             "wert3": netto
         }
-        if netto < payload.wert_wunschnetto:
-            aktuelle_warnungen.append(f"Warnung: Das gewünschte Wunschnetto von {payload.wert_wunschnetto}€ konnte nicht erreicht werden. Es wird mit dem Verkauf aller verfügbaren Anteile gerechnet.")
+        if netto < payload.wert_wunschnetto - 0.01:  # Berücksichtigung von Rundungsfehlern
+            aktuelle_warnungen.append(f"Warnung: Das gewünschte Netto von {payload.wert_wunschnetto}€ konnte nicht erreicht werden. Es wird mit dem Verkauf aller verfügbaren Anteile gerechnet.")
 
     else:
         # ergebnis = {"nachricht": f"Hier werden Steuern für {payload.wert_anteile} Anteile berechnet"}
@@ -121,6 +122,9 @@ async def calculate_steuer(payload: CalculationPayload):
             "wert2": netto,
             "wert3": steuer
         }
+        if anzahl_verkaufen < payload.wert_anteile - 0.0001:  # Berücksichtigung von Rundungsfehlern
+            aktuelle_warnungen.append(f"Warnung: Sie besitzen nicht {payload.wert_anteile} Anteile. Es wird mit dem Verkauf aller verfügbaren Anteile gerechnet.")
+
         # hier vielleicht lieber iregndeine form gewinn aufführen
 
 
@@ -138,8 +142,8 @@ async def calculate_steuer(payload: CalculationPayload):
         {"name": "Anteile aktuell im Besitz", "wert": max_anteile - bereits_verkauft, "einheit": "Anteile"},
         {"name": "Anzahl zu verkaufender Anteile", "wert": anzahl_verkaufen, "einheit": "Anteile"},
         {"name": "Kurs bei Verkauf", "wert": aktueller_kurs, "einheit": "EUR"},
+        {"name": "Kosten bei Kauf", "wert": brutto-gewinn, "einheit": "EUR"},
         {"name": "Brutto Verkaufserlös", "wert": brutto, "einheit": "EUR"},
-        {"name": "Kosten bei Kauf", "wert": gesamtkosten, "einheit": "EUR"},
         {"name": "Gewinn vor Steuer", "wert": gewinn, "einheit": "EUR"},
         {"name": "Abzuziehende Vorabpauschale", "wert": gesamte_vorabpauschale, "einheit": "EUR"},
         {"name": "Gewinn nach Vorabpauschale", "wert": gewinn_nach_vorabpauschale, "einheit": "EUR"},
@@ -147,7 +151,7 @@ async def calculate_steuer(payload: CalculationPayload):
         {"name": "Gewinn nach Verlusttopf", "wert": gewinn_nach_verlusttopf, "einheit": "EUR"},
         {"name": "Neuer Verlusttopf", "wert": verlusttopf_nach_verkauf, "einheit": "EUR"},
         {"name": "Gewinn nach Sparerpauschbetrag", "wert": gewinn_steuerpflichtig, "einheit": "EUR"},
-        {"name": "Ungenutzter Freibetrag", "wert": freibetrag, "einheit": "EUR"},
+        {"name": "Ungenutzter Freibetrag", "wert": freibetrag - (gewinn_nach_verlusttopf - gewinn_steuerpflichtig), "einheit": "EUR"},
         {"name": "Zu zahlende Steuer", "wert": steuer, "einheit": "EUR"},
         {"name": "Netto ", "wert": netto, "einheit": "EUR"},
     ]
@@ -288,7 +292,7 @@ async def upload_trade_republic(file: UploadFile = File(...)):
         col_preis = find_column(["price", "preis", "kurs", "wert"], headers)
 
         if not col_type or not col_isin or not col_name:
-            return {"success": False, "error": f"Erforderliche Spalten (Typ, ISIN, Name) fehlen."}
+            return {"success": False, "error": f"Bitte fügen Sie hier nur originale Trade Republic CSV-Dateien hinzu."}
 
         gefilterte_daten = []
         isin_name_mapping = {} # Merkt sich, welcher Name zu welcher ISIN gehört {"IE00B4L5Y983": "Core S&P 500 USD (Acc)"}

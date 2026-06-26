@@ -386,27 +386,58 @@ def eur(x):
 def anteil(x):
     return f"{x:.5f}".replace(".", ",")
 
-
 def footer(canvas, doc):
     canvas.saveState()
 
+    # 1. Normale Schriftfarbe für das Datum / den Rest festlegen
     canvas.setFont("Helvetica", 9)
+    canvas.setFillColorRGB(0, 0, 0) # Schwarz für den normalen Text
 
-    text = "Berechnet mit etfsteuerrechner.de – Angaben ohne Gewähr."
+    jetzt = datetime.now().strftime("%d.%m.%Y, %H:%M Uhr")
+    
+    # Wir teilen den Text auf, damit wir den Link separat färben können
+    text_start = "Berechnet mit "
+    text_link = "etfsteuerrechner.de"
+    text_end = f" am {jetzt} – Angaben ohne Gewähr."
+    
     x = 2 * cm
     y = 1.5 * cm
 
-    canvas.drawString(x, y, text)
+    # Start-Text zeichnen
+    canvas.drawString(x, y, text_start)
+    x_link = x + canvas.stringWidth(text_start, "Helvetica", 9)
+    
+    # Link-Text in Blau zeichnen
+    canvas.setFillColorRGB(0, 0, 1) # Reines Blau (R=0, G=0, B=1)
+    canvas.drawString(x_link, y, text_link)
+    
+    # Klassische Unterstreichung für den Link zeichnen
+    canvas.setStrokeColorRGB(0, 0, 1) # Blaue Linie
+    canvas.setLineWidth(0.5)
+    link_breite = canvas.stringWidth(text_link, "Helvetica", 9)
+    canvas.line(x_link, y - 1, x_link + link_breite, y - 1)
+    
+    # Restlichen Text wieder in Schwarz zeichnen
+    canvas.setFillColorRGB(0, 0, 0)
+    x_end = x_link + link_breite
+    canvas.drawString(x_end, y, text_end)
 
+    # Die klickbare Box genau über den blauen Text legen
     canvas.linkURL(
         "https://www.etfsteuerrechner.de",
-        (x, y, x + 200, y + 10),
+        (x_link, y - 2, x_link + link_breite, y + 10),
         relative=0
     )
 
     canvas.restoreState()
 
 
+import io
+from reportlab.lib.pagesizes import A4
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import cm
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 
 def create_pdf(
     anzahl_verkaufen, max_anteile, bereits_verkauft,
@@ -423,212 +454,472 @@ def create_pdf(
     durchschnittlicher_kaufpreis = gesamtkosten / max_anteile if max_anteile else 0
 
     buffer = io.BytesIO()
+    
+    # 📝 SEITEN-LAYOUT DEFINIEREN (A4 hat 595.27 pt Breite)
+    # Nutzen wir 2 cm Ränder (~56 pt) -> Nutzbare Breite = ca. 483 pt
+    doc = SimpleDocTemplate(
+        buffer, 
+        pagesize=A4,
+        leftMargin=2*cm,
+        rightMargin=2*cm,
+        topMargin=2*cm,
+        bottomMargin=2*cm
+    )
 
+    # 🎨 FARBPALETTE (Passend zu deinem CSS-Webdesign)
+    PRIMARY_COLOR = colors.HexColor("#2563eb")     # Markenblau
+    TEXT_DARK = colors.HexColor("#1f2937")         # Dunkelgrau für Text
+    TEXT_MUTED = colors.HexColor("#64748b")        # Slate-Grau für Subtexte
+    BG_LIGHT = colors.HexColor("#f8fafc")          # Hellgrauer Kachel-Hintergrund
+    BG_ZEBRA = colors.HexColor("#f1f5f9")          # Alternierende Tabellenzeilen
+    BORDER_COLOR = colors.HexColor("#cbd5e1")      # Saubere Rahmenlinien
+    SUCCESS_COLOR = colors.HexColor("#10b981")     # Grün für Netto
+    
+    # 📑 TYPOGRAFIE STYLES
     styles = getSampleStyleSheet()
+    
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Title'],
+        fontName='Helvetica-Bold',
+        fontSize=24,
+        leading=28,
+        textColor=PRIMARY_COLOR,
+        alignment=0 # Linksbuendig statt zentriert für modernen Look
+    )
+    
+    h2_style = ParagraphStyle(
+        'CustomH2',
+        parent=styles['Heading2'],
+        fontName='Helvetica-Bold',
+        fontSize=14,
+        leading=18,
+        textColor=PRIMARY_COLOR,
+        spaceBefore=15,
+        spaceAfter=8,
+        keepWithNext=True
+    )
+    
+    body_style = ParagraphStyle(
+        'CustomBody',
+        parent=styles['Normal'],
+        fontName='Helvetica',
+        fontSize=10,
+        leading=14,
+        textColor=TEXT_DARK
+    )
+    
+    muted_style = ParagraphStyle(
+        'CustomMuted',
+        parent=styles['Normal'],
+        fontName='Helvetica',
+        fontSize=9,
+        leading=13,
+        textColor=TEXT_MUTED
+    )
+
+    legal_style = ParagraphStyle(
+        'CustomLegal',
+        parent=styles['Normal'],
+        fontName='Helvetica-Oblique', # Kursiv für rechtliche Hinweise üblich
+        fontSize=7.5,                 # Schön klein, damit es nicht dominant ist
+        leading=10,
+        textColor=colors.HexColor("#94a3b8"), # Sehr dezentes Hellgrau
+        spaceBefore=25                # Abstand zur Tabelle darüber
+    )
+    
+
     elements = []
 
     elements.append(
-        Paragraph(
-            '<link href="https://www.etfsteuerrechner.de">etfsteuerrechner.de</link> – Ergebnis',
-            styles["Title"]
-        )
+    Paragraph(
+        '<a href="https://www.etfsteuerrechner.de"><font color="blue"><u>etfsteuerrechner.de</u></font></a> – Ergebnis',
+        title_style
+    )
     )
 
-    elements.append(Spacer(1, 20))
+    # elements.append(Paragraph("Steuerreport Ergebnis", title_style))
+    # elements.append(Paragraph('<font color="#2563eb"><u>etfsteuerrechner.de</u></font>', muted_style))
+    elements.append(Spacer(1, 15))
 
-    # ---------------------------------------------------
-    # Überblick Position
-    # ---------------------------------------------------
-
-    elements.append(Paragraph("Überblick Ihrer Position (vor Verkauf)", styles["Heading2"]))
+    # 2. SEKTION: ÜBERBLICK POSITION
+    elements.append(Paragraph("Überblick Ihrer Position (vor Verkauf)", h2_style))
+    elements.append(Paragraph(f"<b>ETF-Name:</b> {etf_name}", body_style))
+    elements.append(Paragraph(f"Teilfreistellungsquote: <b>{teilfreistellung_quote * 100:.2f} %</b> &nbsp;&nbsp;|&nbsp;&nbsp; Kirchensteuer: <b>{kirchensteuer}</b>", muted_style))
     elements.append(Spacer(1, 10))
 
-    elements.append(Paragraph(f"<b>ETF:</b> {etf_name}", styles["Normal"]))
-
-    elements.append(
-        Paragraph(
-            f"<font size=9>"
-            f"Teilfreistellungsquote: <b>{teilfreistellung_quote * 100:.2f} %</b> &nbsp;&nbsp;|&nbsp;&nbsp; "
-            f"Kirchensteuer: <b>{kirchensteuer}</b>"
-            f"</font>",
-            styles["Normal"]
-        )
-    )
-
-
-    elements.append(Spacer(1, 6))
-
-    ergebnis_data = [
+    # KPI Kacheln für die Position
+    pos_data = [
         [
-            "Anzahl Anteile im Besitz",
-            "Kurs bei Verkauf",
-            "Gesamtwert der Anteile"
+            Paragraph("<b>Anzahl Anteile im Besitz</b>", muted_style),
+            Paragraph("<b>Kurs bei Verkauf</b>", muted_style),
+            Paragraph("<b>Gesamtwert der Anteile</b>", muted_style)
         ],
         [
-            f"{anteil(aktueller_besitz)}",
-            f"{eur(aktueller_kurs)}",
-            f"{eur(gesamtwert)}"
+            Paragraph(f"<font size=12><b>{anteil(aktueller_besitz)}</b></font>", body_style),
+            Paragraph(f"<font size=12><b>{eur(aktueller_kurs)}</b></font>", body_style),
+            Paragraph(f"<font size=12><b>{eur(gesamtwert)}</b></font>", body_style)
         ]
     ]
-
-    ergebnis_table = Table(ergebnis_data)
-
-    ergebnis_table.setStyle(TableStyle([
+    pos_table = Table(pos_data, colWidths=[161, 161, 161])
+    pos_table.setStyle(TableStyle([
+        ("BACKGROUND", (0,0), (-1,-1), BG_LIGHT),
         ("ALIGN", (0,0), (-1,-1), "CENTER"),
-        ("FONTNAME", (0,0), (-1,0), "Helvetica-Bold"),
-        ("BOTTOMPADDING", (0,0), (-1,0), 8),
+        ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
+        ("INNERGRID", (0,0), (-1,-1), 1, BORDER_COLOR),
+        ("BOX", (0,0), (-1,-1), 1, BORDER_COLOR),
+        ("TOPPADDING", (0,0), (-1,-1), 10),
+        ("BOTTOMPADDING", (0,0), (-1,-1), 10),
     ]))
+    elements.append(pos_table)
+    
+    elements.append(Spacer(1, 6))
+    elements.append(Paragraph(f"Gekaufte Anteile gesamt: {anteil(max_anteile)} &nbsp;&nbsp;|&nbsp;&nbsp; Davon bereits verkauft: {anteil(bereits_verkauft)} &nbsp;&nbsp;|&nbsp;&nbsp; Ø-Kaufpreis: {eur(durchschnittlicher_kaufpreis)}", muted_style))
+    elements.append(Spacer(1, 15))
 
-    elements.append(ergebnis_table)
-    elements.append(Spacer(1, 8))
-
-    # Zusatzinfos
-    elements.append(
-        Paragraph(
-            f"<font size=9>"
-            f"Gekaufet Anteile: <b>{anteil(max_anteile)}</b> &nbsp;&nbsp;|&nbsp;&nbsp; "
-            f"Davon verkauft: <b>{anteil(bereits_verkauft)}</b> &nbsp;&nbsp;|&nbsp;&nbsp; "
-            f"Durchschnittlicher Kaufpreis: <b>{eur(durchschnittlicher_kaufpreis)}</b>"
-            f"</font>",
-            styles["Normal"]
-        )
-    )
-
-    elements.append(Spacer(1, 20))
-
-    # ---------------------------------------------------
-    # Verkaufsübersicht
-    # ---------------------------------------------------
-
-    elements.append(Paragraph("Infos über Verkauf", styles["Heading2"]))
-    elements.append(Spacer(1, 10))
-
+    # 3. SEKTION: VERKAUFSÜBERBLICK (KPI-Style)
+    elements.append(Paragraph("Infos über den geplanten Verkauf", h2_style))
+    
     verkauf_data = [
         [
-            "Anzahl zu verkaufender Anteile",
-            "Brutto Verkaufserlös",
-            "Netto nach Steuern"
+            Paragraph("<b>Zu verkaufende Anteile</b>", muted_style),
+            Paragraph("<b>Brutto Verkaufserlös</b>", muted_style),
+            Paragraph("<b>Netto nach Steuern</b>", muted_style)
         ],
         [
-            f"{anteil(anzahl_verkaufen)}",
-            f"{eur(brutto)}",
-            f"{eur(netto)}"
+            Paragraph(f"<font size=13><b>{anteil(anzahl_verkaufen)}</b></font>", body_style),
+            Paragraph(f"<font size=13><b>{eur(brutto)}</b></font>", body_style),
+            Paragraph(f"<font size=13><b>{eur(netto)}</b></font>", body_style)
         ]
     ]
-
-    verkauf_table = Table(verkauf_data)
-
+    verkauf_table = Table(verkauf_data, colWidths=[161, 161, 161])
     verkauf_table.setStyle(TableStyle([
+        ("BACKGROUND", (0,0), (-1,-1), BG_LIGHT),
         ("ALIGN", (0,0), (-1,-1), "CENTER"),
-        ("FONTNAME", (0,0), (-1,0), "Helvetica-Bold"),
-        ("BOTTOMPADDING", (0,0), (-1,0), 8),
+        ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
+        ("INNERGRID", (0,0), (-1,-1), 1, BORDER_COLOR),
+        ("BOX", (0,0), (-1,-1), 1, BORDER_COLOR),
+        ("TOPPADDING", (0,0), (-1,-1), 12),
+        ("BOTTOMPADDING", (0,0), (-1,-1), 12),
     ]))
-
     elements.append(verkauf_table)
-    elements.append(Spacer(1, 12))
+    
+    elements.append(Spacer(1, 6))
+    elements.append(Paragraph(f"Reiner Gewinn aus Verkauf: <b>{eur(gewinn)}</b> &nbsp;&nbsp;|&nbsp;&nbsp; Allgemeiner Verlusttopf nach Verkauf: <b>{eur(verlusttopf_nach_verkauf)}</b>", muted_style))
+    elements.append(Spacer(1, 15))
 
-    # Zusatzinfos Verkauf
-    elements.append(
-        Paragraph(
-            f"<font size=9>"
-            f"Gewinn aus Verkauf: <b>{eur(gewinn)}</b> &nbsp;&nbsp;|&nbsp;&nbsp; "
-            f"Ungenutzter Sparerpauschbetrag: <b>{eur(max(0, freibetrag - gewinn_nach_verlusttopf))}</b>"
-            f"</font>",
-            styles["Normal"]
-        )
-    )
-
-    elements.append(
-        Paragraph(
-            f"<font size=9>"
-            f"Allgemeiner Verlusttopf nach Verkauf: <b>{eur(verlusttopf_nach_verkauf)}</b>"
-            f"</font>",
-            styles["Normal"]
-        )
-    )
-
-
-    elements.append(Spacer(1, 20))
-
-    # ---------------------------------------------------
-    # Steuerberechnung
-    # ---------------------------------------------------
-
-    elements.append(Paragraph("Steuerberechnung", styles["Heading2"]))
-    elements.append(Spacer(1, 10))
-
+    # 4. SEKTION: RECHENSCHAFT / STEUERBERCHNUNG (Klassische, saubere Tabelle)
+    elements.append(Paragraph("Detaillierte Steuerberechnung", h2_style))
+    
     steuer_data = [
-        ["Berechnungsschritt", "Betrag"],
+        [Paragraph("<b>Berechnungsschritt</b>", body_style), Paragraph("<b>Betrag</b>", body_style)],
         ["Anzahl zu verkaufender Anteile", f"{anteil(anzahl_verkaufen)}"],
         ["Kurs bei Verkauf", f"{eur(aktueller_kurs)}"],
         ["Brutto Verkaufserlös", eur(brutto)],
         ["Gewinn vor Steuern", eur(gewinn)],
-        ["Abzuziehende Vorabpauschale", eur(gesamte_vorabpauschale)],
+        ["Abzuziehende Vorabpauschale (historisch)", eur(gesamte_vorabpauschale)],
         ["Gewinn nach Abzug Vorabpauschale", eur(gewinn_nach_vorabpauschale)],
         ["Gewinn nach Teilfreistellung", eur(gewinn_teilfreistellung)],
         ["Gewinn nach Verlustverrechnung", eur(gewinn_nach_verlusttopf)],
-        ["Neuer Verlusttopf", eur(verlusttopf_nach_verkauf)],
-        ["Gewinn nach Sparerpauschbetrag", eur(gewinn_steuerpflichtig)],
+        ["Gewinn nach Sparerpauschbetrag (Steuerpflichtig)", eur(gewinn_steuerpflichtig)],
         ["Ungenutzter Sparerpauschbetrag", eur(max(0, freibetrag - gewinn_nach_verlusttopf))],
-        # ["Steuerpflichtiger Gewinn", eur(gewinn_steuerpflichtig)],
-        ["Zu zahlende Steuer", eur(steuer)],
-        ["Netto nach Steuern", eur(netto)],
+        ["Zu zahlende Abgeltungsteuer", f"{eur(steuer)}"],
+        ["Netto Auszahlungsbetrag", eur(netto)],
     ]
 
-    steuer_table = Table(steuer_data, colWidths=[280,120])
-
-    steuer_table.setStyle(TableStyle([
-        ("ALIGN", (1,0), (-1,-1), "RIGHT"),   # ganze Betrag-Spalte rechts
-        ("FONTNAME", (0,0), (-1,0), "Helvetica-Bold"),
-        ("BOTTOMPADDING", (0,0), (-1,0), 8),
-    ]))
-
+    # Gesamtbreite = 483 pt. Links kriegt 343 pt, Rechts 140 pt.
+    steuer_table = Table(steuer_data, colWidths=[343, 140])
+    
+    # Intelligentes Styling-Array aufbauen
+    t_style = [
+        ("BACKGROUND", (0,0), (-1,0), BG_ZEBRA),     # Header Zeile einfärben
+        ("BOTTOMPADDING", (0,0), (-1,0), 6),
+        ("TOPPADDING", (0,0), (-1,0), 6),
+        ("ALIGN", (1,0), (1,-1), "RIGHT"),            # Rechte Spalte rechtsbündig
+        ("LINEBELOW", (0,0), (-1,-1), 0.5, colors.HexColor("#e2e8f0")), # Feine Trennlinien
+        ("FONTNAME", (0,1), (-1,-1), "Helvetica"),
+        ("FONTSIZE", (0,0), (-1,-1), 9.5),
+        ("TEXTCOLOR", (0,0), (-1,-1), TEXT_DARK),
+    ]
+    
+    # Letzte Zeile (Netto) visuell als "Total" hervorheben
+    t_style.extend([
+        ("FONTNAME", (0,-1), (-1,-1), "Helvetica-Bold"),
+        ("BACKGROUND", (0,-1), (-1,-1), BG_ZEBRA),
+        ("TOPPADDING", (0,-1), (-1,-1), 8),
+        ("BOTTOMPADDING", (0,-1), (-1,-1), 8),
+    ])
+    
+    steuer_table.setStyle(TableStyle(t_style))
     elements.append(steuer_table)
-    elements.append(Spacer(1, 10))
+    elements.append(Spacer(1, 15))
 
-
-
-    elements.append(Spacer(1, 20))
-
-    # ---------------------------------------------------
-    # Vorabpauschale Tabelle
-    # ---------------------------------------------------
-
+    # 5. SEKTION: VORABPAUSCHALE HISTORIE
     if vorabpauschale is not None and len(vorabpauschale) > 0:
-
-        elements.append(Paragraph("Vorabpauschale pro Anteil", styles["Heading2"]))
-        elements.append(Spacer(1, 10))
-
-        data = [["Kalenderjahr", "Vorabpauschale pro Anteil"]]
-
+        elements.append(Paragraph("Eingesetzte Vorabpauschalen pro Anteil", h2_style))
+        
+        vp_data = [[Paragraph("<b>Kalenderjahr</b>", body_style), Paragraph("<b>Vorabpauschale (€ / Anteil)</b>", body_style)]]
+        
         for _, row in vorabpauschale.iterrows():
-            data.append([
+            vp_data.append([
                 f"{row['jahr']:.0f}",
                 f"{row['wert']:.8f}".replace(".", ",")
             ])
 
-        table = Table(data, colWidths=[150,200])
-
-        table.setStyle(TableStyle([
-            ("ALIGN", (1,0), (-1,-1), "RIGHT"),   # ganze Betrag-Spalte rechts
-            ("FONTNAME", (0,0), (-1,0), "Helvetica-Bold"),
-            ("BOTTOMPADDING", (0,0), (-1,0), 8),
+        vp_table = Table(vp_data, colWidths=[150, 200])
+        vp_table.setStyle(TableStyle([
+            ("BACKGROUND", (0,0), (-1,0), BG_ZEBRA),
+            ("ALIGN", (1,0), (1,-1), "RIGHT"),
+            ("LINEBELOW", (0,0), (-1,-1), 0.5, colors.HexColor("#e2e8f0")),
+            ("FONTSIZE", (0,0), (-1,-1), 9),
+            ("TOPPADDING", (0,0), (-1,-1), 5),
+            ("BOTTOMPADDING", (0,0), (-1,-1), 5),
         ]))
+        elements.append(vp_table)
 
 
-        elements.append(table)
+        disclaimer_text = (
+            "<b>Wichtiger Hinweis:</b> Dieser Report dient rein zu Informationszwecken und stellt keine "
+            "Steuer- oder Anlageberatung dar. Trotz sorgfältiger Programmierung kann keine Gewähr für die "
+            "Richtigkeit, Vollständigkeit oder steuerliche Anerkennung der Ergebnisse übernommen werden. "
+            "Die Haftung für finanzielle Verluste oder Steuernachzahlungen ist ausgeschlossen."
+        )
+        elements.append(Paragraph(disclaimer_text, legal_style))
 
-    doc = SimpleDocTemplate(buffer, pagesize=A4)
 
+    # PDF Dokument bauen
     doc.build(
         elements,
         onFirstPage=footer,
         onLaterPages=footer
     )
 
-
     buffer.seek(0)
-
     return buffer
+
+# def create_pdf(
+#     anzahl_verkaufen, max_anteile, bereits_verkauft,
+#     brutto, gewinn, gewinn_teilfreistellung,
+#     gewinn_nach_vorabpauschale, gewinn_nach_verlusttopf,
+#     gewinn_steuerpflichtig, steuer, netto,
+#     gesamtkosten, vorabpauschale, aktueller_kurs, freibetrag, 
+#     etf_name, verlusttopf_nach_verkauf, gesamte_vorabpauschale, 
+#     teilfreistellung_quote, kirchensteuer
+# ):
+
+#     aktueller_besitz = max_anteile - bereits_verkauft
+#     gesamtwert = aktueller_besitz * aktueller_kurs
+#     durchschnittlicher_kaufpreis = gesamtkosten / max_anteile if max_anteile else 0
+
+#     buffer = io.BytesIO()
+
+#     styles = getSampleStyleSheet()
+#     elements = []
+
+
+#     elements.append(
+#         Paragraph(
+#             '<a href="https://www.etfsteuerrechner.de"><font color="blue"><u>etfsteuerrechner.de</u></font></a> – Ergebnis',
+#             styles["Title"]
+#         )
+#     )
+
+
+#     elements.append(Spacer(1, 20))
+
+#     # ---------------------------------------------------
+#     # Überblick Position
+#     # ---------------------------------------------------
+
+#     elements.append(Paragraph("Überblick Ihrer Position (vor Verkauf)", styles["Heading2"]))
+#     elements.append(Spacer(1, 10))
+
+#     elements.append(Paragraph(f"<b>ETF:</b> {etf_name}", styles["Normal"]))
+
+#     elements.append(
+#         Paragraph(
+#             f"<font size=9>"
+#             f"Teilfreistellungsquote: <b>{teilfreistellung_quote * 100:.2f} %</b> &nbsp;&nbsp;|&nbsp;&nbsp; "
+#             f"Kirchensteuer: <b>{kirchensteuer}</b>"
+#             f"</font>",
+#             styles["Normal"]
+#         )
+#     )
+
+
+#     elements.append(Spacer(1, 6))
+
+#     ergebnis_data = [
+#         [
+#             "Anzahl Anteile im Besitz",
+#             "Kurs bei Verkauf",
+#             "Gesamtwert der Anteile"
+#         ],
+#         [
+#             f"{anteil(aktueller_besitz)}",
+#             f"{eur(aktueller_kurs)}",
+#             f"{eur(gesamtwert)}"
+#         ]
+#     ]
+
+#     ergebnis_table = Table(ergebnis_data)
+
+#     ergebnis_table.setStyle(TableStyle([
+#         ("ALIGN", (0,0), (-1,-1), "CENTER"),
+#         ("FONTNAME", (0,0), (-1,0), "Helvetica-Bold"),
+#         ("BOTTOMPADDING", (0,0), (-1,0), 8),
+#     ]))
+
+#     elements.append(ergebnis_table)
+#     elements.append(Spacer(1, 8))
+
+#     # Zusatzinfos
+#     elements.append(
+#         Paragraph(
+#             f"<font size=9>"
+#             f"Gekaufet Anteile: <b>{anteil(max_anteile)}</b> &nbsp;&nbsp;|&nbsp;&nbsp; "
+#             f"Davon verkauft: <b>{anteil(bereits_verkauft)}</b> &nbsp;&nbsp;|&nbsp;&nbsp; "
+#             f"Durchschnittlicher Kaufpreis: <b>{eur(durchschnittlicher_kaufpreis)}</b>"
+#             f"</font>",
+#             styles["Normal"]
+#         )
+#     )
+
+#     elements.append(Spacer(1, 20))
+
+#     # ---------------------------------------------------
+#     # Verkaufsübersicht
+#     # ---------------------------------------------------
+
+#     elements.append(Paragraph("Infos über Verkauf", styles["Heading2"]))
+#     elements.append(Spacer(1, 10))
+
+#     verkauf_data = [
+#         [
+#             "Anzahl zu verkaufender Anteile",
+#             "Brutto Verkaufserlös",
+#             "Netto nach Steuern"
+#         ],
+#         [
+#             f"{anteil(anzahl_verkaufen)}",
+#             f"{eur(brutto)}",
+#             f"{eur(netto)}"
+#         ]
+#     ]
+
+#     verkauf_table = Table(verkauf_data)
+
+#     verkauf_table.setStyle(TableStyle([
+#         ("ALIGN", (0,0), (-1,-1), "CENTER"),
+#         ("FONTNAME", (0,0), (-1,0), "Helvetica-Bold"),
+#         ("BOTTOMPADDING", (0,0), (-1,0), 8),
+#     ]))
+
+#     elements.append(verkauf_table)
+#     elements.append(Spacer(1, 12))
+
+#     # Zusatzinfos Verkauf
+#     elements.append(
+#         Paragraph(
+#             f"<font size=9>"
+#             f"Gewinn aus Verkauf: <b>{eur(gewinn)}</b> &nbsp;&nbsp;|&nbsp;&nbsp; "
+#             f"Ungenutzter Sparerpauschbetrag: <b>{eur(max(0, freibetrag - gewinn_nach_verlusttopf))}</b>"
+#             f"</font>",
+#             styles["Normal"]
+#         )
+#     )
+
+#     elements.append(
+#         Paragraph(
+#             f"<font size=9>"
+#             f"Allgemeiner Verlusttopf nach Verkauf: <b>{eur(verlusttopf_nach_verkauf)}</b>"
+#             f"</font>",
+#             styles["Normal"]
+#         )
+#     )
+
+
+#     elements.append(Spacer(1, 20))
+
+#     # ---------------------------------------------------
+#     # Steuerberechnung
+#     # ---------------------------------------------------
+
+#     elements.append(Paragraph("Steuerberechnung", styles["Heading2"]))
+#     elements.append(Spacer(1, 10))
+
+#     steuer_data = [
+#         ["Berechnungsschritt", "Betrag"],
+#         ["Anzahl zu verkaufender Anteile", f"{anteil(anzahl_verkaufen)}"],
+#         ["Kurs bei Verkauf", f"{eur(aktueller_kurs)}"],
+#         ["Brutto Verkaufserlös", eur(brutto)],
+#         ["Gewinn vor Steuern", eur(gewinn)],
+#         ["Abzuziehende Vorabpauschale", eur(gesamte_vorabpauschale)],
+#         ["Gewinn nach Abzug Vorabpauschale", eur(gewinn_nach_vorabpauschale)],
+#         ["Gewinn nach Teilfreistellung", eur(gewinn_teilfreistellung)],
+#         ["Gewinn nach Verlustverrechnung", eur(gewinn_nach_verlusttopf)],
+#         ["Neuer Verlusttopf", eur(verlusttopf_nach_verkauf)],
+#         ["Gewinn nach Sparerpauschbetrag", eur(gewinn_steuerpflichtig)],
+#         ["Ungenutzter Sparerpauschbetrag", eur(max(0, freibetrag - gewinn_nach_verlusttopf))],
+#         # ["Steuerpflichtiger Gewinn", eur(gewinn_steuerpflichtig)],
+#         ["Zu zahlende Steuer", eur(steuer)],
+#         ["Netto nach Steuern", eur(netto)],
+#     ]
+
+#     steuer_table = Table(steuer_data, colWidths=[280,120])
+
+#     steuer_table.setStyle(TableStyle([
+#         ("ALIGN", (1,0), (-1,-1), "RIGHT"),   # ganze Betrag-Spalte rechts
+#         ("FONTNAME", (0,0), (-1,0), "Helvetica-Bold"),
+#         ("BOTTOMPADDING", (0,0), (-1,0), 8),
+#     ]))
+
+#     elements.append(steuer_table)
+#     elements.append(Spacer(1, 10))
+
+
+
+#     elements.append(Spacer(1, 20))
+
+#     # ---------------------------------------------------
+#     # Vorabpauschale Tabelle
+#     # ---------------------------------------------------
+
+#     if vorabpauschale is not None and len(vorabpauschale) > 0:
+
+#         elements.append(Paragraph("Vorabpauschale pro Anteil", styles["Heading2"]))
+#         elements.append(Spacer(1, 10))
+
+#         data = [["Kalenderjahr", "Vorabpauschale pro Anteil"]]
+
+#         for _, row in vorabpauschale.iterrows():
+#             data.append([
+#                 f"{row['jahr']:.0f}",
+#                 f"{row['wert']:.8f}".replace(".", ",")
+#             ])
+
+#         table = Table(data, colWidths=[150,200])
+
+#         table.setStyle(TableStyle([
+#             ("ALIGN", (1,0), (-1,-1), "RIGHT"),   # ganze Betrag-Spalte rechts
+#             ("FONTNAME", (0,0), (-1,0), "Helvetica-Bold"),
+#             ("BOTTOMPADDING", (0,0), (-1,0), 8),
+#         ]))
+
+
+#         elements.append(table)
+
+#     doc = SimpleDocTemplate(buffer, pagesize=A4)
+
+#     doc.build(
+#         elements,
+#         onFirstPage=footer,
+#         onLaterPages=footer
+#     )
+
+
+#     buffer.seek(0)
+
+#     return buffer
 
 
