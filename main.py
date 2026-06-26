@@ -16,6 +16,8 @@ from fastapi.responses import StreamingResponse
 import base64
 from models import SparplanPayload
 from fastapi.staticfiles import StaticFiles
+import uvicorn
+import os
 
 ########## TERMINAL EINGABE 
 # uvicorn main:app --reload
@@ -375,3 +377,10 @@ def download_pdf(ticker: str, ziel: str, netto: float):
         )
     except Exception as e:
         return {"success": False, "error": str(e)}
+    
+
+
+if __name__ == "__main__":
+    # Render übergibt den Port als Umgebungsvariable, lokal wird 8000 genutzt
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port)
