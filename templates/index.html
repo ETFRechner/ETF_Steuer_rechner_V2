@@ -1045,7 +1045,124 @@ Nein. Alle Berechnungen erfolgen direkt im Browser beziehungsweise innerhalb des
 </div>
 
 
+<div id="datenschutzModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('datenschutzModal')">&times;</span>
+        
+        <h2>Datenschutzerklärung</h2>
+        
+        <h3>1. Allgemeine Hinweise und Pflichtinformationen</h3>
+        <p>
+        Der Schutz Ihrer persönlichen Daten ist mir ein wichtiges Anliegen. Diese Website kann grundsätzlich ohne direkte Angabe personenbezogener Daten (wie Name oder E-Mail-Adresse) genutzt werden. 
+        Die Verarbeitung personenbezogener Daten erfolgt ausschließlich im Rahmen der gesetzlichen Bestimmungen der Datenschutz-Grundverordnung (DSGVO) sowie der einschlägigen nationalen Datenschutzgesetze.
+        </p>
+        
+        <h3>2. Verantwortlicher</h3>
+        <p>
+        Verantwortlich für die Datenverarbeitung auf dieser Website ist:
+        </p>
+        
+        <p>
+        <strong>Dennis Hermelyn</strong><br>
+        Krawehlstr. 44<br>
+        45130 Essen<br>
+        Deutschland<br>
+        E-Mail: dennishermelyn@gmail.com
+        </p>
+        
+        <h3>3. Hosting über Render</h3>
+        <p>
+        Diese Website und das dazugehörige Backend werden über den Cloud-Hosting-Dienst <strong>Render Services, Inc.</strong>, 525 Brannan St, San Francisco, CA 94107, USA betrieben.
+        </p>
+        <p>
+        Beim Aufruf dieser Website werden durch den Infrastruktur-Provider automatisch technische Informationen verarbeitet, die Ihr Browser automatisch an den Server übermittelt. Dies ist technisch erforderlich, um die Website stabil, fehlerfrei und sicher auszuliefern.
+        </p>
+        
+        <p>
+        Dabei werden in den sogenannten Server-Logfiles insbesondere folgende Daten verarbeitet:
+        </p>
+        
+        <ul>
+        <li>IP-Adresse des anfragenden Geräts</li>
+        <li>Datum und Uhrzeit des Serveraufrufs</li>
+        <li>Browsertyp und Browserversion</li>
+        <li>Verwendetes Betriebssystem</li>
+        <li>Aufgerufene Seiten und Pfade</li>
+        <li>Referrer-URL (die zuvor besuchte Seite, von der Sie zu mir gelangt sind)</li>
+        </ul>
+        
+        <p>
+        Eine Zusammenführung dieser Daten mit anderen Datenquellen wird nicht vorgenommen.
+        </p>
+        
+        <p>
+        <strong>Rechtsgrundlage:</strong> Die Verarbeitung dieser Daten erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO. Das berechtigte Interesse des Websitebetreibers liegt in der technisch fehlerfreien Darstellung, der Optimierung und der sicheren Bereitstellung der Website.
+        </p>
+        
+        <p>
+        Render ist ein Anbieter aus den USA. Die Datenübermittlung in die USA erfolgt auf Grundlage von Standardvertragsklauseln der EU-Kommission bzw. bestehender Angemessenheitsbeschlüsse (wie dem EU-US Data Privacy Framework), um ein dem EU-Standard entsprechendes Datenschutzniveau zu gewährleisten.
+        </p>
 
+        <h3>4. Datenverarbeitung durch das Rechner-Tool</h3>
+        <p>
+        Der auf dieser Website bereitgestellte ETF Steuer Rechner verarbeitet die von Ihnen in die Eingabemaske eingetragenen Finanz- und Steuerdaten (z. B. Kaufkurse, Anteile, Freibeträge). 
+        </p>
+        <p>
+        Diese Daten werden über eine verschlüsselte Verbindung (HTTPS) an das Python-Backend auf den Servern meines Hosters (Render) übertragen, um die Berechnung durchzuführen und das Ergebnis an Ihren Browser zurückzusenden. 
+        </p>
+        <p>
+        <strong>Wichtig:</strong> Alle eingegebenen Werte werden ausschließlich flüchtig im Arbeitsspeicher verarbeitet, um das mathematische Ergebnis zu ermitteln. Es findet zu keinem Zeitpunkt eine dauerhafte Speicherung, Protokollierung oder Auswertung Ihrer eingegebenen Finanzdaten statt.
+        </p>
+
+        <h3>5. Einbindung externer Skripte (HTMX via CDN)</h3>
+        <p>
+        Für die interaktiven Funktionen des Rechners nutzt diese Website die JavaScript-Bibliothek HTMX. Diese wird über ein sogenanntes Content Delivery Network (CDN) des Anbieters <strong>unpkg.com</strong> (betrieben von npm, Inc. / GitHub / Microsoft) geladen.
+        </p>
+        <p>
+        Beim Laden der Website ruft Ihr Browser das Skript direkt von den Servern des CDN-Anbieters ab. Hierbei wird Ihre IP-Adresse an den Anbieter übermittelt. Dies ist technisch notwendig, damit die Datei an Ihren Browser ausgeliefert werden kann.
+        </p>
+        <p>
+        <strong>Rechtsgrundlage:</strong> Die Einbindung erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an einer performanten und modernen Bereitstellung meines Web-Tools).
+        </p>
+        
+        <h3>6. Cookies</h3>
+        <p>
+        Diese Website verwendet selbst keine Cookies zur Analyse, Werbung oder zum Tracking von Nutzern. Technische Funktionen werden serverseitig und über flüchtige HTTP-Anfragen gelöst.
+        </p>
+        
+        <h3>7. Ihre Rechte als betroffene Person</h3>
+        <p>
+        Sie haben im Rahmen der gesetzlichen Bestimmungen der DSGVO jederzeit folgende Rechte bezüglich Ihrer personenbezogenen Daten:
+        </p>
+        
+        <ul>
+        <li><strong>Recht auf Auskunft</strong> über Ihre bei mir verarbeiteten Daten (Art. 15 DSGVO)</li>
+        <li><strong>Recht auf Berichtigung</strong> unrichtiger Daten (Art. 16 DSGVO)</li>
+        <li><strong>Recht auf Löschung</strong> Ihrer Daten, sofern keine gesetzlichen Pflichten entgegenstehen (Art. 17 DSGVO)</li>
+        <li><strong>Recht auf Einschränkung der Verarbeitung</strong> (Art. 18 DSGVO)</li>
+        <li><strong>Recht auf Widerspruch</strong> gegen die Verarbeitung (Art. 21 DSGVO)</li>
+        </ul>
+        
+        <p>
+        Da diese Website über die flüchtigen Server-Logfiles hinaus keine Daten (wie Namen, Adressen oder Profile) speichert, liegen mir keine Daten vor, die einer bestimmten Person zugeordnet werden können. 
+        </p>
+        
+        <h3>8. Beschwerderecht bei der Aufsichtsbehörde</h3>
+        <p>
+        Sie haben gemäß Art. 77 DSGVO das Recht, sich bei einer Datenschutz-Aufsichtsbehörde zu beschweren, wenn Sie der Ansicht sind, dass die Verarbeitung Ihrer personenbezogenen Daten gegen das Datenschutzrecht verstößt.
+        </p>
+        
+        <h3>9. Änderungen dieser Datenschutzerklärung</h3>
+        <p>
+        Diese Datenschutzerklärung kann von Zeit zu Zeit angepasst werden, um sie an veränderte rechtliche Vorgaben oder technische Neuerungen anzupassen. Es gilt die jeweils auf der Website bereitgestellte Fassung.
+        </p>
+        
+        <h3>Stand: Juni 2026</h3>
+
+  </div>
+</div>
+
+<!-- 
 <div id="datenschutzModal" class="modal">
   <div class="modal-content">
     <span class="close" onclick="closeModal('datenschutzModal')">&times;</span>
@@ -1164,7 +1281,7 @@ Nein. Alle Berechnungen erfolgen direkt im Browser beziehungsweise innerhalb des
         <h3>Stand: Juni 2026</h3>
 
   </div>
-</div>
+</div> -->
 
 
 </main>
