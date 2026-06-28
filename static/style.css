@@ -108,8 +108,102 @@ label {
   font-size: 0.95rem;
 }
 
-/* 🎯 Textfeld (Suchfeld) komplett mit den anderen Eingaben gleichgestellt */
+
+
+
+/* ==========================================================================
+   1. OPTIMIERUNG DEINER BESTEHENDEN INPUTS (Gleiche Höhe & iOS-Fix)
+   ========================================================================== */
 input[type="number"], 
+input[type="date"], 
+input[type="text"], 
+select { 
+  width: 100%; 
+  height: 42px;              /* 🎯 Zwingt alle Felder auf exakt dieselbe Höhe */
+  padding: 8px 12px;         /* Leicht angepasst für perfekte Zentrierung */
+  box-sizing: border-box; 
+  border: 1px solid #cbd5e1; 
+  border-radius: 6px; 
+  background-color: #ffffff;
+  color: #1f2937;
+  font-family: inherit;
+  font-size: 16px;           /* 🎯 Wichtig: Mindestens 16px verhindert den automatischen iOS-Zoom beim Tippen! */
+  line-height: normal;
+  -webkit-appearance: none;  /* 🎯 Verhindert, dass Apple dem Datumsfeld ein eigenes Design aufzwingt */
+  appearance: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+/* ==========================================================================
+   2. MOBIL-OPTIMIERUNG FÜR DIE TABELLEN (Responsive Stack)
+   ========================================================================== */
+@media (max-width: 600px) {
+  /* Wir machen die Buttons nebeneinander elastisch, damit sie nicht rausragen */
+  div[style*="display: flex; gap: 10px;"] {
+    flex-direction: column;  /* Stapelt "+ Zeile hinzufügen" und "CSV Download" untereinander */
+    gap: 8px !important;
+  }
+  
+  div[style*="display: flex; gap: 10px;"] button {
+    width: 100%;             /* Buttons nutzen volle Breite */
+  }
+
+  /* Der Zaubertrick: Wir verwandeln die starre Tabelle in flexible Blöcke */
+  table, thead, tbody, th, td, tr { 
+    display: block; 
+  }
+  
+  /* Wir verstecken die Tabellenüberschriften (Kaufdatum, Anzahl...), da sie im Stack verwirren */
+  thead tr { 
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+  
+  /* Jede Zeile (tr) wird zu einer eigenen, schicken Karte mit Abstand zur nächsten */
+  tr { 
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  
+  /* Jede Zelle (td) kriegt vollen Platz untereinander und etwas Luft */
+  td { 
+    border: none !important; /* Löscht alte Tabellen-Linien */
+    padding: 6px 0 !important;
+    position: relative;
+    clear: both;
+  }
+
+  /* Optional: Wenn du möchtest, dass vor den Feldern auf dem Handy steht, was es ist */
+  td:nth-of-type(1)::before { content: "Kaufdatum:"; font-weight: 600; font-size: 14px; color: #64748b; display: block; margin-bottom: 4px; }
+  td:nth-of-type(2)::before { content: "Anzahl Anteile:"; font-weight: 600; font-size: 14px; color: #64748b; display: block; margin-bottom: 4px; }
+  td:nth-of-type(3)::before { content: "Kaufpreis pro Anteil (€):"; font-weight: 600; font-size: 14px; color: #64748b; display: block; margin-bottom: 4px; }
+  td:nth-of-type(4)::before { content: "Aktion:"; font-weight: 600; font-size: 14px; color: #64748b; display: block; margin-bottom: 4px; }
+}
+
+/* ==========================================================================
+   3. ERWEITERUNG FÜR DEINEN BESTEHENDEN DARK MODE BLOCK
+   ========================================================================== */
+@media (prefers-color-scheme: dark) {
+
+  /* Mobil-Karten im Darkmode dunkel färben */
+  @media (max-width: 600px) {
+    tr {
+      background: #1e293b !important;
+      border-color: #334155 !important;
+    }
+    td::before {
+      color: #94a3b8 !important; /* Hellere Beschriftung im Darkmode */
+    }
+  }
+}
+
+
+/* input[type="number"], 
 input[type="date"], 
 input[type="text"], 
 select { 
@@ -123,9 +217,8 @@ select {
   font-family: inherit;
   font-size: 1rem;
   transition: border-color 0.2s, box-shadow 0.2s;
-}
+} 
 
-/* 🎯 Focus-Effekt gilt nun für alle Felder gleichermaßen */
 input[type="number"]:focus, 
 input[type="date"]:focus, 
 input[type="text"]:focus, 
@@ -133,7 +226,7 @@ select:focus {
   outline: none;
   border-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-}
+} */
 
 /* ☀️ Suchergebnisse-Container (Dropdown-Optik im Light Mode) */
 #such_ergebnisse {
@@ -422,7 +515,7 @@ summary:hover { color: #2563eb; }
   summary:hover { color: #60a5fa; }
   
   /* 🎯 Formulare im Dark Mode – Gilt jetzt exakt so für ALLE Inputs inkl. Textfeld */
-  input[type="number"], 
+  /* input[type="number"], 
   input[type="date"], 
   input[type="text"], 
   select {
@@ -436,7 +529,7 @@ summary:hover { color: #2563eb; }
   input[type="text"]:focus, 
   select:focus {
     border-color: #60a5fa !important;
-  }
+  } */
   
   /* Tabellen im Dark Mode */
   th { 
@@ -508,7 +601,7 @@ summary:hover { color: #2563eb; }
   .tooltip-icon::before {
     border-color: #0f172a transparent transparent transparent;
   }
-  
+
 }
 
 /* ==========================================================================
