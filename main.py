@@ -30,11 +30,11 @@ templates = Jinja2Templates(directory="templates")
 
 @app.get("/sitemap.xml", include_in_schema=False)
 def get_sitemap():
-    return FileResponse("static/sitemap.xml", media_type="application/xml")
+    return FileResponse("sitemap.xml", media_type="application/xml")
 
 @app.get("/robots.txt", include_in_schema=False)
 def get_robots():
-    return FileResponse("static/robots.txt", media_type="text/plain")
+    return FileResponse("robots.txt", media_type="text/plain")
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
