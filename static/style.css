@@ -533,6 +533,7 @@ button, .btn-add, .btn-delete {
 #btn_pdf_download:hover { background: #1d4ed8; }
 #btn_pdf_download:active { transform: scale(0.98); }
 
+
 /* ==========================================================================
    8. MOBIL-OPTIMIERUNG (Responsive / Media Queries < 600px)
    ========================================================================== */
@@ -574,22 +575,30 @@ button, .btn-add, .btn-delete {
     width: 100%;
   }
 
-  /* 🎯 TABELLEN-ZUM-KARTEN-STAPEL UMSTELLEN (Kein horizontales Scrollen mehr!) */
-  table, thead, tbody, th, td, tr { 
+  /* ==========================================================================
+     🎯 TABELLEN-ZUM-KARTEN-STAPEL (NUR für die Kaufhistorie-Tabellen!)
+     ========================================================================== */
+  
+  /* Wir zwingen AUSSCHLIESSLICH die drei Bodys deiner Kauf-Tabellen ins Block-Layout */
+  #tabelle_body, #sparplan_tabelle_body, #tr_tabelle_body,
+  #tabelle_body tr, #sparplan_tabelle_body tr, #tr_tabelle_body tr,
+  #tabelle_body td, #sparplan_tabelle_body td, #tr_tabelle_body td { 
     display: block !important; 
     width: 100% !important;
     box-sizing: border-box !important;
   }
   
-  /* Blendet die Tabellenüberschriften auf dem Handy unsichtbar aus */
-  thead tr { 
+  /* Blendet die Tabellenüberschriften (thead) NUR für die Kauf-Tabellen aus */
+  table:has(#tabelle_body) thead,
+  table:has(#sparplan_tabelle_body) thead,
+  table:has(#tr_tabelle_body) thead { 
     position: absolute !important;
     top: -9999px !important;
     left: -9999px !important;
   }
   
-  /* Jede Tabellenzeile wird zu einer kompakten Karte mit einem 2-Spalten-Raster */
-  tr { 
+  /* Jede Tabellenzeile der Kauf-Tabellen wird zu einer Grid-Karte */
+  #tabelle_body tr, #sparplan_tabelle_body tr, #tr_tabelle_body tr { 
     background: #ffffff !important;
     border: 1px solid #e2e8f0 !important;
     border-radius: 8px !important;
@@ -597,32 +606,34 @@ button, .btn-add, .btn-delete {
     margin-bottom: 12px !important;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
     
-    /* Aktiviert das CSS Grid für die 2x2 Anordnung */
     display: grid !important;
     grid-template-columns: 1fr 1fr !important; /* Zwei exakt gleich breite Spalten */
-    gap: 10px !important; /* Abstand zwischen den Elementen */
+    gap: 10px !important; 
   }
   
-  /* Jede Zelle verliert ihre starren Tabellen-Eigenschaften */
-  td { 
+  /* Zellen-Eigenschaften für die Kauf-Tabellen zurücksetzen */
+  #tabelle_body td, #sparplan_tabelle_body td, #tr_tabelle_body td { 
     border: none !important; 
     padding: 0 !important;
     position: relative !important;
     width: 100% !important;
   }
 
-
   /* Die vierte Zelle (Löschen-Button) zentriert das Icon unten rechts */
-  td:nth-of-type(4) {
+  #tabelle_body td:nth-of-type(4),
+  #sparplan_tabelle_body td:nth-of-type(4),
+  #tr_tabelle_body td:nth-of-type(4) {
     display: flex !important;
     align-items: flex-end !important;
     justify-content: flex-end !important;
   }
 
-  /* 🎯 Schicker, kompakter Mülleimer-Button auf dem Handy (Nicht mehr über die ganze Breite!) */
-  td:nth-of-type(4) .btn-delete {
-    width: 42px !important;  /* Macht den Button perfekt quadratisch (42x42px) */
-    height: 42px !important; /* Gleiche Höhe wie deine Eingabefelder */
+  /* Quadratischer Mülleimer-Button auf dem Handy */
+  #tabelle_body td:nth-of-type(4) .btn-delete,
+  #sparplan_tabelle_body td:nth-of-type(4) .btn-delete,
+  #tr_tabelle_body td:nth-of-type(4) .btn-delete {
+    width: 42px !important;  
+    height: 42px !important; 
     margin: 0 !important;
     padding: 0 !important;
     display: flex !important;
@@ -632,34 +643,30 @@ button, .btn-add, .btn-delete {
     border-radius: 6px !important;
   }
 
-  /* 📱 Automatische Mobil-Beschriftung über den jeweiligen Feldern */
-  td:nth-of-type(1)::before { content: "Kaufdatum:"; font-weight: 600; font-size: 12px; color: #64748b; display: block; margin-bottom: 2px; }
-  td:nth-of-type(2)::before { content: "Anzahl Anteile:"; font-weight: 600; font-size: 12px; color: #64748b; display: block; margin-bottom: 2px; }
-  td:nth-of-type(3)::before { content: "Kaufpreis pro Anteil:"; font-weight: 600; font-size: 12px; color: #64748b; display: block; margin-bottom: 2px; }
+  /* 📱 Automatische Mobil-Beschriftung NUR über den Kauf-Tabellen-Feldern */
+  #tabelle_body td:nth-of-type(1)::before,
+  #sparplan_tabelle_body td:nth-of-type(1)::before,
+  #tr_tabelle_body td:nth-of-type(1)::before { 
+    content: "Kaufdatum:"; font-weight: 600; font-size: 12px; color: #64748b; display: block; margin-bottom: 2px; 
+  }
   
-  /* 🎯 Das "Aktion:"-Label wurde hier komplett gelöscht! */
-  td:nth-of-type(4)::before { content: ""; display: block; }
-
-  /* td:nth-of-type(4) {
-    display: flex !important;
-    align-items: flex-end !important;
-    justify-content: flex-end !important;
+  #tabelle_body td:nth-of-type(2)::before,
+  #sparplan_tabelle_body td:nth-of-type(2)::before,
+  #tr_tabelle_body td:nth-of-type(2)::before { 
+    content: "Anzahl Anteile:"; font-weight: 600; font-size: 12px; color: #64748b; display: block; margin-bottom: 2px; 
   }
-
-  td:nth-of-type(4) .btn-delete {
-    width: 100% !important;
-    height: 42px !important; 
-    margin: 0 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    font-size: 1.2rem !important;
+  
+  #tabelle_body td:nth-of-type(3)::before,
+  #sparplan_tabelle_body td:nth-of-type(3)::before,
+  #tr_tabelle_body td:nth-of-type(3)::before { 
+    content: "Kaufpreis pro Anteil:"; font-weight: 600; font-size: 12px; color: #64748b; display: block; margin-bottom: 2px; 
   }
-
-  td:nth-of-type(1)::before { content: "Kaufdatum:"; font-weight: 600; font-size: 12px; color: #64748b; display: block; margin-bottom: 2px; }
-  td:nth-of-type(2)::before { content: "Anzahl Anteile:"; font-weight: 600; font-size: 12px; color: #64748b; display: block; margin-bottom: 2px; }
-  td:nth-of-type(3)::before { content: "Kaufpreis pro Anteil:"; font-weight: 600; font-size: 12px; color: #64748b; display: block; margin-bottom: 2px; }
-  td:nth-of-type(4)::before { content: "Aktion:"; font-weight: 600; font-size: 12px; color: #64748b; display: block; margin-bottom: 2px; margin-right: auto; } */
+  
+  #tabelle_body td:nth-of-type(4)::before,
+  #sparplan_tabelle_body td:nth-of-type(4)::before,
+  #tr_tabelle_body td:nth-of-type(4)::before { 
+    content: ""; display: block; 
+  }
 
   /* Rechner-Ergebnis KPI Cards untereinander stapeln */
   .kpi-wrapper {
@@ -670,8 +677,7 @@ button, .btn-add, .btn-delete {
   .kpi-card { padding: 15px !important; }
   .kpi-wert { font-size: 1.5rem !important; }
   #btn_pdf_download { width: 100% !important; text-align: center !important; }
-} /* <-- Diese Klammer schließt die Media-Query (max-width: 600px) ab! */
-
+} /* <-- Schließt die Media-Query (max-width: 600px) ab */
 
 
 /* Sticky Mobile Button (Falls aktiv genutzt) */
@@ -687,6 +693,7 @@ button, .btn-add, .btn-delete {
   }
   .mobile-tool-button.visible { display: block; }
 }
+
 
 /* ==========================================================================
    9. GLOBALER DARK MODE (Greift vollautomatisch über Systemsteuerung)
@@ -739,13 +746,13 @@ button, .btn-add, .btn-delete {
   .tooltip-icon::after { background-color: #0f172a; border: 1px solid #334155; }
   .tooltip-icon::before { border-color: #0f172a transparent transparent transparent; }
 
-  /* 🎯 Wichtig: Mobil-Karten-Hintergrund für Darkmode anpassen */
+  /* 🎯 SPEZIFISCHE MOBIL-KARTEN FÜR DEN DARKMODE (Hält Ergebnisse & Vorabpauschale sauber!) */
   @media (max-width: 600px) {
-    tr {
+    #tabelle_body tr, #sparplan_tabelle_body tr, #tr_tabelle_body tr {
       background: #1e293b !important;
       border-color: #334155 !important;
     }
-    td::before {
+    #tabelle_body td::before, #sparplan_tabelle_body td::before, #tr_tabelle_body td::before {
       color: #94a3b8 !important;
     }
   }
@@ -755,4 +762,12 @@ button, .btn-add, .btn-delete {
     color: #94a3b8 !important;
     border-color: #334155 !important;
   }
+}
+
+
+#tabelle_body tr.row-hidden, 
+#sparplan_tabelle_body tr.row-hidden, 
+#tr_tabelle_body tr.row-hidden,
+.row-hidden {
+    display: none !important;
 }

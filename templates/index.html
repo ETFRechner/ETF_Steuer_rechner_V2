@@ -135,27 +135,30 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
     <div id="bereich_manuell">
         <h3>Kaufdaten manuell erfassen</h3>
 
+        <!-- <div class="form-group" style="position: relative;">
+            <label for="etf_suche_input">ETF suchen (Name, ISIN oder Ticker)
+                <span class="tooltip-icon" data-tooltip="Falls der Name Ihres ETF nicht gefunden wird, können Sie auch die ISIN als verlässliche Alternative verwenden.">?</span>
+            </label>
+            <input type="text" id="etf_suche_input" placeholder="z.B. MSCI World..." oninput="liveSuche(this.value, 'manuell')" autocomplete="off">
+            <div id="such_ergebnisse"></div>
+        </div> -->
+
         <div class="form-group" style="position: relative;">
             <label for="etf_suche_input">ETF suchen (Name, ISIN oder Ticker)
                 <span class="tooltip-icon" data-tooltip="Falls der Name Ihres ETF nicht gefunden wird, können Sie auch die ISIN als verlässliche Alternative verwenden.">?</span>
             </label>
             <input type="text" id="etf_suche_input" placeholder="z.B. MSCI World..." oninput="liveSuche(this.value, 'manuell')" autocomplete="off">
             <div id="such_ergebnisse"></div>
+        
+            <div id="etf_suche_warnung" class="message-box message-warning" style="display: none;">
+                ⚠️ Freitext erkannt: Es werden keine automatischen Kursdaten geladen. Die Berechnung läuft im manuellen Modus.
+            </div>
         </div>
-
 
 
         <div id="ausgewählter_etf_box" style="display: none;">
             <span id="etf_name_anzeige">-</span>
             <span id="etf_symbol_anzeige">-</span>
-        </div>
-
-
-        <div class="checkbox-group" style="margin: 15px 0;">
-            <input type="checkbox" id="kein_etf_auswahl" onchange="toggleKeinEtfOption()">
-            <label for="kein_etf_auswahl"><strong>Keinen spezifischen ETF auswählen</strong> (Freie manuelle Eingabe)
-                <span class="tooltip-icon" data-tooltip="Aktivieren Sie dies, wenn Sie Ihre Kaufdaten komplett frei und ohne automatische Kursdaten eingeben möchten.">?</span>
-            </label>
         </div>
 
         <div class="form-group">
@@ -294,13 +297,24 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
     <div id="bereich_sparplan" style="display: none;">
         <h3>Sparplan erfassen (über ETF Suche)</h3>
         
+        <!-- <div class="form-group" style="position: relative;">
+            <label for="etf_suche_input_sparplan">ETF suchen (Name, ISIN oder Ticker)
+                <span class="tooltip-icon" data-tooltip="Falls der Name Ihres ETF nicht gefunden wird, können Sie auch die ISIN als verlässliche Alternative verwenden.">?</span>
+            </label>
+            <input type="text" id="etf_suche_input_sparplan" placeholder="z.B. MSCI World..." oninput="liveSuche(this.value, 'sparplan')" autocomplete="off">
+            <div id="such_ergebnisse_sparplan"></div>
+        </div> -->
+
         <div class="form-group" style="position: relative;">
             <label for="etf_suche_input_sparplan">ETF suchen (Name, ISIN oder Ticker)
                 <span class="tooltip-icon" data-tooltip="Falls der Name Ihres ETF nicht gefunden wird, können Sie auch die ISIN als verlässliche Alternative verwenden.">?</span>
             </label>
             <input type="text" id="etf_suche_input_sparplan" placeholder="z.B. MSCI World..." oninput="liveSuche(this.value, 'sparplan')" autocomplete="off">
-            <!-- <input type="text" id="etf_suche_input_sparplan" placeholder="z.B. MSCI World..." oninput="liveSucheSparplan(this.value)" autocomplete="off"> -->
             <div id="such_ergebnisse_sparplan"></div>
+
+            <div id="etf_suche_warnung_sparplan" class="message-box message-warning" style="display: none;">
+                ⚠️ Freitext erkannt: Es werden keine automatischen Kursdaten geladen. Die Berechnung läuft im manuellen Modus.
+            </div>
         </div>
 
 

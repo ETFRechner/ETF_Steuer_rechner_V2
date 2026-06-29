@@ -1,5 +1,5 @@
 /* ==========================================================================
-   1. BASIS-STYLING (Global & Layout)
+   1. GLOBAL & LAYOUT (Basis-Styling)
    ========================================================================== */
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
@@ -8,12 +8,15 @@ body {
   color: #1f2937;
   margin: 0;
 }
-p { margin: 0 0 14px; }
+
+p { 
+  margin: 0 0 14px; 
+}
 
 .container {
-    max-width: 1000px;
-    margin: auto;
-    padding: 40px 20px;
+  max-width: 1000px;
+  margin: auto;
+  padding: 40px 20px;
 }
 
 /* ==========================================================================
@@ -29,19 +32,15 @@ p { margin: 0 0 14px; }
 }
 
 .tool {
-    background: #ffffff;
-    padding: 30px;
-    border-radius: 12px;
-    margin-top: 50px;
-    margin-right: 0;
-    margin-bottom: 10px;
-    margin-left: 0;
-    box-shadow: 0 12px 30px rgba(0,0,0,0.08);
-    border: 1px solid #e5e7eb;
-    border-left: 4px solid #2563eb;
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 12px;
+  margin: 50px 0 10px 0;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+  border: 1px solid #e5e7eb;
+  border-left: 4px solid #2563eb;
 }
 
-/* Der untere .box Style wurde hier elegant integriert */
 .box { 
   padding: 20px; 
   background: #f8fafc; 
@@ -51,7 +50,7 @@ p { margin: 0 0 14px; }
 }
 
 /* ==========================================================================
-   3. TYPOGRAFIE & ELEMENTE
+   3. TYPOGRAFIE & DEKO-ELEMENTE
    ========================================================================== */
 h1 {
   font-size: 2.4rem;
@@ -64,38 +63,43 @@ h2 {
   margin-top: 36px;
 }
 
-ul { padding-left: 20px; }
-li { margin-bottom: 6px; }
-
-hr {
-  border: none;
-  border-top: 1px solid #2563eb;
-  margin: 30px 0;
-  color: #2563eb;
+ul { 
+  padding-left: 20px; 
 }
 
-iframe {
-    width: 100%;
-    height: 90vh;
-    border: none;
-    display: block;
-}
-
-footer {
-    margin-top: 40px;
-    font-size: 0.9em;
-    color: #555;
+li { 
+  margin-bottom: 6px; 
 }
 
 hr.trennlinie {
-  border: none;               /* Entfernt den hässlichen Standard-Rahmen des Browsers */
-  border-top: 1px solid #cbd5e1; /* Ein schönes, dezentes Hellgrau (passend zu deinen Input-Feldern) */
-  margin: 25px 0;             /* 25px Platz nach oben und unten */
-  opacity: 1;                 /* Sorgt dafür, dass sie voll sichtbar bleibt */
+  border: none;
+  border-top: 1px solid #cbd5e1;
+  margin: 25px 0;
+  opacity: 1;
+}
+
+iframe {
+  width: 100%;
+  height: 90vh;
+  border: none;
+  display: block;
+}
+
+footer {
+  margin-top: 40px;
+  font-size: 0.9em;
+  color: #555;
+}
+
+.disclaimer {
+  font-size: 0.9em;
+  color: #555;
+  margin-top: 2px;
+  margin-bottom: 30px;
 }
 
 /* ==========================================================================
-   4. FORMULARE & EINGABEN (An das Blue/Modern-Design angepasst)
+   4. FORMULARE, INPUTS & UTILITIES (Light Mode)
    ========================================================================== */
 .form-group { 
   margin-bottom: 18px; 
@@ -108,114 +112,24 @@ label {
   font-size: 0.95rem;
 }
 
-
-
-
-/* ==========================================================================
-   1. OPTIMIERUNG DEINER BESTEHENDEN INPUTS (Gleiche Höhe & iOS-Fix)
-   ========================================================================== */
+/* Einheitliches Styling für alle Eingabefelder */
 input[type="number"], 
 input[type="date"], 
 input[type="text"], 
 select { 
   width: 100%; 
-  height: 42px;              /* 🎯 Zwingt alle Felder auf exakt dieselbe Höhe */
-  padding: 8px 12px;         /* Leicht angepasst für perfekte Zentrierung */
+  height: 42px;
+  padding: 8px 12px;
   box-sizing: border-box; 
   border: 1px solid #cbd5e1; 
   border-radius: 6px; 
   background-color: #ffffff;
   color: #1f2937;
   font-family: inherit;
-  font-size: 16px;           /* 🎯 Wichtig: Mindestens 16px verhindert den automatischen iOS-Zoom beim Tippen! */
+  font-size: 16px; /* Verhindert iOS-Autofokus-Zoom */
   line-height: normal;
-  -webkit-appearance: none;  /* 🎯 Verhindert, dass Apple dem Datumsfeld ein eigenes Design aufzwingt */
+  -webkit-appearance: none;
   appearance: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-/* ==========================================================================
-   2. MOBIL-OPTIMIERUNG FÜR DIE TABELLEN (Responsive Stack)
-   ========================================================================== */
-@media (max-width: 600px) {
-  /* Wir machen die Buttons nebeneinander elastisch, damit sie nicht rausragen */
-  div[style*="display: flex; gap: 10px;"] {
-    flex-direction: column;  /* Stapelt "+ Zeile hinzufügen" und "CSV Download" untereinander */
-    gap: 8px !important;
-  }
-  
-  div[style*="display: flex; gap: 10px;"] button {
-    width: 100%;             /* Buttons nutzen volle Breite */
-  }
-
-  /* Der Zaubertrick: Wir verwandeln die starre Tabelle in flexible Blöcke */
-  table, thead, tbody, th, td, tr { 
-    display: block; 
-  }
-  
-  /* Wir verstecken die Tabellenüberschriften (Kaufdatum, Anzahl...), da sie im Stack verwirren */
-  thead tr { 
-    position: absolute;
-    top: -9999px;
-    left: -9999px;
-  }
-  
-  /* Jede Zeile (tr) wird zu einer eigenen, schicken Karte mit Abstand zur nächsten */
-  tr { 
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 12px;
-    margin-bottom: 15px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-  }
-  
-  /* Jede Zelle (td) kriegt vollen Platz untereinander und etwas Luft */
-  td { 
-    border: none !important; /* Löscht alte Tabellen-Linien */
-    padding: 6px 0 !important;
-    position: relative;
-    clear: both;
-  }
-
-  /* Optional: Wenn du möchtest, dass vor den Feldern auf dem Handy steht, was es ist */
-  td:nth-of-type(1)::before { content: "Kaufdatum:"; font-weight: 600; font-size: 14px; color: #64748b; display: block; margin-bottom: 4px; }
-  td:nth-of-type(2)::before { content: "Anzahl Anteile:"; font-weight: 600; font-size: 14px; color: #64748b; display: block; margin-bottom: 4px; }
-  td:nth-of-type(3)::before { content: "Kaufpreis pro Anteil (€):"; font-weight: 600; font-size: 14px; color: #64748b; display: block; margin-bottom: 4px; }
-  td:nth-of-type(4)::before { content: "Aktion:"; font-weight: 600; font-size: 14px; color: #64748b; display: block; margin-bottom: 4px; }
-}
-
-/* ==========================================================================
-   3. ERWEITERUNG FÜR DEINEN BESTEHENDEN DARK MODE BLOCK
-   ========================================================================== */
-@media (prefers-color-scheme: dark) {
-
-  /* Mobil-Karten im Darkmode dunkel färben */
-  @media (max-width: 600px) {
-    tr {
-      background: #1e293b !important;
-      border-color: #334155 !important;
-    }
-    td::before {
-      color: #94a3b8 !important; /* Hellere Beschriftung im Darkmode */
-    }
-  }
-}
-
-
-/* input[type="number"], 
-input[type="date"], 
-input[type="text"], 
-select { 
-  width: 100%; 
-  padding: 10px 12px; 
-  box-sizing: border-box; 
-  border: 1px solid #cbd5e1; 
-  border-radius: 6px; 
-  background-color: #ffffff;
-  color: #1f2937;
-  font-family: inherit;
-  font-size: 1rem;
   transition: border-color 0.2s, box-shadow 0.2s;
 } 
 
@@ -226,9 +140,32 @@ select:focus {
   outline: none;
   border-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-} */
+}
 
-/* ☀️ Suchergebnisse-Container (Dropdown-Optik im Light Mode) */
+/* Checkbox-Gruppe Ausrichtung */
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 15px;
+}
+
+.checkbox-group label {
+  display: inline;
+  margin-bottom: 0;
+  cursor: pointer;
+}
+
+.checkbox-group input[type="checkbox"] {
+  width: auto;
+  cursor: pointer;
+  margin: 0;
+}
+
+/* ==========================================================================
+   5. SPEZIFISCHE WIDGETS (Suchvorschläge, CSV Dropzone, Tooltips)
+   ========================================================================== */
+/* Suchergebnisse Dropdown */
 #such_ergebnisse {
   display: none;
   position: absolute;
@@ -238,12 +175,11 @@ select:focus {
   z-index: 1000;
   border: 1px solid #cbd5e1; 
   border-radius: 6px;
-  background-color: #ffffff !important; 
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.08) !important;
+  background-color: #ffffff; 
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.08);
   margin-top: 4px;
 }
 
-/* ☀️ Die einzelnen Optionen in der Box (Gleiches Schriftbild wie Eingabefelder) */
 .search-suggestion {
   padding: 10px 12px; 
   cursor: pointer;
@@ -253,16 +189,15 @@ select:focus {
   font-size: 1rem; 
 }
 
-/* 🌟 Hover-Effekt: Das native Blau deines Fokus-Rahmens (#2563eb) */
 .search-suggestion:hover {
   background-color: #2563eb !important; 
   color: #ffffff !important;
 }
 
+/* CSV Upload Dropzone */
 .upload-dropzone {
   border: 2px dashed #cbd5e1;
   border-radius: 6px;
-  /* 🎯 Kleiner gemacht: Weniger Innenabstand */
   padding: 12px 20px; 
   text-align: center;
   background-color: #ffffff;
@@ -278,88 +213,52 @@ select:focus {
 
 .dropzone-content {
   display: flex;
-  /* 🎯 Auf Zeile (row) umgestellt, damit es kompakter untereinander oder nebeneinander steht */
   flex-direction: row; 
   align-items: center;
   justify-content: center;
   gap: 15px;
-  flex-wrap: wrap; /* Verhindert Probleme auf kleinen Bildschirmen */
+  flex-wrap: wrap;
 }
 
-.dropzone-icon {
-  font-size: 1.3rem; /* 🎯 Icon verkleinert */
-}
+.dropzone-icon { font-size: 1.3rem; }
+.dropzone-text { margin: 0; color: #475569; font-size: 0.9rem; }
+.dropzone-text strong { color: #2563eb; }
 
-.dropzone-text {
-  margin: 0;
-  color: #475569;
-  font-size: 0.9rem; /* 🎯 Schrift minimal verkleinert */
-}
-
-.dropzone-text strong {
-  color: #2563eb;
-}
-
-/* 🎯 Hier steuern wir nun die ausgewählte Datei deutlich an */
 .file-name-preview {
   font-size: 0.95rem;
-  font-weight: 700;        /* 🎯 Fett gedruckt, damit es sofort auffällt */
-  color: #1f2937;         /* 🎯 Deine normale, dunkle Light-Mode Schriftfarbe */
-  font-style: normal;     /* Nicht mehr kursiv */
-  border-left: 2px solid #cbd5e1; /* Ein kleiner Trennstrich zur Info links */
+  font-weight: 700;
+  color: #1f2937;
+  border-left: 2px solid #cbd5e1;
   padding-left: 15px;
 }
 
-/* 🎯 Bringt Checkbox und Label perfekt in eine Reihe */
-.checkbox-group {
-  display: flex;
-  align-items: center; /* Zentriert Box und Text vertikal auf eine Linie */
-  gap: 8px;            /* Angenehmer Abstand zwischen Box und Text */
-  margin-top: 15px;
-}
-
-/* 🎯 Hebelt das "display: block" für Labels innerhalb von Checkbox-Gruppen aus */
-.checkbox-group label {
-  display: inline;     /* Erlaubt dem Text, neben der Box zu stehen */
-  margin-bottom: 0;    /* Entfernt den Abstand nach unten, den normale Labels haben */
-  cursor: pointer;     /* Macht auch den Text anklickbar */
-}
-
-/* 🎯 Optionaler Feinschliff für die Checkbox selbst */
-.checkbox-group input[type="checkbox"] {
-  width: auto;         /* Verhindert, dass die Checkbox 100% Breite einnimmt */
-  cursor: pointer;
-  margin: 0;           /* Entfernt Browser-Standard-Abstände */
-}
-
-/* ☀️ Das Fragezeichen-Symbol selbst */
+/* Tooltips */
 .tooltip-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 16px;
   height: 16px;
-  background-color: #cbd5e1; /* Dezentes Grau */
+  background-color: #cbd5e1;
   color: #475569;
   font-size: 0.75rem;
   font-weight: bold;
-  border-radius: 50%; /* Macht es kreisrund */
+  border-radius: 50%;
   margin-left: 6px;
-  cursor: help; /* Ändert den Mauszeiger zu einem Fragezeichen mit Pfeil */
-  position: relative; /* Wichtig für die Positionierung des Textes */
+  cursor: help;
+  position: relative;
   vertical-align: middle;
 }
 
-/* ☀️ Das eigentliche Infokästchen (Standardmäßig unsichtbar) */
 .tooltip-icon::after {
-  content: attr(data-tooltip); /* Holt sich den Text aus dem HTML-Attribut */
+  content: attr(data-tooltip);
   position: absolute;
-  bottom: 130%; /* Platziert das Kästchen über dem Symbol */
+  bottom: 130%;
   left: 50%;
   transform: translateX(-50%);
-  width: 220px; /* Breite des Infokästchens */
+  width: 220px;
   padding: 8px 12px;
-  background-color: #1e293b; /* Dunkler, moderner Hintergrund */
+  background-color: #1e293b;
   color: #ffffff;
   font-size: 0.85rem;
   font-weight: normal;
@@ -367,14 +266,11 @@ select:focus {
   border-radius: 6px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   z-index: 1000;
-  
-  /* Unsichtbar-Zustand für eine weiche Animation */
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
-/* ☀️ Der kleine Pfeil unten am Infokästchen */
 .tooltip-icon::before {
   content: "";
   position: absolute;
@@ -383,29 +279,63 @@ select:focus {
   transform: translateX(-50%);
   border-width: 6px;
   border-style: solid;
-  border-color: #1e293b transparent transparent transparent; /* Erzeugt ein Dreieck */
+  border-color: #1e293b transparent transparent transparent;
   z-index: 1000;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s ease;
 }
 
-/* 🌟 EINBLENDEN bei Hover (Desktop) und Focus/Active (Mobilgeräte) */
-.tooltip-icon:hover::after,
-.tooltip-icon:hover::before {
+.tooltip-icon:hover::after, .tooltip-icon:hover::before {
   opacity: 1;
 }
 
-/* 📱 Trick für Handys: Wenn man draufdrückt, bleibt es kurz sichtbar */
-@media (max-width: 600px) {
-  .tooltip-icon:active::after,
-  .tooltip-icon:active::before {
-    opacity: 1;
-  }
+/* --- EINHEITLICHE SYSTEM-MELDUNGEN --- */
+
+/* Gemeinsame Basis für alle Boxen */
+.message-box {
+    padding: 12px 16px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    line-height: 1.4;
+    margin: 12px 0;
+    border: 1px solid transparent;
+}
+
+/* ⚠️ WARNUNGEN (z.B. Unvollständige Zeilen) */
+.message-warning {
+    background-color: #fffbeb; /* Sanftes Gelb */
+    border-color: #fde047;
+    color: #b45309;
+}
+
+/* 🛑 FEHLER (Für Abbrüche oder Serverfehler) */
+.message-error {
+    background-color: #fff1f2; /* Sanftes Rot */
+    border-color: #fecdd3;
+    color: #e11d48;
+}
+
+/* --- DARK MODE ERGÄNZUNGEN --- */
+@media (prefers-color-scheme: dark) {
+    /* Warnungen im Dark Mode */
+    .message-warning {
+        background-color: rgba(251, 191, 36, 0.1) !important; /* Transparentes Amber */
+        border-color: rgba(251, 191, 36, 0.4) !important;
+        color: #fcd34d !important;
+    }
+
+    /* Fehler im Dark Mode */
+    .message-error {
+        background-color: rgba(244, 63, 94, 0.1) !important; /* Transparentes Rose */
+        border-color: rgba(244, 63, 94, 0.4) !important;
+        color: #fda4af !important;
+    }
 }
 
 /* ==========================================================================
-   5. TABELLEN (Modernisiert & Clean)
+   6. TABELLEN & BUTTONS (Desktop-Ansicht)
    ========================================================================== */
 table { 
   width: 100%; 
@@ -417,7 +347,6 @@ table {
 th, td { 
   padding: 12px 10px; 
   text-align: left; 
-  color: #1f2937; 
 }
 
 th { 
@@ -426,17 +355,13 @@ th {
   color: #475569;
 }
 
-/* Alle Zellen in der Tabelle werden jetzt fett und tiefschwarz */
 td {
-  color: #000000;      /* Echtes, sattes Schwarz */
-  font-weight: 600;    /* Kräftiger Fettdruck, genau wie die Zahlen */
+  color: #000000; /* Sattes Schwarz für gute Lesbarkeit der Werte */
+  font-weight: 600;
 }
 
-/* ==========================================================================
-   6. BUTTONS
-   ========================================================================== */
 .btn-add { 
-  background-color: #2563eb; /* 🎯 Auf dein primäres Markenblau angepasst */
+  background-color: #2563eb;
   color: white; 
   border: none; 
   padding: 10px 20px; 
@@ -449,7 +374,7 @@ td {
 .btn-add:hover { background-color: #1d4ed8; }
 
 .btn-delete { 
-  background-color: #ef4444; /* Modernes Rot */
+  background-color: #ef4444;
   color: white; 
   border: none; 
   padding: 6px 12px; 
@@ -460,9 +385,7 @@ td {
 }
 .btn-delete:hover { background-color: #dc2626; }
 
-/* ==========================================================================
-   7. AKKORDEON (DETAILS) & MODALS
-   ========================================================================== */
+/* Akkoridons & Modals */
 details { margin-bottom: 12px; }
 summary { cursor: pointer; font-weight: bold; padding: 10px 0; }
 summary:hover { color: #2563eb; }
@@ -471,10 +394,7 @@ summary:hover { color: #2563eb; }
   display: none;
   position: fixed;
   z-index: 1000;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
+  left: 0; top: 0; width: 100%; height: 100%;
   background-color: rgba(0,0,0,0.5);
 }
 
@@ -497,177 +417,66 @@ summary:hover { color: #2563eb; }
   top: 0;
 }
 
-.disclaimer {
-    font-size: 0.9em;
-    color: #555;
-    margin-top: 2px;
-    margin-bottom: 30px;
+button:active, 
+.btn-add:active, 
+.btn-delete:active {
+  transform: scale(0.96); /* Der Button schrumpft beim Drücken um 4% */
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2); /* Erzeugt einen inneren Schatten für Tiefe */
+  filter: brightness(0.9); /* Macht die Farbe ganz leicht dunkler */
 }
 
-/* ==========================================================================
-   8. DARK MODE ADJUSTMENTS (Formulare & Tabellen sauber vereint)
-   ========================================================================== */
-@media (prefers-color-scheme: dark) {
-  body { background: #0f172a; color: #e5e7eb; }
-  .hero, .tool, .faq { background: #1e293b; border: 1px solid #334155; }
-  .box { background: #1e293b; border-color: #334155; }
-  footer, .disclaimer { color: #cbd5f5; }
-  summary:hover { color: #60a5fa; }
-  
-  /* 🎯 Formulare im Dark Mode – Gilt jetzt exakt so für ALLE Inputs inkl. Textfeld */
-  /* input[type="number"], 
-  input[type="date"], 
-  input[type="text"], 
-  select {
-    background-color: #334155 !important;
-    border-color: #475569 !important;
-    color: #f8fafc !important;
-  }
-  
-  input[type="number"]:focus, 
-  input[type="date"]:focus, 
-  input[type="text"]:focus, 
-  select:focus {
-    border-color: #60a5fa !important;
-  } */
-  
-  /* Tabellen im Dark Mode */
-  th { 
-    background-color: #334155; 
-    color: #cbd5e1; 
-  }
-  
-  /* Überschreibt das Schwarz aus dem Lightmode mit leuchtendem Weiß */
-  td { 
-    color: #ffffff !important; 
-  }
-
-  hr.trennlinie {
-    border-top-color: #334155; 
-  }
-  
-  /* 🎯 Die Vorschlagsbox im Dark Mode nutzt exakt die gleichen Farben wie die Inputs */
-  #such_ergebnisse {
-    background-color: #334155 !important;
-    border: 1px solid #475569 !important;
-    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.4) !important;
-  }
-
-  .search-suggestion {
-    background-color: #334155 !important;
-    color: #f8fafc !important;
-  }
-
-  /* Hover-Effekt bleibt im Dark Mode schön kräftig Blau */
-  .search-suggestion:hover {
-    background-color: #2563eb !important;
-    color: #ffffff !important;
-  }
-
-  .upload-dropzone {
-    background-color: #334155 !important;
-    border-color: #475569 !important;
-  }
-  
-  .upload-dropzone.dragover {
-    border-color: #60a5fa !important;
-    background-color: rgba(96, 165, 250, 0.08) !important;
-  }
-  
-  .dropzone-text {
-    color: #cbd5e1;
-  }
-  
-  .dropzone-text strong {
-    color: #60a5fa;
-  }
-  
-  /* 🎯 Dateiname im Dark Mode deutlich sichtbar machen */
-  .file-name-preview {
-    color: #e5e7eb !important; /* 🎯 Deine normale, helle Dark-Mode Schriftfarbe */
-    border-left-color: #475569;
-  }
-
-  .tooltip-icon {
-    background-color: #475569; /* Dunkleres Grau */
-    color: #cbd5e1;
-  }
-  
-  /* Optional: Infokästchen im Dark Mode mit feinem Rahmen versehen */
-  .tooltip-icon::after {
-    background-color: #0f172a;
-    border: 1px solid #334155;
-  }
-  .tooltip-icon::before {
-    border-color: #0f172a transparent transparent transparent;
-  }
-
+/* Sorgt dafür, dass alle Buttons geschmeidig federn */
+button, .btn-add, .btn-delete {
+  transition: transform 0.1s ease, background-color 0.2s, box-shadow 0.2s;
 }
 
-/* ==========================================================================
-   9. RESPONSIVE / MOBILE DESIGN
-   ========================================================================== */
-@media (max-width: 600px) {
-  .container { padding: 10px; max-width: 100%; }
-  
-  .tool {
-    margin-left: -10px;
-    margin-right: -10px;
-    border-radius: 0;
-    border-left: none;
-    padding: 20px 15px;
-  }
-
-  .tool-frame { width: 100%; height: 95vh; border: none; display: block; }
-  .hero, .faq { padding: 18px; margin-bottom: 20px; }
-  h1 { font-size: 1.8rem; }
-  h2 { font-size: 1.3rem; }
-  iframe { width: 100%; min-height: 90vh; }
-
-  body {
-    font-size: 17px;
-    padding-bottom: 90px;
-    margin: 0;
-  }
-
-  .modal-content {
-    margin: 10% 10px;
-    padding: 20px;
-    max-width: 100%;
-    max-height: 85vh;
-  }
-  
-  /* Tabellen mobil scrollbar machen, damit sie das Layout nicht sprengen */
-  table {
-    display: block;
-    overflow-x: auto;
-    white-space: nowrap;
-  }
-}
-
-/* Sticky Mobile Button */
-.mobile-tool-button { display: none; }
-@media (max-width: 600px) {
-  .mobile-tool-button {
-    display: none;
-    position: fixed;
-    bottom: 16px;
-    left: 16px;
-    right: 16px;
-    background: #2563eb;
+/* Überschreibt nur die Hintergrundfarbe und den Rahmen für den Löschknopf */
+.btn-add.btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
     color: white;
-    text-align: center;
-    padding: 12px;
-    border-radius: 8px;
+}
+
+/* Optional: Ein etwas dunkleres Rot, wenn man mit der Maus darüber fährt */
+.btn-add.btn-danger:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+}
+
+/* Styling für die Einklapp-Knöpfe (Nutzt dein blaues Design) */
+.btn-toggle-table {
+    width: 100%;
+    background-color: #2563eb;
+    color: white; 
+    border: none; 
+    padding: 10px 20px; 
+    border-radius: 6px; 
+    cursor: pointer; 
     font-weight: 600;
-    font-size: 15px;
-    z-index: 999;
-  }
-  .mobile-tool-button.visible { display: block; }
+    margin-top: 10px; 
+    margin-bottom: 10px;
+    transition: background 0.2s;
+    text-align: center;
+}
+
+/* Hover-Effekt wie bei .btn-add */
+.btn-toggle-table:hover { 
+    background-color: #1d4ed8; 
+}
+
+/* Die Platzhalter-Zeile im Light Mode */
+.placeholder-row td {
+    text-align: center;
+    font-style: italic;
+    background-color: #f1f5f9 !important;
+    color: #64748b;
+    padding: 12px !important;
+    font-size: 0.95em;
+    border: 1px dashed #cbd5e1;
 }
 
 /* ==========================================================================
-   10. BERECHNUNGSERGEBNIS CONTAINER & DETAILS
+   7. RECHNER-ERGEBNISSE (KPI Cards & PDF)
    ========================================================================== */
 #ergebnis_container h2 {
   margin-top: 0;
@@ -721,40 +530,214 @@ summary:hover { color: #2563eb; }
   font-weight: 600;
   transition: background 0.2s, transform 0.1s;
 }
-
 #btn_pdf_download:hover { background: #1d4ed8; }
 #btn_pdf_download:active { transform: scale(0.98); }
 
 /* ==========================================================================
-   11. ERGEBNIS DARK MODE ADJUSTMENTS
+   8. MOBIL-OPTIMIERUNG (Responsive / Media Queries < 600px)
    ========================================================================== */
-@media (prefers-color-scheme: dark) {
-  #ergebnis_container h2 { color: #60a5fa; }
+@media (max-width: 600px) {
+  /* Layout-Stauchung */
+  .container { padding: 10px; max-width: 100%; }
   
-  .kpi-card {
-    background: #1e293b;
-    box-shadow: inset 0 0 0 1px #334155;
+  .tool {
+    margin-left: -10px;
+    margin-right: -10px;
+    border-radius: 0;
+    border-left: none;
+    padding: 20px 15px;
+  }
+
+  h1 { font-size: 1.8rem; }
+  h2 { font-size: 1.3rem; }
+  body { font-size: 17px; padding-bottom: 90px; }
+  
+  .modal-content {
+    margin: 10% 10px;
+    padding: 20px;
+    max-width: 100%;
+    max-height: 85vh;
+  }
+
+  /* Tooltip Aktivierung per Touch */
+  .tooltip-icon:active::after, .tooltip-icon:active::before {
+    opacity: 1;
+  }
+
+  /* Flexible Buttons */
+  div[style*="display: flex; gap: 10px;"] {
+    flex-direction: column;
+    gap: 8px !important;
   }
   
-  .kpi-label { color: #94a3b8; }
-  .kpi-neutral { color: #f8fafc; }
+  div[style*="display: flex; gap: 10px;"] button {
+    width: 100%;
+  }
+
+  /* 🎯 TABELLEN-ZUM-KARTEN-STAPEL UMSTELLEN (Kein horizontales Scrollen mehr!) */
+  table, thead, tbody, th, td, tr { 
+    display: block !important; 
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Blendet die Tabellenüberschriften auf dem Handy unsichtbar aus */
+  thead tr { 
+    position: absolute !important;
+    top: -9999px !important;
+    left: -9999px !important;
+  }
+  
+  /* Jede Tabellenzeile wird zu einer kompakten Karte mit einem 2-Spalten-Raster */
+  tr { 
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    padding: 12px !important;
+    margin-bottom: 12px !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
+    
+    /* Aktiviert das CSS Grid für die 2x2 Anordnung */
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important; /* Zwei exakt gleich breite Spalten */
+    gap: 10px !important; /* Abstand zwischen den Elementen */
+  }
+  
+  /* Jede Zelle verliert ihre starren Tabellen-Eigenschaften */
+  td { 
+    border: none !important; 
+    padding: 0 !important;
+    position: relative !important;
+    width: 100% !important;
+  }
+
+
+  /* Die vierte Zelle (Löschen-Button) zentriert das Icon unten rechts */
+  td:nth-of-type(4) {
+    display: flex !important;
+    align-items: flex-end !important;
+    justify-content: flex-end !important;
+  }
+
+  /* 🎯 Schicker, kompakter Mülleimer-Button auf dem Handy (Nicht mehr über die ganze Breite!) */
+  td:nth-of-type(4) .btn-delete {
+    width: 42px !important;  /* Macht den Button perfekt quadratisch (42x42px) */
+    height: 42px !important; /* Gleiche Höhe wie deine Eingabefelder */
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 1.2rem !important;
+    border-radius: 6px !important;
+  }
+
+  /* 📱 Automatische Mobil-Beschriftung über den jeweiligen Feldern */
+  td:nth-of-type(1)::before { content: "Kaufdatum:"; font-weight: 600; font-size: 12px; color: #64748b; display: block; margin-bottom: 2px; }
+  td:nth-of-type(2)::before { content: "Anzahl Anteile:"; font-weight: 600; font-size: 12px; color: #64748b; display: block; margin-bottom: 2px; }
+  td:nth-of-type(3)::before { content: "Kaufpreis pro Anteil:"; font-weight: 600; font-size: 12px; color: #64748b; display: block; margin-bottom: 2px; }
+  
+  /* 🎯 Das "Aktion:"-Label wurde hier komplett gelöscht! */
+  td:nth-of-type(4)::before { content: ""; display: block; }
+
+
+  /* Rechner-Ergebnis KPI Cards untereinander stapeln */
+  .kpi-wrapper {
+    flex-direction: column !important;
+    gap: 12px !important;
+    margin-bottom: 20px !important;
+  }
+  .kpi-card { padding: 15px !important; }
+  .kpi-wert { font-size: 1.5rem !important; }
+  #btn_pdf_download { width: 100% !important; text-align: center !important; }
+} /* <-- Diese Klammer schließt die Media-Query (max-width: 600px) ab! */
+
+
+
+/* Sticky Mobile Button (Falls aktiv genutzt) */
+.mobile-tool-button { display: none; }
+@media (max-width: 600px) {
+  .mobile-tool-button {
+    display: none;
+    position: fixed;
+    bottom: 16px; left: 16px; right: 16px;
+    background: #2563eb; color: white; text-align: center;
+    padding: 12px; border-radius: 8px; font-weight: 600; font-size: 15px;
+    z-index: 999;
+  }
+  .mobile-tool-button.visible { display: block; }
 }
 
 /* ==========================================================================
-   12. ERGEBNIS RESPONSIVE DESIGN (MOBIL)
+   9. GLOBALER DARK MODE (Greift vollautomatisch über Systemsteuerung)
    ========================================================================== */
-@media (max-width: 600px) {
-  .kpi-wrapper {
-    flex-direction: column;
-    gap: 12px;
-    margin-bottom: 20px;
+@media (prefers-color-scheme: dark) {
+  body { background: #0f172a; color: #e5e7eb; }
+  .hero, .tool, .faq { background: #1e293b; border: 1px solid #334155; }
+  .box { background: #1e293b; border-color: #334155; }
+  footer, .disclaimer { color: #cbd5f5; }
+  summary:hover { color: #60a5fa; }
+  hr.trennlinie { border-top-color: #334155; }
+  
+  /* Formulare & Inputs im Dark Mode */
+  input[type="number"], 
+  input[type="date"], 
+  input[type="text"], 
+  select {
+    background-color: #334155 !important;
+    border-color: #475569 !important;
+    color: #f8fafc !important;
+  }
+  input[type="number"]:focus, input[type="date"]:focus, input[type="text"]:focus, select:focus {
+    border-color: #60a5fa !important;
   }
   
-  .kpi-card { padding: 15px; }
-  .kpi-wert { font-size: 1.5rem; }
+  /* Tabellen & KPI Cards im Dark Mode */
+  th { background-color: #334155; color: #cbd5e1; }
+  td { color: #ffffff !important; }
+  #ergebnis_container h2 { color: #60a5fa; }
+  .kpi-card { background: #1e293b; box-shadow: inset 0 0 0 1px #334155; }
+  .kpi-label { color: #94a3b8; }
+  .kpi-neutral { color: #f8fafc; }
   
-  #btn_pdf_download {
-    width: 100%; 
-    text-align: center;
+  /* Widgets (Suche, Dropzone, Tooltips) im Dark Mode */
+  #such_ergebnisse {
+    background-color: #334155 !important;
+    border: 1px solid #475569 !important;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.4) !important;
   }
+  .search-suggestion { background-color: #334155 !important; color: #f8fafc !important; }
+  .search-suggestion:hover { background-color: #2563eb !important; color: #ffffff !important; }
+
+  .upload-dropzone { background-color: #334155 !important; border-color: #475569 !important; }
+  .upload-dropzone.dragover { border-color: #60a5fa !important; background-color: rgba(96, 165, 250, 0.08) !important; }
+  .dropzone-text { color: #cbd5e1; }
+  .dropzone-text strong { color: #60a5fa; }
+  .file-name-preview { color: #e5e7eb !important; border-left-color: #475569; }
+
+  .tooltip-icon { background-color: #475569; color: #cbd5e1; }
+  .tooltip-icon::after { background-color: #0f172a; border: 1px solid #334155; }
+  .tooltip-icon::before { border-color: #0f172a transparent transparent transparent; }
+
+  /* 🎯 Wichtig: Mobil-Karten-Hintergrund für Darkmode anpassen */
+  @media (max-width: 600px) {
+    tr {
+      background: #1e293b !important;
+      border-color: #334155 !important;
+    }
+    td::before {
+      color: #94a3b8 !important;
+    }
+  }
+
+  .placeholder-row td {
+    background-color: #1e293b !important;
+    color: #94a3b8 !important;
+    border-color: #334155 !important;
+  }
+}
+
+/* 🎯 Diese Klasse zwingt das Element zum Verschwinden, egal was das Mobil-Grid sagt! */
+.row-hidden {
+    display: none !important;
 }

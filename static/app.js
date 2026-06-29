@@ -145,7 +145,6 @@ function handleFileSelectTR(input) {
     }
 }
 
-
 function handleFileSelect(input) {
     const displaySpan = document.getElementById("file_name_display");
     if (input.files.length > 0) {
@@ -156,10 +155,15 @@ function handleFileSelect(input) {
         // 1. Startet deine bestehende Upload-Logik
         uploadCSV();
 
-        // 2. NEU: Direkt danach prüfen wir, ob die Tabelle fälschlicherweise geöffnet wurde
-        // Wenn "Kein ETF" NICHT angehakt ist, zwingen wir die Vorabpauschale, 
-        // sich nach dem Zustand des normalen Häkchens zu richten (meistens unsichtbar)
-        if (!document.getElementById('kein_etf_auswahl').checked) {
+        // 2. 🎯 REPARIERT: Keine 'kein_etf_auswahl'-Checkbox mehr!
+        // Wir ermitteln dynamisch, ob der freie, manuelle Modus ohne ETF aktiv ist
+        const sucheInputFeld = document.getElementById('etf_suche_input');
+        const symbolAnzeige = document.getElementById('etf_symbol_anzeige')?.innerText || "-";
+        const etfBoxSichtbar = document.getElementById('ausgewählter_etf_box').style.display !== 'none';
+        const keinEtfGewaehlt = (sucheInputFeld.value.trim() === "" && (!etfBoxSichtbar || symbolAnzeige === "-"));
+
+        // Wenn ein ETF gewählt ist, steuert das Häkchen die Vorabpauschale (sonst ist sie dauerhaft offen)
+        if (!keinEtfGewaehlt) {
             toggleVorabpauschale();
         }
     } else {
@@ -167,10 +171,10 @@ function handleFileSelect(input) {
         displaySpan.style.color = "";
     }
     isTableCollapsed = true; // Nach Upload standardmäßig einklappen
-    aktualisiereTabellenAnsicht();
-
+    if (typeof aktualisiereTabellenAnsicht === "function") {
+        aktualisiereTabellenAnsicht();
+    }
 }
-
 
 function aktualisiereVorabpauschaleTabelle() {
     let datumsFelder = document.querySelectorAll(".row-datum");
@@ -194,6 +198,8 @@ function aktualisiereVorabpauschaleTabelle() {
 
     let vorabBereich = document.getElementById("bereich_vorabpauschale");
     let tbody = document.getElementById("vorab_tabelle_body");
+    if (!tbody) return;
+    
     tbody.innerHTML = ""; // Vorherige Zeilen löschen
 
     // 2. Schleife von ältestem Jahr bis zum Vorjahr des aktuellen Jahres (Befüllen)
@@ -206,18 +212,21 @@ function aktualisiereVorabpauschaleTabelle() {
             `;
         }
 
-        // 3. NEU: Sichtbarkeits-Logik, die deine Bedingungen respektiert
-        const keinEtfGewaehlt = document.getElementById('kein_etf_auswahl').checked;
-        const hakenManuellAktiv = document.getElementById('haken_vorabpauschale').checked;
+        // 3. 🎯 SAUBERE SICHTBARKEITS-LOGIK: Wann darf die Tabelle zu sehen sein?
+        const symbolAnzeige = document.getElementById('etf_symbol_anzeige')?.innerText || "-";
+        const etfBoxSichtbar = document.getElementById('ausgewählter_etf_box').style.display !== 'none';
+        const etfWurdeAusgewaehlt = (etfBoxSichtbar && symbolAnzeige !== "-");
+        
+        const hakenManuellAktiv = document.getElementById('haken_vorabpauschale')?.checked || false;
 
-        if (keinEtfGewaehlt || hakenManuellAktiv) {
-            vorabBereich.style.display = "block"; // Nur einblenden, wenn gewünscht oder Pflicht
+        if (!etfWurdeAusgewaehlt || hakenManuellAktiv) {
+            if (vorabBereich) vorabBereich.style.display = "block";
         } else {
-            vorabBereich.style.display = "none";  // Unsichtbar beim normalen CSV-Upload mit ETF-Suche
+            if (vorabBereich) vorabBereich.style.display = "none";
         }
 
     } else {
-        vorabBereich.style.display = "none"; // Ausblenden, wenn alles im aktuellen Jahr gekauf wurde
+        if (vorabBereich) vorabBereich.style.display = "none"; // Ausblenden, wenn alles im aktuellen Jahr gekauft wurde
     }
 }
 
@@ -264,6 +273,12 @@ async function sendeBerechnung() {
         }
     });
 
+
+    // Prüfen, ob ein valider Ticker existiert. Wenn dort "-" steht oder die Box versteckt ist, ist es null.
+    let etfBoxSichtbar = document.getElementById("ausgewählter_etf_box").style.display !== "none";
+    let aktuellerTicker = etfBoxSichtbar ? document.getElementById("etf_symbol_anzeige")?.innerText : null;
+    if (aktuellerTicker === "-") aktuellerTicker = null;
+
     // 3. Das gesamte Daten-Paket (Payload) schnüren
     let payload = {
         rechen_ziel: document.getElementById("rechen_ziel").value,
@@ -273,16 +288,18 @@ async function sendeBerechnung() {
         freibetrag: parseFloat(document.getElementById("freibetrag").value),
         verlusttopf: parseFloat(document.getElementById("verlusttopf").value),
         kirchensteuer: document.getElementById("kirchensteuer").value,
-        // tagesgenau: document.getElementById("tagesgenau").checked,
         tagesgenau: (document.getElementById("tagesgenau").value === "true"),
-        manuelle_vorabpauschale_aktiv: document.getElementById("haken_vorabpauschale").checked,
+        
+        // 🎯 AUTOMATISIERTE LOGIK: Wenn kein Ticker existiert, IST die manuelle Vorabpauschale automatisch aktiv (true)!
+        manuelle_vorabpauschale_aktiv: aktuellerTicker ? document.getElementById("haken_vorabpauschale").checked : true,
+        
         kaeufe: kaeufe,
         vorabpauschalen: vorabpauschalen,
         teilfreistellung: parseFloat(document.getElementById("teilfreistellung").value),
         ist_thesaurierend: (document.getElementById("ertragsverwendung").value === "thesaurierend"),
         bereits_verkaufte_anteile: parseFloat(document.getElementById("bereits_verkauft_manuell").value) || 0,
         quelle: "manuell",
-        ticker: document.getElementById("etf_symbol_anzeige")?.innerText || null
+        ticker: aktuellerTicker
     };
 
     // --- FRONTEND-VALIDIERUNGEN ---
@@ -353,24 +370,63 @@ async function sendeBerechnung() {
     }
 }
 
-
 async function liveSuche(suchbegriff, modus = 'manuell') {
     // Bestimmt die ID dynamisch je nach Modus ('manuell' oder 'sparplan')
     const suffix = modus === 'sparplan' ? '_sparplan' : '';
     let ergebnisDiv = document.getElementById("such_ergebnisse" + suffix);
 
-    if (suchbegriff.length < 2) {
-        ergebnisDiv.style.display = "none";
+    // 🎯 Wenn das Feld leer ist oder weniger als 2 Zeichen hat -> Alles zurücksetzen!
+    if (!suchbegriff || suchbegriff.trim().length < 2) {
+        if (ergebnisDiv) {
+            ergebnisDiv.innerHTML = "";
+            ergebnisDiv.style.display = "none";
+        }
+
+        // 🎯 Blendet die jeweilige Warnbox aus, wenn das Feld geleert wird
+        let aktuelleWarnung = document.getElementById("etf_suche_warnung" + suffix);
+        if (aktuelleWarnung) aktuelleWarnung.style.display = "none";
+
+        // Wenn wir im manuellen Modus sind, setzen wir die manuelle Box zurück
+        if (modus === 'manuell') {
+            let etfBox = document.getElementById("ausgewählter_etf_box");
+            if (etfBox) etfBox.style.display = "none";
+            
+            let symbolAnzeige = document.getElementById("etf_symbol_anzeige");
+            if (symbolAnzeige) symbolAnzeige.innerText = "-";
+            
+            let nameAnzeige = document.getElementById("etf_name_anzeige");
+            if (nameAnzeige) nameAnzeige.innerText = "-";
+
+            // Schaltet das Layout sofort wieder in den freien, manuellen Modus um
+            aktualisiereManuelleAnsicht();
+        } 
+        // 🎯 NEU: Wenn wir im Sparplan-Modus sind, setzen wir die Sparplan-Box zurück
+        else if (modus === 'sparplan') {
+            let etfBoxSparplan = document.getElementById("ausgewählter_etf_box_sparplan");
+            if (etfBoxSparplan) etfBoxSparplan.style.display = "none";
+            
+            let symbolAnzeigeSparplan = document.getElementById("etf_symbol_anzeige_sparplan");
+            if (symbolAnzeigeSparplan) symbolAnzeigeSparplan.innerText = "-";
+            
+            let nameAnzeigeSparplan = document.getElementById("etf_name_anzeige_sparplan");
+            if (nameAnzeigeSparplan) nameAnzeigeSparplan.innerText = "-";
+
+            // Schaltet das Layout sofort wieder in den freien Sparplan-Modus um
+            aktualisiereSparplanAnsicht();
+        }
         return;
     }
 
+    // --- INTERNET-ABFRAGE DER LIVE-SUCHE ---
     let response = await fetch(`/api/search?q=${encodeURIComponent(suchbegriff)}`);
     let treffer = await response.json();
 
-    ergebnisDiv.innerHTML = "";
+    if (ergebnisDiv) {
+        ergebnisDiv.innerHTML = "";
+    }
 
     if (treffer && treffer.length > 0 && !treffer.error) {
-        ergebnisDiv.style.display = "block";
+        if (ergebnisDiv) ergebnisDiv.style.display = "block";
     
         treffer.forEach(item => {
             let eintrag = document.createElement("div");
@@ -380,29 +436,80 @@ async function liveSuche(suchbegriff, modus = 'manuell') {
             // Wir übergeben den Modus an die waehleETF-Funktion weiter!
             eintrag.onclick = () => waehleETF(item.name, item.symbol, modus);
         
-            ergebnisDiv.appendChild(eintrag);
+            if (ergebnisDiv) ergebnisDiv.appendChild(eintrag);
         });
     } else {
-        ergebnisDiv.style.display = "none";
+        if (ergebnisDiv) ergebnisDiv.style.display = "none";
+    }
+
+    // 🎯 NEU: Am Ende delegieren wir die Ansichts- und Warnungssteuerung an das jeweilige System
+    if (modus === 'sparplan') {
+        aktualisiereSparplanAnsicht();
+    } else if (modus === 'manuell') {
+        aktualisiereManuelleAnsicht();
     }
 }
 
 function waehleETF(name, symbol, modus = 'manuell') {
+    console.log("🎯 waehleETF wurde aufgerufen! Ticker:", symbol);
+    console.log("Suffix-Check:", modus === 'sparplan' ? '_sparplan' : '');
+    console.log("Gibt es Suchergebnisse?", document.getElementById("such_ergebnisse" + (modus === 'sparplan' ? '_sparplan' : '')));
+    console.log("Gibt es Inputfeld?", document.getElementById("etf_suche_input" + (modus === 'sparplan' ? '_sparplan' : '')));
+    console.log("Gibt es globalen Namen?", document.getElementById("etf_name_anzeige"));
+    console.log("Gibt es globales Symbol?", document.getElementById("etf_symbol_anzeige"));
+    console.log("Gibt es globale Box?", document.getElementById("ausgewählter_etf_box"));
+
     const suffix = modus === 'sparplan' ? '_sparplan' : '';
 
-    document.getElementById("such_ergebnisse" + suffix).style.display = "none";
-    document.getElementById("etf_suche_input" + suffix).value = `${name} (${symbol})`;
+    // 1. Ergebnisse schließen und Input-Feld befüllen
+    const suchErgebnisDiv = document.getElementById("such_ergebnisse" + suffix);
+    if (suchErgebnisDiv) suchErgebnisDiv.style.display = "none";
+    
+    const suchInput = document.getElementById("etf_suche_input" + suffix);
+    if (suchInput) suchInput.value = `${name} (${symbol})`;
 
-    // Die Werte werden weiterhin im Hintergrund befüllt...
-    document.getElementById("etf_name_anzeige" + suffix).innerText = name;
-    document.getElementById("etf_symbol_anzeige" + suffix).innerText = symbol;
+    // 2. Im manuellen Modus die globalen Box-Werte setzen und Box AKTIVIEREN
+    if (modus === 'manuell') {
+        const globalName = document.getElementById("etf_name_anzeige");
+        const globalSymbol = document.getElementById("etf_symbol_anzeige");
+        const globalBox = document.getElementById("ausgewählter_etf_box");
 
-    // ...aber die Box wird HIER NICHT MEHR auf 'block' gesetzt. Sie bleibt unsichtbar!
+        if (globalName) globalName.innerText = name;
+        if (globalSymbol) globalSymbol.innerText = symbol;
+        if (globalBox) globalBox.style.display = "block"; // Zwingend auf block für die UI-Logik!
 
-    if (typeof ladeAktuellenKurs === "function") {
-        ladeAktuellenKurs(symbol, modus);
+        // 🎯 SOFORT DIE ANSICHT AKTUALISIEREN (Damit die Tabelle sofort einklappt)
+        console.log("🔄 Schalte Ansicht auf ETF-Modus um...");
+        aktualisiereManuelleAnsicht();
     }
+
+    if (modus === 'sparplan') {
+        const sparplanName = document.getElementById("etf_name_anzeige_sparplan");
+        const sparplanSymbol = document.getElementById("etf_symbol_anzeige_sparplan");
+        const sparplanBox = document.getElementById("ausgewählter_etf_box_sparplan");
+
+        if (sparplanName) sparplanName.innerText = name;
+        if (sparplanSymbol) sparplanSymbol.innerText = symbol;
+        if (sparplanBox) sparplanBox.style.display = "block"; // Auf block setzen für die Logik!
+
+        // 🎯 Ansicht für den Sparplan triggern
+        aktualisiereSparplanAnsicht();
+    }
+
+    // 3. Den aktuellen Kurs laden (wird fehlerisoliert danach ausgeführt)
+    if (typeof ladeAktuellenKurs === "function") {
+        try {
+            ladeAktuellenKurs(symbol, modus);
+        } catch (error) {
+            console.error("Fehler beim Kursladen, Berechnung läuft aber weiter:", error);
+        }
+    }
+
+    // Sparplan-Warnung ausblenden
+    let sparplanWarnung = document.getElementById("etf_suche_warnung_sparplan");
+    if (sparplanWarnung) sparplanWarnung.style.display = "none";
 }
+
 
 async function ladeAktuellenKurs(symbol, modus = 'manuell') {
     // Dynamische IDs basierend auf dem Modus wählen
@@ -434,43 +541,6 @@ async function ladeAktuellenKurs(symbol, modus = 'manuell') {
     }
 }
 
-// function fuegeZeileHinzuSuche(datum = "", anzahl = "", preis = "") {
-//     let tbody = document.getElementById("suche_tabelle_body_manuell");
-//     let row = tbody.insertRow();
-
-//     // 📅 Ermittelt das heutige Datum live im Format YYYY-MM-DD
-//     const heute = new Date().toISOString().split('T')[0];
-
-//     row.innerHTML = `
-//         <td>
-//             <input type="date" class="row-datum-suche" max="${heute}" value="${datum}" onchange="
-//                 if(this.value > this.max) { 
-//                     this.value = this.max; 
-//                 }
-//                 toggleVorabpauschaleSuche();
-//             ">
-//         </td>
-//         <td>
-//             <input type="number" class="row-anzahl-suche" step="0.00001" min="0.00001" placeholder="0.0" value="${anzahl}" onchange="
-//                 if(this.value !== '') {
-//                     if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min;
-//                 }
-//             ">
-//         </td>
-//         <td>
-//             <input type="number" class="row-preis-suche" step="0.01" min="0.01" placeholder="0.00" value="${preis}" onchange="
-//                 if(this.value !== '') {
-//                     if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min;
-//                 }
-//             ">
-//         </td>
-//         <td>
-//             <button class="btn-delete" onclick="this.parentNode.parentNode.remove(); toggleVorabpauschaleSuche();">🗑️</button>
-//         </td>
-//     `;
-// }
-
-
 let alterOnload = window.onload;
 window.onload = function() {
     if (alterOnload) alterOnload();
@@ -497,52 +567,9 @@ window.onload = function() {
     if (kaufOption === "suche_manuell") {
         fuegeZeileHinzuSuche();
     }
+    aktualisiereManuelleAnsicht();
 };
 
-
-// function toggleSucheKaufLogik() {
-//     let opt = document.getElementById("suche_kauf_option").value;
-//     let tbody = document.getElementById("suche_tabelle_body_manuell");
-        
-//     document.getElementById("suche_sub_csv").style.display = (opt === "suche_manuell") ? "block" : "none";
-//     document.getElementById("suche_sub_sparplan").style.display = (opt === "suche_sparplan") ? "block" : "none";
-        
-//     if (opt === "suche_sparplan") {
-//         // Wenn der Nutzer auf Sparplan wechselt und die Tabelle enthält nur 1 leere Zeile, löschen wir sie direkt
-//         if (tbody.rows.length === 1 && tbody.rows[0].querySelector(".row-datum-suche").value === "") {
-//             tbody.innerHTML = "";
-//         }
-//     } else if (opt === "suche_manuell") {
-//         // Wenn er zurück auf manuell wechselt und die Tabelle ist komplett leer, spendieren wir wieder eine frische leere Zeile
-//         if (tbody.rows.length === 0) {
-//             fuegeZeileHinzuSuche();
-//         }
-//     }
-// }
-
-
-//         // 2. NEU: CSV-Upload speziell für den Suchpfad (leert die Tabelle nicht zwingend, sondern man kann importieren)
-//         async function uploadCSVSuche() {
-//             let fileInput = document.getElementById("csv_file_suche");
-//             if (fileInput.files.length === 0) return;
-        
-//             let formData = new FormData();
-//             formData.append("file", fileInput.files[0]);
-        
-//             let response = await fetch("/api/upload-csv", { method: "POST", body: formData });
-//             let result = await response.json();
-        
-//             if (result.success) {
-//                 // Bei CSV-Upload leeren wir einmalig die Tabelle vor dem Befüllen
-//                 document.getElementById("suche_tabelle_body_manuell").innerHTML = "";
-//                 result.data.forEach(kauf => {
-//                     fuegeZeileHinzuSuche(kauf.datum, kauf.anzahl, kauf.preis);
-//                 });
-//                 toggleVorabpauschaleSuche();
-//             } else {
-//                 alert("Fehler beim Laden der CSV: Die hochgeladene Datei muss die Spalten 'datum', 'anzahl' und 'preis' enthalten.");
-//             }
-//         }
 
 async function generiereSparplan() {
     // 1. IDs angepasst: Holt das Symbol jetzt aus der Sparplan-Suchbox
@@ -588,13 +615,16 @@ async function generiereSparplan() {
         alert("Fehler bei Sparplan-Generierung: " + result.error);
     }
 
-    // Wenn es ein manueller Klick ohne Daten ist, klappen wir auf
-    if (!datum) { 
+    // 🎯 KORREKTUR: Prüft nun sauber, ob das Ergebnis-Array leer ist oder existiert, statt nach der toten Variable 'datum' zu suchen
+    if (!result.data || result.data.length === 0) { 
         isSparplanTableCollapsed = false; 
     }
-    aktualisiereTabellenAnsichtSparplan();
-
+    
+    if (typeof aktualisiereTabellenAnsichtSparplan === "function") {
+        aktualisiereTabellenAnsichtSparplan();
+    }
 }
+
 
 // 4. AKTUALISIERT: Generiert eine CSV-Datei direkt aus der aktuell aktiven Tabelle
 function downloadCSVFromTable() {
@@ -639,65 +669,6 @@ function downloadCSVFromTable() {
     document.body.removeChild(link);
 }
 
-        // // NEU: Blendet die Vorabpauschalen-Tabelle im Suchbereich ein/aus und berechnet die Jahre
-        // function toggleVorabpauschaleSuche() {
-        //     let haken = document.getElementById("haken_vorabpauschale_suche").checked;
-        //     let vorabBereich = document.getElementById("bereich_vorabpauschale_suche");
-        //     let tbody = document.getElementById("vorab_tabelle_body_suche");
-
-        //     tbody.innerHTML = ""; // Vorherige Zeilen leeren
-        
-        //     if (!haken) {
-        //         vorabBereich.style.display = "none";
-        //         return;
-        //     }
-        
-        //     // Ältestes Jahr aus der Suche-Kauftabelle ermitteln
-        //     let datumsFelder = document.querySelectorAll(".row-datum-suche");
-        //     let MindestJahr = 2018;
-        //     let aktuellesJahr = 2026; // Fixes aktuelles Jahr
-        //     let aeltestesJahr = aktuellesJahr;
-        
-        //     datumsFelder.forEach(feld => {
-        //         if (feld.value) {
-        //             let kaufJahr = new Date(feld.value).getFullYear();
-        //             if (kaufJahr < aeltestesJahr) {
-        //                 aeltestesJahr = kaufJahr;
-        //             }
-        //         }
-        //     });
-        
-        //     if (aeltestesJahr < MindestJahr) {
-        //         aeltestesJahr = MindestJahr;
-        //     }
-        
-        //     // Wenn Käufe vor dem aktuellen Jahr existieren, Tabelle aufbauen
-        //     if (aeltestesJahr < aktuellesJahr) {
-        //         vorabBereich.style.display = "block";
-        //         for (let jahr = aeltestesJahr; jahr < aktuellesJahr; jahr++) {
-        //             let row = tbody.insertRow();
-        //             row.innerHTML = `
-        //                 <td><input type="number" class="vorab-jahr-suche" value="${jahr}" disabled ></td>
-        //                 <td><input type="number" class="vorab-wert-suche" value="0.00000000" step="0.00000001" min="0"></td>
-        //             `;
-        //         }
-        //     } else {
-        //         vorabBereich.style.display = "block";
-        //         // Falls kein älteres Jahr gefunden wurde, dem Nutzer einen Hinweiszeile geben
-        //         let row = tbody.insertRow();
-        //         row.innerHTML = `<td colspan="2" style="color: #666; text-align: center;">Es gibt keine Käufe aus abgelaufenen Kalenderjahren, weshalb keine Vorabpauschalen berechnet werden müssen.</td>`;
-        //     }
-        // }
-
-        // // NEU: Zeigt Zusatzfelder basierend auf dem gewählten Berechnungsziel im Suchbereich an
-        // function toggleRechenZielFelderSuche() {
-        //     let ziel = document.getElementById("rechen_ziel_suche").value;
-        //     let fNetto = document.getElementById("feld_wunschnetto_suche");
-        //     let fAnteile = document.getElementById("feld_anteile_suche");
-        
-        //     fNetto.style.display = (ziel === "wunschnetto") ? "block" : "none";
-        //     fAnteile.style.display = (ziel === "steuer_berechnen") ? "block" : "none";
-        // }
 
 async function sendeBerechnungSparplan() {
     versteckeHinweis(); // Alte Meldungen direkt zu Beginn löschen
@@ -741,7 +712,6 @@ async function sendeBerechnungSparplan() {
     }
 
     // 4. Das Daten-Paket (Payload) für den Sparplan schnüren
-    // Hinweis: Übergreifende Felder wie Freibetrag, Verlusttopf etc. bleiben wie in der manuellen Version
     let payload = {
         rechen_ziel: document.getElementById("rechen_ziel_sparplan").value,
         wert_wunschnetto: parseFloat(document.getElementById("wert_wunschnetto_sparplan").value) || 0,
@@ -751,7 +721,10 @@ async function sendeBerechnungSparplan() {
         verlusttopf: parseFloat(document.getElementById("verlusttopf").value) || 0,     
         kirchensteuer: document.getElementById("kirchensteuer").value,             
         tagesgenau: (document.getElementById("tagesgenau_sparplan").value === "true"),
-        manuelle_vorabpauschale_aktiv: document.getElementById("haken_vorabpauschale_tr").checked,
+        
+        // 🎯 KORREKTUR: Jetzt wird das Sparplan-Häkchen abgefragt!
+        manuelle_vorabpauschale_aktiv: document.getElementById("haken_vorabpauschale_sparplan").checked,
+        
         kaeufe: kaeufe,
         vorabpauschalen: vorabpauschalen,
         teilfreistellung: parseFloat(document.getElementById("teilfreistellung").value) || 0,
@@ -936,42 +909,6 @@ function fuegeZeileHinzuTR(datum = "", anzahl = "", preis = "") {
     isTRTableCollapsed = false; // Bei manuellem Hinzufügen aufklappen
     aktualisiereTabellenAnsichtTR();
 }
-
-// function fuegeZeileHinzuTR(datum = "", anzahl = "", preis = "") {
-//     let tbody = document.getElementById("tr_tr_tabelle_body") || document.getElementById("tr_tabelle_body");
-//     let row = tbody.insertRow();
-        
-//     // 📅 Ermittelt das heutige Datum live im Format YYYY-MM-DD
-//     const heute = new Date().toISOString().split('T')[0];
-        
-//     row.innerHTML = `
-//         <td>
-//             <input type="date" class="row-datum-suche" max="${heute}" value="${datum}" onchange="
-//                 if(this.value > this.max) { 
-//                     this.value = this.max; 
-//                 }
-//                 toggleVorabpauschaleSuche();
-//             ">
-//         </td>
-//         <td>
-//             <input type="number" class="row-anzahl-suche" step="0.00001" min="0.00001" placeholder="0.0" value="${anzahl}" onchange="
-//                 if(this.value !== '') {
-//                     if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min;
-//                 }
-//             ">
-//         </td>
-//         <td>
-//             <input type="number" class="row-preis-suche" step="0.01" min="0.01" placeholder="0.00" value="${preis}" onchange="
-//                 if(this.value !== '') {
-//                     if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min;
-//                 }
-//             ">
-//         </td>
-//     `;
-//     isTRTableCollapsed = false; // Bei manuellem Hinzufügen aufklappen
-//     aktualisiereTabellenAnsichtTR();
-// }
-
 
 // Umschalter für Berechnungsfelder im TR-Pfad
 function toggleRechenZielFelderTR() {
@@ -1414,54 +1351,77 @@ document.addEventListener("DOMContentLoaded", function () {
 
 });
 
-function toggleKeinEtfOption() {
-    const keinEtfGewaehlt = document.getElementById('kein_etf_auswahl').checked;
+
+function aktualisiereManuelleAnsicht() {
     const sucheInputFeld = document.getElementById('etf_suche_input');
-    const csvUploadGruppe = document.getElementById('manuell_csv_upload_group');
+    const symbolAnzeige = document.getElementById('etf_symbol_anzeige')?.innerText || "-";
+    const etfBoxSichtbar = document.getElementById('ausgewählter_etf_box').style.display !== 'none';
     
-    // Die Elemente für die Vorabpauschale
+    const csvUploadGruppe = document.getElementById('manuell_csv_upload_group');
     const vorabpauschaleHakenGroup = document.getElementById('vorabpauschale_haken_group');
     const bereichVorabpauschale = document.getElementById('bereich_vorabpauschale');
+    const sucheWarnung = document.getElementById('etf_suche_warnung');
 
-    if (keinEtfGewaehlt) {
-        // 1. Suche sperren und leeren, CSV erlauben
-        sucheInputFeld.value = "";
-        sucheInputFeld.disabled = true;
-        document.getElementById('ausgewählter_etf_box').style.display = 'none';
-        csvUploadGruppe.style.display = 'block';
-        
-        // 2. Vorabpauschale-Häkchen komplett VERSTECKEN
-        vorabpauschaleHakenGroup.style.display = 'none';
-        
-        // 3. Tabelle IMMER anzeigen
-        bereichVorabpauschale.style.display = 'block';
-        
-        // Optional: Hier eine Funktion aufrufen, die dir die leeren Zeilen (2018 bis heute) in die Tabelle generiert
-        // generiereLeereVorabpauschaleTabelle(); 
+    // Ein ETF gilt NUR DANN als gültig ausgewählt, wenn die Box sichtbar ist UND das Symbol nicht "-" ist.
+    const etfWurdeAusgewaehlt = (etfBoxSichtbar && symbolAnzeige !== "-");
 
+    console.log("🔍 PRÜFUNG:");
+    console.log("Input-Wert:", sucheInputFeld.value);
+    console.log("Symbol in Box:", symbolAnzeige);
+    console.log("Box sichtbar?:", etfBoxSichtbar);
+
+    if (!etfWurdeAusgewaehlt) {
+        console.log("Ergebnis: Ist ETF gültig ausgewählt?:", etfWurdeAusgewaehlt);
+        // ==========================================================================
+        // ❌ FALL A: KEIN ETF GEWÄHLT (Leer oder reiner Freitext)
+        // ==========================================================================
+        if (csvUploadGruppe) csvUploadGruppe.style.display = 'block';
+        if (vorabpauschaleHakenGroup) vorabpauschaleHakenGroup.style.display = 'none';
+        
+        // Tabelle bei Freitext/Leere IMMER dauerhaft anzeigen
+        if (bereichVorabpauschale) bereichVorabpauschale.style.display = 'block';
+
+        // Warnung einblenden, wenn Freitext eingetippt wurde
+        if (sucheWarnung) {
+            sucheWarnung.style.display = (sucheInputFeld && sucheInputFeld.value.trim().length > 0) ? 'block' : 'none';
+        }
+
+        // Jahre generieren
+        if (typeof aktualisiereVorabpauschaleTabelle === "function") {
+            aktualisiereVorabpauschaleTabelle();
+        }
     } else {
-        // Wenn der Haken wieder entfernt wird:
-        sucheInputFeld.disabled = false;
+        // ==========================================================================
+        //  FALL B: GÜLTIGER ETF AKTIV AUSGEWÄHLT
+        // ==========================================================================
+        if (vorabpauschaleHakenGroup) vorabpauschaleHakenGroup.style.display = 'block';
+        if (sucheWarnung) sucheWarnung.style.display = 'none';
         
-        // Häkchen-Option wieder einblenden
-        vorabpauschaleHakenGroup.style.display = 'block';
-        
-        // Den Zustand basierend auf dem aktuellen Häkchen-Status setzen
+        // Zuerst die Jahre im Hintergrund berechnen lassen
+        if (typeof aktualisiereVorabpauschaleTabelle === "function") {
+            aktualisiereVorabpauschaleTabelle();
+        }
+
+        // Jetzt entscheidet EXKLUSIV der Status des Häkchens über die Sichtbarkeit!
         toggleVorabpauschale();
     }
 }
 
 function toggleVorabpauschale() {
-    // Falls "Kein ETF" aktiv ist, greift diese Logik nicht (wird von toggleKeinEtfOption abgefangen)
-    if (document.getElementById('kein_etf_auswahl').checked) return;
-
-    const hakenAktiv = document.getElementById('haken_vorabpauschale').checked;
+    // 🎯 Bereinigt: Die alte 'kein_etf_auswahl'-Abfrage wurde entfernt, da sie Fehler verursacht hat
+    const hakenAktiv = document.getElementById('haken_vorabpauschale')?.checked || false;
     const bereichVorabpauschale = document.getElementById('bereich_vorabpauschale');
 
-    if (hakenAktiv) {
-        bereichVorabpauschale.style.display = 'block';
-    } else {
-        bereichVorabpauschale.style.display = 'none';
+    if (bereichVorabpauschale) {
+        if (hakenAktiv) {
+            bereichVorabpauschale.style.display = 'block';
+            // Falls beim Aktivieren des Hakens im ETF-Modus auch die Jahre berechnet werden sollen:
+            if (typeof aktualisiereVorabpauschaleTabelle === "function") {
+                aktualisiereVorabpauschaleTabelle();
+            }
+        } else {
+            bereichVorabpauschale.style.display = 'none';
+        }
     }
 }
 
@@ -1474,6 +1434,7 @@ function loescheZeileSparplan(button) {
     aktualisiereTabellenAnsichtSparplan();
 }
 
+
 function aktualisiereVorabpauschaleTabelleSparplan() {
     let datumsFelder = document.querySelectorAll(".row-datum-sparplan");
     let MindestJahr = 2018; 
@@ -1482,7 +1443,8 @@ function aktualisiereVorabpauschaleTabelleSparplan() {
 
     // 1. Ältestes Kaufdatum ermitteln
     datumsFelder.forEach(feld => {
-        if (feld.value) {
+        // 🎯 KORREKTUR: Hier muss 'feld' statt 'datum' abgefragt werden!
+        if (feld && feld.value) {
             let kaufJahr = new Date(feld.value).getFullYear();
             if (kaufJahr < aeltestesJahr) {
                 aeltestesJahr = kaufJahr;
@@ -1496,6 +1458,8 @@ function aktualisiereVorabpauschaleTabelleSparplan() {
 
     let vorabBereich = document.getElementById("bereich_vorabpauschale_sparplan");
     let tbody = document.getElementById("vorab_tabelle_body_sparplan");
+    if (!tbody) return;
+    
     tbody.innerHTML = ""; // Vorherige Zeilen leeren
 
     // 2. Zeilen für die Jahre generieren
@@ -1508,17 +1472,70 @@ function aktualisiereVorabpauschaleTabelleSparplan() {
             `;
         }
 
-        // 3. Sichtbarkeit steuern basierend auf dem Häkchen
-        const hakenManuellAktiv = document.getElementById('haken_vorabpauschale_sparplan').checked;
+        // 3. Sichtbarkeit an den neuen Modus koppeln
+        const symbolAnzeige = document.getElementById('etf_symbol_anzeige_sparplan')?.innerText || "-";
+        const etfBoxSichtbar = document.getElementById('ausgewählter_etf_box_sparplan').style.display !== 'none';
+        const etfWurdeAusgewaehlt = (etfBoxSichtbar && symbolAnzeige !== "-");
+        
+        const hakenManuellAktiv = document.getElementById('haken_vorabpauschale_sparplan')?.checked || false;
 
-        if (hakenManuellAktiv) {
-            vorabBereich.style.display = "block";
+        // Wenn kein ETF da ist OR das Häkchen im ETF-Modus aktiv ist -> Zeigen!
+        if (!etfWurdeAusgewaehlt || hakenManuellAktiv) {
+            if (vorabBereich) vorabBereich.style.display = "block";
         } else {
-            vorabBereich.style.display = "none";
+            if (vorabBereich) vorabBereich.style.display = "none";
         }
 
     } else {
-        vorabBereich.style.display = "none";
+        if (vorabBereich) vorabBereich.style.display = "none";
+    }
+}
+
+
+function aktualisiereSparplanAnsicht() {
+    const sucheInputFeld = document.getElementById('etf_suche_input_sparplan');
+    const symbolAnzeige = document.getElementById('etf_symbol_anzeige_sparplan')?.innerText || "-";
+    const etfBoxSichtbar = document.getElementById('ausgewählter_etf_box_sparplan').style.display !== 'none';
+    
+    const vorabpauschaleHakenGroup = document.getElementById('sparplan_vorabpauschale_haken_group');
+    const bereichVorabpauschale = document.getElementById('bereich_vorabpauschale_sparplan');
+    const sucheWarnung = document.getElementById('etf_suche_warnung_sparplan');
+
+    // Ein ETF gilt als gültig ausgewählt, wenn die Box aktiv ist und das Symbol nicht "-" lautet
+    const etfWurdeAusgewaehlt = (etfBoxSichtbar && symbolAnzeige !== "-");
+
+    if (!etfWurdeAusgewaehlt) {
+        // ==========================================================================
+        // ❌ FALL A: KEIN ETF GEWÄHLT (Leer oder Freitext)
+        // ==========================================================================
+        if (vorabpauschaleHakenGroup) vorabpauschaleHakenGroup.style.display = 'none';
+        
+        // Im Freitext-Modus die Tabelle IMMER dauerhaft anzeigen
+        if (bereichVorabpauschale) bereichVorabpauschale.style.display = 'block';
+
+        // Warnung steuern: Anzeigen, wenn wilder Text eingetippt wurde
+        if (sucheWarnung) {
+            sucheWarnung.style.display = (sucheInputFeld && sucheInputFeld.value.trim().length > 0) ? 'block' : 'none';
+        }
+
+        // Jahre in der Tabelle neu berechnen und füllen
+        if (typeof aktualisiereVorabpauschaleTabelleSparplan === "function") {
+            aktualisiereVorabpauschaleTabelleSparplan();
+        }
+    } else {
+        // ==========================================================================
+        //  FALL B: GÜLTIGER ETF IM SPARPLAN GEWÄHLT
+        // ==========================================================================
+        if (vorabpauschaleHakenGroup) vorabpauschaleHakenGroup.style.display = 'block';
+        if (sucheWarnung) sucheWarnung.style.display = 'none';
+        
+        // Erst Jahre im Hintergrund berechnen lassen
+        if (typeof aktualisiereVorabpauschaleTabelleSparplan === "function") {
+            aktualisiereVorabpauschaleTabelleSparplan();
+        }
+
+        // Jetzt entscheidet exklusiv der Status des Häkchens über die Sichtbarkeit
+        toggleVorabpauschaleSparplan();
     }
 }
 
@@ -1556,6 +1573,27 @@ function toggleRechenZielFelderSparplan() {
 // Globaler Zustand für den Einklapp-Status (Standard: eingeklappt nach CSV-Upload)
 let isTableCollapsed = true; 
 
+
+// Funktion für den Klick auf die Toggle-Buttons
+function toggleTabelleKlappen() {
+    isTableCollapsed = !isTableCollapsed;
+    aktualisiereTabellenAnsicht();
+}
+
+
+// Globaler Zustand für den Einklapp-Status der Sparplan-Tabelle
+let isSparplanTableCollapsed = true; 
+
+// Click-Handler für die Buttons des Sparplans
+function toggleTabelleKlappenSparplan() {
+    isSparplanTableCollapsed = !isSparplanTableCollapsed;
+    aktualisiereTabellenAnsichtSparplan();
+}
+
+// Globaler Zustand für den Einklapp-Status der Trade Republic Tabelle
+let isTRTableCollapsed = true; 
+
+
 function aktualisiereTabellenAnsicht() {
     let tbody = document.getElementById("tabelle_body");
     // Alle echten Zeilen holen (Platzhalter-Zeile ausschließen)
@@ -1571,7 +1609,7 @@ function aktualisiereTabellenAnsicht() {
 
     // 🎯 REGLUNG 1: Wenn weniger als 3 Einträge existieren: Beide Knöpfe weg, alles sichtbar
     if (zeilen.length < 3) {
-        zeilen.forEach(z => z.style.display = "");
+        zeilen.forEach(z => z.classList.remove("row-hidden")); // Sichtbar machen
         if (btnOben) btnOben.style.display = "none";
         if (btnUnten) btnUnten.style.display = "none";
         if (aktionsLeiste) aktionsLeiste.style.display = "flex"; // Buttons immer sichtbar
@@ -1589,12 +1627,12 @@ function aktualisiereTabellenAnsicht() {
         // Verstecke die Aktionsknöpfe (Hinzufügen, Download, Leeren)
         if (aktionsLeiste) aktionsLeiste.style.display = "none";
 
-        // Erste und letzte Zeile zeigen, den Rest verstecken
+        // Erste und letzte Zeile zeigen, den Rest via CSS-Klasse verstecken
         zeilen.forEach((zeile, index) => {
             if (index === 0 || index === zeilen.length - 1) {
-                zeile.style.display = "";
+                zeile.classList.remove("row-hidden");
             } else {
-                zeile.style.display = "none";
+                zeile.classList.add("row-hidden"); // Überschreibt das Mobil-Grid!
             }
         });
 
@@ -1602,6 +1640,8 @@ function aktualisiereTabellenAnsicht() {
         let verdeckteAnzahl = zeilen.length - 2;
         let placeholderTr = document.createElement("tr");
         placeholderTr.className = "placeholder-row";
+        // Streckt den Platzhalter im Mobil-Grid über beide Spalten
+        placeholderTr.style.setProperty("grid-column", "span 2", "important");
         placeholderTr.innerHTML = `
             <td colspan="4" style="text-align: center; font-style: italic;">
                 ➔ ${verdeckteAnzahl} weitere Einträge ausgeblendet...
@@ -1624,20 +1664,10 @@ function aktualisiereTabellenAnsicht() {
         if (aktionsLeiste) aktionsLeiste.style.display = "flex";
 
         // Alle Tabellenzeilen einblenden
-        zeilen.forEach(zeile => zeile.style.display = "");
+        zeilen.forEach(zeile => zeile.classList.remove("row-hidden"));
     }
 }
 
-
-// Funktion für den Klick auf die Toggle-Buttons
-function toggleTabelleKlappen() {
-    isTableCollapsed = !isTableCollapsed;
-    aktualisiereTabellenAnsicht();
-}
-
-
-// Globaler Zustand für den Einklapp-Status der Sparplan-Tabelle
-let isSparplanTableCollapsed = true; 
 
 function aktualisiereTabellenAnsichtSparplan() {
     let tbody = document.getElementById("sparplan_tabelle_body");
@@ -1654,7 +1684,7 @@ function aktualisiereTabellenAnsichtSparplan() {
 
     // Regel 1: Unter 3 Einträgen -> alles anzeigen, Knöpfe weg
     if (zeilen.length < 3) {
-        zeilen.forEach(z => z.style.display = "");
+        zeilen.forEach(z => z.classList.remove("row-hidden"));
         if (btnOben) btnOben.style.display = "none";
         if (btnUnten) btnUnten.style.display = "none";
         if (aktionsLeiste) aktionsLeiste.style.display = "flex";
@@ -1675,9 +1705,9 @@ function aktualisiereTabellenAnsichtSparplan() {
         // Nur erste und letzte Zeile anzeigen
         zeilen.forEach((zeile, index) => {
             if (index === 0 || index === zeilen.length - 1) {
-                zeile.style.display = "";
+                zeile.classList.remove("row-hidden");
             } else {
-                zeile.style.display = "none";
+                zeile.classList.add("row-hidden"); // Überschreibt das Mobil-Grid!
             }
         });
 
@@ -1685,6 +1715,8 @@ function aktualisiereTabellenAnsichtSparplan() {
         let verdeckteAnzahl = zeilen.length - 2;
         let placeholderTr = document.createElement("tr");
         placeholderTr.className = "placeholder-row";
+        // Streckt den Platzhalter im Mobil-Grid über beide Spalten
+        placeholderTr.style.setProperty("grid-column", "span 2", "important");
         placeholderTr.innerHTML = `
             <td colspan="4" style="text-align: center; font-style: italic;">
                 ➔ ${verdeckteAnzahl} weitere Einträge ausgeblendet...
@@ -1706,18 +1738,10 @@ function aktualisiereTabellenAnsichtSparplan() {
         if (aktionsLeiste) aktionsLeiste.style.display = "flex";
 
         // Alle echten Zeilen einblenden
-        zeilen.forEach(zeile => zeile.style.display = "");
+        zeilen.forEach(zeile => zeile.classList.remove("row-hidden"));
     }
 }
 
-// Click-Handler für die Buttons des Sparplans
-function toggleTabelleKlappenSparplan() {
-    isSparplanTableCollapsed = !isSparplanTableCollapsed;
-    aktualisiereTabellenAnsichtSparplan();
-}
-
-// Globaler Zustand für den Einklapp-Status der Trade Republic Tabelle
-let isTRTableCollapsed = true; 
 
 function aktualisiereTabellenAnsichtTR() {
     let tbody = document.getElementById("tr_tabelle_body");
@@ -1734,7 +1758,7 @@ function aktualisiereTabellenAnsichtTR() {
 
     // Regel 1: Unter 3 Einträgen -> alles anzeigen, Knöpfe weg, Aktionsleiste sichtbar
     if (zeilen.length < 3) {
-        zeilen.forEach(z => z.style.display = "");
+        zeilen.forEach(z => z.classList.remove("row-hidden"));
         if (btnOben) btnOben.style.display = "none";
         if (btnUnten) btnUnten.style.display = "none";
         if (aktionsLeiste) aktionsLeiste.style.display = "flex";
@@ -1755,9 +1779,9 @@ function aktualisiereTabellenAnsichtTR() {
         // Nur erste und letzte Zeile anzeigen
         zeilen.forEach((zeile, index) => {
             if (index === 0 || index === zeilen.length - 1) {
-                zeile.style.display = "";
+                zeile.classList.remove("row-hidden");
             } else {
-                zeile.style.display = "none";
+                zeile.classList.add("row-hidden"); // Überschreibt das Mobil-Grid!
             }
         });
 
@@ -1765,6 +1789,8 @@ function aktualisiereTabellenAnsichtTR() {
         let verdeckteAnzahl = zeilen.length - 2;
         let placeholderTr = document.createElement("tr");
         placeholderTr.className = "placeholder-row";
+        // Streckt den Platzhalter im Mobil-Grid über beide Spalten
+        placeholderTr.style.setProperty("grid-column", "span 2", "important");
         placeholderTr.innerHTML = `
             <td colspan="4" style="text-align: center; font-style: italic;">
                 ➔ ${verdeckteAnzahl} weitere Einträge ausgeblendet...
@@ -1786,7 +1812,7 @@ function aktualisiereTabellenAnsichtTR() {
         if (aktionsLeiste) aktionsLeiste.style.display = "flex";
 
         // Alle echten Zeilen einblenden
-        zeilen.forEach(zeile => zeile.style.display = "");
+        zeilen.forEach(zeile => zeile.classList.remove("row-hidden"));
     }
 }
 
