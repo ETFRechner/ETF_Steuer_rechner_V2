@@ -527,7 +527,7 @@ def create_pdf(
         textColor=colors.HexColor("#94a3b8"), # Sehr dezentes Hellgrau
         spaceBefore=25                # Abstand zur Tabelle darüber
     )
-    
+
 
     elements = []
 

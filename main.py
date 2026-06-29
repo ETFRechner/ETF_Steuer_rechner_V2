@@ -80,29 +80,65 @@ async def upload_csv(file: UploadFile = File(...)):
 
 @app.post("/api/calculate")
 async def calculate_steuer(payload: CalculationPayload):
-    # raise HTTPException(status_code=501, detail="Diese Funktion ist noch nicht implementiert. Bitte implementiere die Berechnungslogik in der Funktion.")
-    aktuelle_warnungen = []  # Beispielwarnung, die du anpassen kannst
-    # aktuelle_warnungen.append("WARNUNG: Die Berechnung basiert auf den übermittelten Daten. Bitte überprüfe die Eingaben sorgfältig.")
+    aktuelle_warnungen = []
 
-    # if payload.quelle == "tr" or payload.quelle == "suche":
-    if (payload.quelle == "tr" or payload.quelle == "suche") and not payload.vorabpauschalen:
+    # 1. Zustand des manuellen Häkchens direkt aus Pydantic lesen
+    manuell_aktiv = payload.manuelle_vorabpauschale_aktiv
 
-        # bestimme startjahr für vorabpauschale
-        # payoad.kaeufe.sort(key=lambda x: x.datum)  # Sortiere die Käufe nach Datum
+    ticker_gesaeubert = str(payload.ticker).strip() if payload.ticker else ""
+    ticker_existiert = ticker_gesaeubert not in ["", "None", "-", "null"]
+
+    # 3. Automatische Schätzung nur, wenn ein ECHTER Ticker da ist und der Haken aus ist
+    automatische_schätzung_aktiv = ticker_existiert and not manuell_aktiv
+
+    if automatische_schätzung_aktiv and payload.ticker:
+        # Bestimme Startjahr für die historische Abfrage
         startjahr = payload.kaeufe[0].datum.year if payload.kaeufe else None
 
-        # vorabpauschale berechnen
-        kursdaten = funktionen.lade_kursdaten(payload.ticker,startjahr)
+        # Vorabpauschale automatisch über Kurshistorie schätzen
+        kursdaten = funktionen.lade_kursdaten(payload.ticker, startjahr)
         vorabpauschalen = funktionen.berechne_vorabpauschalen(kursdaten)
 
         etf_name = payload.ticker
     else:
-        vorab_liste = [v.model_dump() for v in payload.vorabpauschalen]
+        # FALLBACK: Der Haken ist an ODER wir sind in der rein manuellen Zeilen-Eingabe.
+        # Wir nutzen ausschließlich die vom User übermittelten Tabellenwerte.
+        if payload.vorabpauschalen:
+            vorab_liste = [v.model_dump() for v in payload.vorabpauschalen]
+            vorabpauschalen = pd.DataFrame(vorab_liste)
+        else:
+            # Falls die Tabelle leer übergeben wurde, ein leeres DataFrame bereitstellen,
+            # damit nachfolgende mathematische Berechnungen nicht mit einem AttributeError abstürzen.
+            vorabpauschalen = pd.DataFrame(columns=["jahr", "wert"])
+            
+        etf_name = "unbekannt" if payload.quelle == "manuell" else (payload.ticker or "unbekannt")
 
-        # 2. Das DataFrame daraus erstellen
-        vorabpauschalen = pd.DataFrame(vorab_liste)
+    # ... AB HIER GEHT DEIN CODE EXAKT WEITER (if payload.rechen_ziel == "steuerfrei" etc.) ...
+# @app.post("/api/calculate")
+# async def calculate_steuer(payload: CalculationPayload):
+#     # raise HTTPException(status_code=501, detail="Diese Funktion ist noch nicht implementiert. Bitte implementiere die Berechnungslogik in der Funktion.")
+#     aktuelle_warnungen = []  # Beispielwarnung, die du anpassen kannst
+#     # aktuelle_warnungen.append("WARNUNG: Die Berechnung basiert auf den übermittelten Daten. Bitte überprüfe die Eingaben sorgfältig.")
 
-        etf_name = "unbekannt"
+#     # if payload.quelle == "tr" or payload.quelle == "suche":
+#     if (payload.quelle == "tr" or payload.quelle == "suche") and not payload.vorabpauschalen:
+
+#         # bestimme startjahr für vorabpauschale
+#         # payoad.kaeufe.sort(key=lambda x: x.datum)  # Sortiere die Käufe nach Datum
+#         startjahr = payload.kaeufe[0].datum.year if payload.kaeufe else None
+
+#         # vorabpauschale berechnen
+#         kursdaten = funktionen.lade_kursdaten(payload.ticker,startjahr)
+#         vorabpauschalen = funktionen.berechne_vorabpauschalen(kursdaten)
+
+#         etf_name = payload.ticker
+#     else:
+#         vorab_liste = [v.model_dump() for v in payload.vorabpauschalen]
+
+#         # 2. Das DataFrame daraus erstellen
+#         vorabpauschalen = pd.DataFrame(vorab_liste)
+
+#         etf_name = "unbekannt"
 
 
 
@@ -225,40 +261,47 @@ async def get_etf_price(symbol: str):
     except Exception as e:
         return {"success": False, "error": str(e)}
     
-
-
 @app.post("/api/generate-sparplan")
 async def generate_sparplan(payload: SparplanPayload):
     try:
         ticker = yf.Ticker(payload.symbol)
-        # Historische Daten für den Zeitraum laden
         df = ticker.history(start=payload.start_date, end=payload.end_date, interval="1d")
         
         if df.empty:
             return {"success": False, "error": "Keine historischen Kurse für diesen Zeitraum gefunden."}
             
-        # Wir gruppieren nach Jahr und Monat, um den gewünschten Ausführungstag zu finden
         df['jahr'] = df.index.year
         df['monat'] = df.index.month
         df['tag'] = df.index.day
         
         generierte_kaeufe = []
         
-        # Für jeden Monat im Zeitraum den passenden Tag suchen
         grouped = df.groupby(['jahr', 'monat'])
         for (jahr, monat), group in grouped:
-            # Versuche den exakten Tag (z.B. 1. oder 15.) zu finden, sonst den nächsten verfügbaren Börsentag
             ziel_tag = payload.tag
             verfuegbare_tage = group['tag'].tolist()
             
-            # Finde den Tag, der am nächsten am Ziel-Tag liegt (aber nicht davor, falls möglich)
+            # Findet den Tag mit dem geringsten Abstand zum Wunschtag
             gueltiger_tag = min(verfuegbare_tage, key=lambda x: abs(x - ziel_tag))
             
             row = group[group['tag'] == gueltiger_tag].iloc[0]
-            kauf_datum = row.name.strftime('%Y-%m-%d')
+            tatsaechliches_datum = row.name.date()
+            
+            # --- DIESE PRÜFUNG ERSETZT DIE ALTEN VERSUCHE ---
+            # Wenn wir im Startmonat sind, darf der gefundene Tag nicht WEIT nach dem Wunschtag liegen.
+            # Beispiel: Wunschtag = 1, Startdatum = 25.06., gefundener Tag = 25. -> 25 > 1 -> Überspringen!
+            if tatsaechliches_datum.year == payload.start_date.year and tatsaechliches_datum.month == payload.start_date.month:
+                if gueltiger_tag > ziel_tag + 4: # +4 puffert Wochenenden/Feiertage ab, falls der 1. ein Samstag war
+                    continue
+            
+            # Sicherheitsnetz für kalendarisch davor liegende Tage
+            if tatsaechliches_datum < payload.start_date:
+                continue
+            # ------------------------------------------------
+                
+            kauf_datum = tatsaechliches_datum.strftime('%Y-%m-%d')
             kauf_preis = round(row['Close'], 2)
             
-            # Anzahl Anteile = Sparrate / Kurs
             anzahl_anteile = round(payload.rate / kauf_preis, 5)
             
             generierte_kaeufe.append({
@@ -272,6 +315,7 @@ async def generate_sparplan(payload: SparplanPayload):
     except Exception as e:
         return {"success": False, "error": str(e)}
     
+
 
 @app.post("/api/upload-trade-republic")
 async def upload_trade_republic(file: UploadFile = File(...)):

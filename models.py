@@ -29,6 +29,7 @@ class CalculationPayload(BaseModel):
     kirchensteuer: str
     bereits_verkaufte_anteile: float
     tagesgenau: bool
+    manuelle_vorabpauschale_aktiv: bool = False
     kaeufe: List[KaufEintrag]
     vorabpauschalen: List[VorabEintrag]
     quelle: str
