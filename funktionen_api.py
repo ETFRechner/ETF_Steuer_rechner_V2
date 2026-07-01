@@ -3,14 +3,25 @@ import numpy as np
 import pandas as pd
 # Importiere dein Modell aus deiner models.py
 from models import CalculationPayload 
-import requests
 import yfinance as yf
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.lib.pagesizes import A4
-from reportlab.lib.units import cm
-from reportlab.platypus import TableStyle
+# from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table
+# from reportlab.lib.styles import getSampleStyleSheet
+# from reportlab.lib.pagesizes import A4
+# from reportlab.lib.units import cm
+# from reportlab.platypus import TableStyle
 import io
+
+from reportlab.lib.pagesizes import A4
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import cm
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+
+from models import CalculationPayload #, RechenZiel, KirchensteuerStatus
+from reportlab.platypus import Image
+import os
+from reportlab.lib.utils import ImageReader
+from reportlab.platypus import KeepTogether
 
 def lade_kursdaten(ticker, startjahr):
 
@@ -271,6 +282,115 @@ def finde_anteile(ziel_netto, max_anteile, aktueller_kurs, data, vorabpauschale,
     return round(mid, 6)
 
 
+# def daten_aufbereiten(payload: CalculationPayload):
+#     # 1. Da payload.kaeufe eine Liste von Pydantic-Objekten (KaufEintrag) ist,
+#     # wandeln wir jedes Objekt per .model_dump() in ein normales Dict um.
+#     kaeufe_liste = [kauf.model_dump() for kauf in payload.kaeufe]
+    
+#     # 2. DataFrame aus der Liste von Dictionaries erstellen
+#     df_kaeufe = pd.DataFrame(kaeufe_liste)
+    
+#     # Falls die Liste leer sein sollte, fangen wir das hier ab, damit es keine Fehler gibt
+#     if df_kaeufe.empty:
+#         raise ValueError("Die Liste der Käufe ist leer. Bitte geben Sie mindestens einen Kauf ein.")
+    
+#     # Optional: Da du steuerlich vermutlich nach dem FIFO-Prinzip (First-In-First-Out)
+#     # rechnen musst, sortieren wir das DataFrame sicherheitshalber nach Datum.
+#     data = df_kaeufe.sort_values(by='datum').reset_index(drop=True)
+
+#     max_anteile = df_kaeufe["anzahl"].sum()
+#     bereits_verkauft = payload.bereits_verkaufte_anteile
+#     aktueller_kurs = payload.verkaufskurs
+
+#     # 🎯 BEST PRACTICE: Nutzung des KirchensteuerStatus-Enums
+#     if payload.kirchensteuer == KirchensteuerStatus.NEIN:
+#         steuersatz = 0.26375
+#     elif payload.kirchensteuer == KirchensteuerStatus.ACHT_PROZENT:
+#         steuersatz = 0.2782
+#     elif payload.kirchensteuer == KirchensteuerStatus.NEUN_PROZENT:
+#         steuersatz = 0.2799
+#     else:
+#         # Sicherheits-Fallback falls unerwartet etwas schiefgeht
+#         steuersatz = 0.26375
+
+#     # Achtung: In deiner index.html / app.js übergibst du die Teilfreistellung vermutlich 
+#     # bereits als Prozentwert (z.B. 30 statt 0.30) oder als Dezimalzahl?
+#     # Wenn dein JS eine Zahl wie 30 schickt, konvertiert dies deine Zeile hier sauber zu 0.3.
+#     teilfreistellung_quote = payload.teilfreistellung * 0.01
+#     verlusttopf = payload.verlusttopf
+#     freibetrag = payload.freibetrag
+#     tagesgeanue_berechnung = payload.tagesgenau
+#     return data, max_anteile, bereits_verkauft, aktueller_kurs, steuersatz, teilfreistellung_quote, verlusttopf, freibetrag, tagesgeanue_berechnung
+
+# def berechne_steuerfrei(payload: CalculationPayload, vorabpauschalen: pd.DataFrame) -> pd.DataFrame:
+#     """
+#     Nimmt das CalculationPayload entgegen, extrahiert die Käufe,
+#     wandelt sie in ein Pandas DataFrame um und berechnet wichtige Basiswerte.
+#     """
+#     data, max_anteile, bereits_verkauft, aktueller_kurs, steuersatz, teilfreistellung_quote, verlusttopf, freibetrag, tagesgeanue_berechnung = daten_aufbereiten(payload)
+    
+#     anzahl_verkaufen = finde_anteile_ohne_steuer(max_anteile-bereits_verkauft, aktueller_kurs, data, vorabpauschalen, bereits_verkauft, steuersatz, teilfreistellung_quote, verlusttopf, freibetrag, tagesgeanue_berechnung)
+#     gewinn, brutto, gesamte_vorabpauschale = bestimme_steuer(anzahl_verkaufen, aktueller_kurs, data, vorabpauschalen, bereits_verkauft, tagesgenau = tagesgeanue_berechnung)
+
+#     gewinn_nach_vorabpauschale, gewinn_teilfreistellung, gewinn_nach_verlusttopf, gewinn_steuerpflichtig = bestimme_steuerpflichtigen_gewinn(gewinn, teilfreistellung_quote, gesamte_vorabpauschale, verlusttopf, freibetrag, all=True)
+#     steuer = gewinn_steuerpflichtig * steuersatz
+#     netto = brutto - steuer
+
+#     if gewinn_teilfreistellung < 0:
+#         verlusttopf_nach_verkauf = verlusttopf - gewinn_teilfreistellung
+#     else:
+#         verlusttopf_nach_verkauf = max(0, verlusttopf - gewinn_teilfreistellung)
+
+#     # 🎯 .value gibt den ursprünglichen String ("nein", "8%" oder "9%") an das PDF weiter
+#     kirchensteuer = payload.kirchensteuer.value
+#     gesamtkosten = sum(data["anzahl"] * data["preis"])
+
+#     return anzahl_verkaufen, max_anteile, bereits_verkauft, brutto, gewinn, gewinn_teilfreistellung, gewinn_nach_vorabpauschale, gewinn_nach_verlusttopf, gewinn_steuerpflichtig, steuer, netto, gesamtkosten, aktueller_kurs, freibetrag, verlusttopf_nach_verkauf, gesamte_vorabpauschale, teilfreistellung_quote, kirchensteuer
+
+
+# def berechne_wunschnetto(payload: CalculationPayload, vorabpauschalen: pd.DataFrame):
+#     data, max_anteile, bereits_verkauft, aktueller_kurs, steuersatz, teilfreistellung_quote, verlusttopf, freibetrag, tagesgeanue_berechnung = daten_aufbereiten(payload)
+#     gewolltes_netto = payload.wert_wunschnetto
+    
+#     anzahl_verkaufen = finde_anteile(gewolltes_netto, max_anteile, aktueller_kurs, data, vorabpauschalen, bereits_verkauft, steuersatz, teilfreistellung_quote, verlusttopf, freibetrag, tagesgeanue_berechnung)
+#     gewinn, brutto, gesamte_vorabpauschale= bestimme_steuer(anzahl_verkaufen, aktueller_kurs, data, vorabpauschalen, bereits_verkauft, tagesgenau = tagesgeanue_berechnung)
+
+#     gewinn_nach_vorabpauschale, gewinn_teilfreistellung, gewinn_nach_verlusttopf, gewinn_steuerpflichtig = bestimme_steuerpflichtigen_gewinn(gewinn, teilfreistellung_quote, gesamte_vorabpauschale, verlusttopf, freibetrag, all=True)
+#     steuer = gewinn_steuerpflichtig * steuersatz
+#     netto = brutto - steuer
+
+#     if gewinn_teilfreistellung < 0:
+#         verlusttopf_nach_verkauf = verlusttopf - gewinn_teilfreistellung
+#     else:
+#         verlusttopf_nach_verkauf = max(0, verlusttopf - gewinn_teilfreistellung)
+
+#     # 🎯 .value gibt den ursprünglichen String ("nein", "8%" oder "9%") an das PDF weiter
+#     kirchensteuer = payload.kirchensteuer.value
+#     gesamtkosten = sum(data["anzahl"] * data["preis"])
+
+#     return anzahl_verkaufen, max_anteile, bereits_verkauft, brutto, gewinn, gewinn_teilfreistellung, gewinn_nach_vorabpauschale, gewinn_nach_verlusttopf, gewinn_steuerpflichtig, steuer, netto, gesamtkosten, aktueller_kurs, freibetrag, verlusttopf_nach_verkauf, gesamte_vorabpauschale, teilfreistellung_quote, kirchensteuer
+
+# def berechne_anteile_steuer(payload: CalculationPayload, vorabpauschalen: pd.DataFrame):
+#     data, max_anteile, bereits_verkauft, aktueller_kurs, steuersatz, teilfreistellung_quote, verlusttopf, freibetrag, tagesgeanue_berechnung = daten_aufbereiten(payload)
+#     anzahl_verkaufen = payload.wert_anteile
+
+#     gewinn, brutto, gesamte_vorabpauschale = bestimme_steuer(anzahl_verkaufen, aktueller_kurs, data, vorabpauschalen, bereits_verkauft, tagesgenau = tagesgeanue_berechnung)
+
+#     # Typo korrigiert: bestimme_steuerpflichtigen_gewinn (vorher drei 'n' am Ende)
+#     gewinn_nach_vorabpauschale, gewinn_teilfreistellung, gewinn_nach_verlusttopf, gewinn_steuerpflichtig = bestimme_steuerpflichtigen_gewinn(gewinn, teilfreistellung_quote, gesamte_vorabpauschale, verlusttopf, freibetrag, all=True)
+#     steuer = gewinn_steuerpflichtig * steuersatz
+#     netto = brutto - steuer
+
+#     if gewinn_teilfreistellung < 0:
+#         verlusttopf_nach_verkauf = verlusttopf - gewinn_teilfreistellung
+#     else:
+#         verlusttopf_nach_verkauf = max(0, verlusttopf - gewinn_teilfreistellung)
+
+#     # 🎯 .value gibt den ursprünglichen String ("nein", "8%" oder "9%") an das PDF weiter
+#     kirchensteuer = payload.kirchensteuer.value
+#     gesamtkosten = sum(data["anzahl"] * data["preis"])
+
+#     return anzahl_verkaufen, max_anteile, bereits_verkauft, brutto, gewinn, gewinn_teilfreistellung, gewinn_nach_vorabpauschale, gewinn_nach_verlusttopf, gewinn_steuerpflichtig, steuer, netto, gesamtkosten, aktueller_kurs, freibetrag, verlusttopf_nach_verkauf, gesamte_vorabpauschale, teilfreistellung_quote, kirchensteuer
 
 def daten_aufbereiten(payload: CalculationPayload):
     # 1. Da payload.kaeufe eine Liste von Pydantic-Objekten (KaufEintrag) ist,
@@ -432,12 +552,51 @@ def footer(canvas, doc):
     canvas.restoreState()
 
 
-import io
-from reportlab.lib.pagesizes import A4
-from reportlab.lib import colors
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import cm
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+def header_later_pages(canvas, doc):
+    """Zeichnet das Logo ab Seite 2 oben rechts in die Ecke."""
+    canvas.saveState()
+
+        
+    # Pfad zu deinem Logo ermitteln
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    logo_path = os.path.join(current_dir, "static", "logo.png") 
+    
+    # Maße auslesen für die proportionale Skalierung
+    img_reader = ImageReader(logo_path)
+    img_w, img_h = img_reader.getSize()
+    
+    # Auf den Folgeseiten machen wir es dezent (z. B. 22pt hoch)
+    ziel_hoehe = 22.0
+    ziel_breite = (img_w / img_h) * ziel_hoehe
+    
+    # --- POSITIONIERUNG OBEN RECHTS ---
+    # A4 Breite ist 595.27 pt. Wir ziehen den rechten Rand (2cm = ca. 56.7pt) 
+    # und die Breite des Logos ab, damit es exakt rechtsbündig abschließt.
+    x_pos = 595.27 - (2 * 28.34) - ziel_breite  # 1 cm = 28.34 pt bei ReportLab
+    
+    # A4 Höhe ist 841.89 pt. Wir platzieren es knapp unter dem oberen Rand.
+    y_pos = 841.89 - (1.5 * 28.34)
+    
+    # Bild direkt auf das Canvas zeichnen
+    # canvas.drawImage(logo_path, x_pos, y_pos, width=ziel_breite, height=ziel_hoehe)
+
+    canvas.drawImage(
+            logo_path, 
+            x_pos, 
+            y_pos, 
+            width=ziel_breite, 
+            height=ziel_hoehe, 
+            mask='auto'  # <--- Das zwingt ReportLab, die Transparenz zu erhalten!
+        )
+    
+
+    
+    canvas.restoreState()
+
+
+def footer_and_header_later(canvas, doc):
+    footer(canvas, doc)             # Ruft deinen bestehenden Footer auf
+    header_later_pages(canvas, doc) # Ruft den neuen Logo-Header auf
 
 def create_pdf(
     anzahl_verkaufen, max_anteile, bereits_verkauft,
@@ -528,54 +687,108 @@ def create_pdf(
         spaceBefore=25                # Abstand zur Tabelle darüber
     )
 
+    header_text_style = ParagraphStyle(
+        'CustomHeaderSubtitle',
+        parent=styles['Normal'], # Wir erben von der Basis
+        fontName='Helvetica-Bold',
+        fontSize=16,             # Kleiner als die vorherigen 24pt des TitleStyles
+        leading=20,              # Zeilenabstand passend zur Schriftgröße
+        textColor=TEXT_MUTED     # Nutzt dein definiertes Slate-Grau (#64748b)
+    )
+    
+
 
     elements = []
 
-    elements.append(
-    Paragraph(
-        '<a href="https://www.etfsteuerrechner.de"><font color="blue"><u>etfsteuerrechner.de</u></font></a> – Ergebnis',
-        title_style
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+
+    logo_path = os.path.join(current_dir, "static", "logo.png") 
+    
+    # --- FIX FÜR VERZERRUNG: Proportionen automatisch auslesen ---
+    img_reader = ImageReader(logo_path)
+    img_w, img_h = img_reader.getSize()
+    
+    # Wir wollen, dass das Logo genau 28pt hoch ist (passend zur Schrifthöhe)
+    ziel_hoehe = 50.0
+    ziel_breite = (img_w / img_h) * ziel_hoehe # Berechnet die perfekte Breite proportional
+    
+    logo_img = Image(logo_path, width=ziel_breite, height=ziel_hoehe)
+    logo_img.hAlign = 'LEFT'
+
+    header_text = Paragraph(
+        ' - Steuerreport',
+        header_text_style
     )
-    )
+
+    # Wir packen Logo und Text in eine Tabelle, damit sie perfekt nebeneinander stehen
+    # Spalte 1: Exakt so breit wie dein berechnetes Logo + 10pt Abstand zum Text
+    # Spalte 2: Der Rest der verfügbaren Seitenbreite (483pt gesamt)
+    spalten_breiten = [max(30, ziel_breite + 10), 483 - max(30, ziel_breite + 10)]
+    
+    header_table = Table([[logo_img, header_text]], colWidths=spalten_breiten)
+    header_table.setStyle(TableStyle([
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'), # Zentriert Logo und Text vertikal zueinander
+        ('ALIGN', (0,0), (0,0), 'LEFT'),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 0),
+        ('TOPPADDING', (0,0), (-1,-1), 0),
+        ('LEFTPADDING', (0,0), (-1,-1), 0),
+        ('RIGHTPADDING', (0,0), (-1,-1), 0),
+    ]))
+    
+    elements.append(header_table)
+    
+    # Eine feine, elegante Trennlinie unter dem kombinierten Header
+    elements.append(Spacer(1, 10))
+    line_table = Table([[""]], colWidths=[483])
+    line_table.setStyle(TableStyle([
+        ('LINEBELOW', (0,0), (-1,-1), 1, PRIMARY_COLOR),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 0),
+        ('TOPPADDING', (0,0), (-1,-1), 0),
+    ]))
+    elements.append(line_table)
+    
+    elements.append(Spacer(1, 10))
+
+
 
     # elements.append(Paragraph("Steuerreport Ergebnis", title_style))
     # elements.append(Paragraph('<font color="#2563eb"><u>etfsteuerrechner.de</u></font>', muted_style))
     elements.append(Spacer(1, 15))
 
-    # 2. SEKTION: ÜBERBLICK POSITION
-    elements.append(Paragraph("Überblick Ihrer Position (vor Verkauf)", h2_style))
+    # # 2. SEKTION: ÜBERBLICK POSITION
+    # elements.append(Paragraph("Überblick Ihrer Position (vor Verkauf)", h2_style))
     elements.append(Paragraph(f"<b>ETF-Name:</b> {etf_name}", body_style))
     elements.append(Paragraph(f"Teilfreistellungsquote: <b>{teilfreistellung_quote * 100:.2f} %</b> &nbsp;&nbsp;|&nbsp;&nbsp; Kirchensteuer: <b>{kirchensteuer}</b>", muted_style))
-    elements.append(Spacer(1, 10))
+    # elements.append(Spacer(1, 10))
 
-    # KPI Kacheln für die Position
-    pos_data = [
-        [
-            Paragraph("<b>Anzahl Anteile im Besitz</b>", muted_style),
-            Paragraph("<b>Kurs bei Verkauf</b>", muted_style),
-            Paragraph("<b>Gesamtwert der Anteile</b>", muted_style)
-        ],
-        [
-            Paragraph(f"<font size=12><b>{anteil(aktueller_besitz)}</b></font>", body_style),
-            Paragraph(f"<font size=12><b>{eur(aktueller_kurs)}</b></font>", body_style),
-            Paragraph(f"<font size=12><b>{eur(gesamtwert)}</b></font>", body_style)
-        ]
-    ]
-    pos_table = Table(pos_data, colWidths=[161, 161, 161])
-    pos_table.setStyle(TableStyle([
-        ("BACKGROUND", (0,0), (-1,-1), BG_LIGHT),
-        ("ALIGN", (0,0), (-1,-1), "CENTER"),
-        ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
-        ("INNERGRID", (0,0), (-1,-1), 1, BORDER_COLOR),
-        ("BOX", (0,0), (-1,-1), 1, BORDER_COLOR),
-        ("TOPPADDING", (0,0), (-1,-1), 10),
-        ("BOTTOMPADDING", (0,0), (-1,-1), 10),
-    ]))
-    elements.append(pos_table)
+    # # KPI Kacheln für die Position
+    # pos_data = [
+    #     [
+    #         Paragraph("<b>Anzahl Anteile im Besitz</b>", muted_style),
+    #         Paragraph("<b>Kurs bei Verkauf</b>", muted_style),
+    #         Paragraph("<b>Gesamtwert der Anteile</b>", muted_style)
+    #     ],
+    #     [
+    #         Paragraph(f"<font size=12><b>{anteil(aktueller_besitz)}</b></font>", body_style),
+    #         Paragraph(f"<font size=12><b>{eur(aktueller_kurs)}</b></font>", body_style),
+    #         Paragraph(f"<font size=12><b>{eur(gesamtwert)}</b></font>", body_style)
+    #     ]
+    # ]
+    # pos_table = Table(pos_data, colWidths=[161, 161, 161])
+    # pos_table.setStyle(TableStyle([
+    #     ("BACKGROUND", (0,0), (-1,-1), BG_LIGHT),
+    #     ("ALIGN", (0,0), (-1,-1), "CENTER"),
+    #     ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
+    #     ("INNERGRID", (0,0), (-1,-1), 1, BORDER_COLOR),
+    #     ("BOX", (0,0), (-1,-1), 1, BORDER_COLOR),
+    #     ("TOPPADDING", (0,0), (-1,-1), 10),
+    #     ("BOTTOMPADDING", (0,0), (-1,-1), 10),
+    # ]))
+    # elements.append(pos_table)
     
-    elements.append(Spacer(1, 6))
-    elements.append(Paragraph(f"Gekaufte Anteile gesamt: {anteil(max_anteile)} &nbsp;&nbsp;|&nbsp;&nbsp; Davon bereits verkauft: {anteil(bereits_verkauft)} &nbsp;&nbsp;|&nbsp;&nbsp; Ø-Kaufpreis: {eur(durchschnittlicher_kaufpreis)}", muted_style))
-    elements.append(Spacer(1, 15))
+    # elements.append(Spacer(1, 6))
+    # elements.append(Paragraph(f"Gekaufte Anteile gesamt: {anteil(max_anteile)} &nbsp;&nbsp;|&nbsp;&nbsp; Davon bereits verkauft: {anteil(bereits_verkauft)} &nbsp;&nbsp;|&nbsp;&nbsp; Ø-Kaufpreis: {eur(durchschnittlicher_kaufpreis)}", muted_style))
+    # elements.append(Spacer(1, 15))
 
     # 3. SEKTION: VERKAUFSÜBERBLICK (KPI-Style)
     elements.append(Paragraph("Infos über den geplanten Verkauf", h2_style))
@@ -599,8 +812,8 @@ def create_pdf(
         ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
         ("INNERGRID", (0,0), (-1,-1), 1, BORDER_COLOR),
         ("BOX", (0,0), (-1,-1), 1, BORDER_COLOR),
-        ("TOPPADDING", (0,0), (-1,-1), 12),
-        ("BOTTOMPADDING", (0,0), (-1,-1), 12),
+        ("TOPPADDING", (0,0), (-1,-1), 7),    # Von 12 auf 7pt reduziert
+        ("BOTTOMPADDING", (0,0), (-1,-1), 7), # Von 12 auf 7pt reduziert
     ]))
     elements.append(verkauf_table)
     
@@ -611,20 +824,38 @@ def create_pdf(
     # 4. SEKTION: RECHENSCHAFT / STEUERBERCHNUNG (Klassische, saubere Tabelle)
     elements.append(Paragraph("Detaillierte Steuerberechnung", h2_style))
     
+
+    ungenutzter_freibetrag_wert = freibetrag - (gewinn_nach_verlusttopf - gewinn_steuerpflichtig)
+
     steuer_data = [
-        [Paragraph("<b>Berechnungsschritt</b>", body_style), Paragraph("<b>Betrag</b>", body_style)],
+        [Paragraph("<b>Berechnungsschritt</b>", body_style), Paragraph("<b>Wert</b>", body_style)],
+        
+        # --- Positions-Historie (Anteile) ---
+        ["Insgesamt gekaufte Anteile", f"{anteil(max_anteile)}"],
+        ["Bereits verkaufte Anteile", f"{anteil(bereits_verkauft)}"],
+        ["Anteile aktuell im Besitz", f"{anteil(max_anteile - bereits_verkauft)}"],
+        
+        # --- Der anstehende Verkauf (Anteile & Kurs) ---
         ["Anzahl zu verkaufender Anteile", f"{anteil(anzahl_verkaufen)}"],
         ["Kurs bei Verkauf", f"{eur(aktueller_kurs)}"],
-        ["Brutto Verkaufserlös", eur(brutto)],
-        ["Gewinn vor Steuern", eur(gewinn)],
-        ["Abzuziehende Vorabpauschale (historisch)", eur(gesamte_vorabpauschale)],
-        ["Gewinn nach Abzug Vorabpauschale", eur(gewinn_nach_vorabpauschale)],
-        ["Gewinn nach Teilfreistellung", eur(gewinn_teilfreistellung)],
-        ["Gewinn nach Verlustverrechnung", eur(gewinn_nach_verlusttopf)],
-        ["Gewinn nach Sparerpauschbetrag (Steuerpflichtig)", eur(gewinn_steuerpflichtig)],
-        ["Ungenutzter Sparerpauschbetrag", eur(max(0, freibetrag - gewinn_nach_verlusttopf))],
-        ["Zu zahlende Abgeltungsteuer", f"{eur(steuer)}"],
-        ["Netto Auszahlungsbetrag", eur(netto)],
+        
+        # --- Erlöse & Kosten ---
+        ["Kosten bei Kauf", f"{eur(brutto - gewinn)}"],
+        ["Brutto Verkaufserlös", f"{eur(brutto)}"],
+        ["Gewinn vor Steuer", f"{eur(gewinn)}"],
+        
+        # --- Steuerliche Zwischenschritte ---
+        ["Abzuziehende Vorabpauschale", f"{eur(gesamte_vorabpauschale)}"],
+        ["Gewinn nach Vorabpauschale", f"{eur(gewinn_nach_vorabpauschale)}"],
+        ["Gewinn nach Teilfreistellung", f"{eur(gewinn_teilfreistellung)}"],
+        ["Gewinn nach Verlusttopf", f"{eur(gewinn_nach_verlusttopf)}"],
+        ["Neuer Verlusttopf", f"{eur(verlusttopf_nach_verkauf)}"],
+        ["Gewinn nach Sparerpauschbetrag", f"{eur(gewinn_steuerpflichtig)}"],
+        ["Ungenutzter Freibetrag", f"{eur(max(0, ungenutzter_freibetrag_wert))}"], # Mit max(0, ...), falls negativ
+        
+        # --- Finale Steuer & Auszahlung ---
+        ["Zu zahlende Steuer", f"{eur(steuer)}"],
+        ["Netto", f"{eur(netto)}"],
     ]
 
     # Gesamtbreite = 483 pt. Links kriegt 343 pt, Rechts 140 pt.
@@ -641,6 +872,8 @@ def create_pdf(
         ("FONTSIZE", (0,0), (-1,-1), 9.5),
         ("TEXTCOLOR", (0,0), (-1,-1), TEXT_DARK),
     ]
+
+
     
     # Letzte Zeile (Netto) visuell als "Total" hervorheben
     t_style.extend([
@@ -655,8 +888,11 @@ def create_pdf(
     elements.append(Spacer(1, 15))
 
     # 5. SEKTION: VORABPAUSCHALE HISTORIE
+    # 5. SEKTION: VORABPAUSCHALE HISTORIE
     if vorabpauschale is not None and len(vorabpauschale) > 0:
-        elements.append(Paragraph("Eingesetzte Vorabpauschalen pro Anteil", h2_style))
+        # KeepTogether verhindert, dass Überschrift und Tabelle getrennt werden
+        vp_elements = []
+        vp_elements.append(Paragraph("Eingesetzte Vorabpauschalen pro Anteil", h2_style))
         
         vp_data = [[Paragraph("<b>Kalenderjahr</b>", body_style), Paragraph("<b>Vorabpauschale (€ / Anteil)</b>", body_style)]]
         
@@ -675,251 +911,64 @@ def create_pdf(
             ("TOPPADDING", (0,0), (-1,-1), 5),
             ("BOTTOMPADDING", (0,0), (-1,-1), 5),
         ]))
-        elements.append(vp_table)
+        vp_elements.append(vp_table)
+        elements.append(KeepTogether(vp_elements)) # <--- Import oben: from reportlab.platypus import KeepTogether
+
+    # --- RECHTLICHER HINWEIS (Jetzt AUSSERHALB der If-Bedingung, damit er IMMER erscheint) ---
+    disclaimer_text = (
+        "<b>Wichtiger Hinweis:</b> Dieser Report dient rein zu Informationszwecken und stellt keine "
+        "Steuer- oder Anlageberatung dar. Trotz sorgfältiger Programmierung kann keine Gewähr für die "
+        "Richtigkeit, Vollständigkeit oder steuerliche Anerkennung der Ergebnisse übernommen werden. "
+        "Die Haftung für finanzielle Verluste oder Steuernachzahlungen ist ausgeschlossen."
+    )
+    elements.append(Paragraph(disclaimer_text, legal_style))
 
 
-        disclaimer_text = (
-            "<b>Wichtiger Hinweis:</b> Dieser Report dient rein zu Informationszwecken und stellt keine "
-            "Steuer- oder Anlageberatung dar. Trotz sorgfältiger Programmierung kann keine Gewähr für die "
-            "Richtigkeit, Vollständigkeit oder steuerliche Anerkennung der Ergebnisse übernommen werden. "
-            "Die Haftung für finanzielle Verluste oder Steuernachzahlungen ist ausgeschlossen."
-        )
-        elements.append(Paragraph(disclaimer_text, legal_style))
+    # if vorabpauschale is not None and len(vorabpauschale) > 0:
+    #     elements.append(Paragraph("Eingesetzte Vorabpauschalen pro Anteil", h2_style))
+        
+    #     vp_data = [[Paragraph("<b>Kalenderjahr</b>", body_style), Paragraph("<b>Vorabpauschale (€ / Anteil)</b>", body_style)]]
+        
+    #     for _, row in vorabpauschale.iterrows():
+    #         vp_data.append([
+    #             f"{row['jahr']:.0f}",
+    #             f"{row['wert']:.8f}".replace(".", ",")
+    #         ])
+
+    #     vp_table = Table(vp_data, colWidths=[150, 200])
+    #     vp_table.setStyle(TableStyle([
+    #         ("BACKGROUND", (0,0), (-1,0), BG_ZEBRA),
+    #         ("ALIGN", (1,0), (1,-1), "RIGHT"),
+    #         ("LINEBELOW", (0,0), (-1,-1), 0.5, colors.HexColor("#e2e8f0")),
+    #         ("FONTSIZE", (0,0), (-1,-1), 9),
+    #         ("TOPPADDING", (0,0), (-1,-1), 5),
+    #         ("BOTTOMPADDING", (0,0), (-1,-1), 5),
+    #     ]))
+    #     elements.append(vp_table)
+
+
+    #     disclaimer_text = (
+    #         "<b>Wichtiger Hinweis:</b> Dieser Report dient rein zu Informationszwecken und stellt keine "
+    #         "Steuer- oder Anlageberatung dar. Trotz sorgfältiger Programmierung kann keine Gewähr für die "
+    #         "Richtigkeit, Vollständigkeit oder steuerliche Anerkennung der Ergebnisse übernommen werden. "
+    #         "Die Haftung für finanzielle Verluste oder Steuernachzahlungen ist ausgeschlossen."
+    #     )
+    #     elements.append(Paragraph(disclaimer_text, legal_style))
 
 
     # PDF Dokument bauen
+    # doc.build(
+    #     elements,
+    #     onFirstPage=footer,
+    #     onLaterPages=footer
+    # )
     doc.build(
         elements,
-        onFirstPage=footer,
-        onLaterPages=footer
+        onFirstPage=footer,                  # Seite 1: Nur der Footer
+        onLaterPages=footer_and_header_later # Ab Seite 2: Footer + Logo oben rechts
     )
 
     buffer.seek(0)
     return buffer
 
-# def create_pdf(
-#     anzahl_verkaufen, max_anteile, bereits_verkauft,
-#     brutto, gewinn, gewinn_teilfreistellung,
-#     gewinn_nach_vorabpauschale, gewinn_nach_verlusttopf,
-#     gewinn_steuerpflichtig, steuer, netto,
-#     gesamtkosten, vorabpauschale, aktueller_kurs, freibetrag, 
-#     etf_name, verlusttopf_nach_verkauf, gesamte_vorabpauschale, 
-#     teilfreistellung_quote, kirchensteuer
-# ):
-
-#     aktueller_besitz = max_anteile - bereits_verkauft
-#     gesamtwert = aktueller_besitz * aktueller_kurs
-#     durchschnittlicher_kaufpreis = gesamtkosten / max_anteile if max_anteile else 0
-
-#     buffer = io.BytesIO()
-
-#     styles = getSampleStyleSheet()
-#     elements = []
-
-
-#     elements.append(
-#         Paragraph(
-#             '<a href="https://www.etfsteuerrechner.de"><font color="blue"><u>etfsteuerrechner.de</u></font></a> – Ergebnis',
-#             styles["Title"]
-#         )
-#     )
-
-
-#     elements.append(Spacer(1, 20))
-
-#     # ---------------------------------------------------
-#     # Überblick Position
-#     # ---------------------------------------------------
-
-#     elements.append(Paragraph("Überblick Ihrer Position (vor Verkauf)", styles["Heading2"]))
-#     elements.append(Spacer(1, 10))
-
-#     elements.append(Paragraph(f"<b>ETF:</b> {etf_name}", styles["Normal"]))
-
-#     elements.append(
-#         Paragraph(
-#             f"<font size=9>"
-#             f"Teilfreistellungsquote: <b>{teilfreistellung_quote * 100:.2f} %</b> &nbsp;&nbsp;|&nbsp;&nbsp; "
-#             f"Kirchensteuer: <b>{kirchensteuer}</b>"
-#             f"</font>",
-#             styles["Normal"]
-#         )
-#     )
-
-
-#     elements.append(Spacer(1, 6))
-
-#     ergebnis_data = [
-#         [
-#             "Anzahl Anteile im Besitz",
-#             "Kurs bei Verkauf",
-#             "Gesamtwert der Anteile"
-#         ],
-#         [
-#             f"{anteil(aktueller_besitz)}",
-#             f"{eur(aktueller_kurs)}",
-#             f"{eur(gesamtwert)}"
-#         ]
-#     ]
-
-#     ergebnis_table = Table(ergebnis_data)
-
-#     ergebnis_table.setStyle(TableStyle([
-#         ("ALIGN", (0,0), (-1,-1), "CENTER"),
-#         ("FONTNAME", (0,0), (-1,0), "Helvetica-Bold"),
-#         ("BOTTOMPADDING", (0,0), (-1,0), 8),
-#     ]))
-
-#     elements.append(ergebnis_table)
-#     elements.append(Spacer(1, 8))
-
-#     # Zusatzinfos
-#     elements.append(
-#         Paragraph(
-#             f"<font size=9>"
-#             f"Gekaufet Anteile: <b>{anteil(max_anteile)}</b> &nbsp;&nbsp;|&nbsp;&nbsp; "
-#             f"Davon verkauft: <b>{anteil(bereits_verkauft)}</b> &nbsp;&nbsp;|&nbsp;&nbsp; "
-#             f"Durchschnittlicher Kaufpreis: <b>{eur(durchschnittlicher_kaufpreis)}</b>"
-#             f"</font>",
-#             styles["Normal"]
-#         )
-#     )
-
-#     elements.append(Spacer(1, 20))
-
-#     # ---------------------------------------------------
-#     # Verkaufsübersicht
-#     # ---------------------------------------------------
-
-#     elements.append(Paragraph("Infos über Verkauf", styles["Heading2"]))
-#     elements.append(Spacer(1, 10))
-
-#     verkauf_data = [
-#         [
-#             "Anzahl zu verkaufender Anteile",
-#             "Brutto Verkaufserlös",
-#             "Netto nach Steuern"
-#         ],
-#         [
-#             f"{anteil(anzahl_verkaufen)}",
-#             f"{eur(brutto)}",
-#             f"{eur(netto)}"
-#         ]
-#     ]
-
-#     verkauf_table = Table(verkauf_data)
-
-#     verkauf_table.setStyle(TableStyle([
-#         ("ALIGN", (0,0), (-1,-1), "CENTER"),
-#         ("FONTNAME", (0,0), (-1,0), "Helvetica-Bold"),
-#         ("BOTTOMPADDING", (0,0), (-1,0), 8),
-#     ]))
-
-#     elements.append(verkauf_table)
-#     elements.append(Spacer(1, 12))
-
-#     # Zusatzinfos Verkauf
-#     elements.append(
-#         Paragraph(
-#             f"<font size=9>"
-#             f"Gewinn aus Verkauf: <b>{eur(gewinn)}</b> &nbsp;&nbsp;|&nbsp;&nbsp; "
-#             f"Ungenutzter Sparerpauschbetrag: <b>{eur(max(0, freibetrag - gewinn_nach_verlusttopf))}</b>"
-#             f"</font>",
-#             styles["Normal"]
-#         )
-#     )
-
-#     elements.append(
-#         Paragraph(
-#             f"<font size=9>"
-#             f"Allgemeiner Verlusttopf nach Verkauf: <b>{eur(verlusttopf_nach_verkauf)}</b>"
-#             f"</font>",
-#             styles["Normal"]
-#         )
-#     )
-
-
-#     elements.append(Spacer(1, 20))
-
-#     # ---------------------------------------------------
-#     # Steuerberechnung
-#     # ---------------------------------------------------
-
-#     elements.append(Paragraph("Steuerberechnung", styles["Heading2"]))
-#     elements.append(Spacer(1, 10))
-
-#     steuer_data = [
-#         ["Berechnungsschritt", "Betrag"],
-#         ["Anzahl zu verkaufender Anteile", f"{anteil(anzahl_verkaufen)}"],
-#         ["Kurs bei Verkauf", f"{eur(aktueller_kurs)}"],
-#         ["Brutto Verkaufserlös", eur(brutto)],
-#         ["Gewinn vor Steuern", eur(gewinn)],
-#         ["Abzuziehende Vorabpauschale", eur(gesamte_vorabpauschale)],
-#         ["Gewinn nach Abzug Vorabpauschale", eur(gewinn_nach_vorabpauschale)],
-#         ["Gewinn nach Teilfreistellung", eur(gewinn_teilfreistellung)],
-#         ["Gewinn nach Verlustverrechnung", eur(gewinn_nach_verlusttopf)],
-#         ["Neuer Verlusttopf", eur(verlusttopf_nach_verkauf)],
-#         ["Gewinn nach Sparerpauschbetrag", eur(gewinn_steuerpflichtig)],
-#         ["Ungenutzter Sparerpauschbetrag", eur(max(0, freibetrag - gewinn_nach_verlusttopf))],
-#         # ["Steuerpflichtiger Gewinn", eur(gewinn_steuerpflichtig)],
-#         ["Zu zahlende Steuer", eur(steuer)],
-#         ["Netto nach Steuern", eur(netto)],
-#     ]
-
-#     steuer_table = Table(steuer_data, colWidths=[280,120])
-
-#     steuer_table.setStyle(TableStyle([
-#         ("ALIGN", (1,0), (-1,-1), "RIGHT"),   # ganze Betrag-Spalte rechts
-#         ("FONTNAME", (0,0), (-1,0), "Helvetica-Bold"),
-#         ("BOTTOMPADDING", (0,0), (-1,0), 8),
-#     ]))
-
-#     elements.append(steuer_table)
-#     elements.append(Spacer(1, 10))
-
-
-
-#     elements.append(Spacer(1, 20))
-
-#     # ---------------------------------------------------
-#     # Vorabpauschale Tabelle
-#     # ---------------------------------------------------
-
-#     if vorabpauschale is not None and len(vorabpauschale) > 0:
-
-#         elements.append(Paragraph("Vorabpauschale pro Anteil", styles["Heading2"]))
-#         elements.append(Spacer(1, 10))
-
-#         data = [["Kalenderjahr", "Vorabpauschale pro Anteil"]]
-
-#         for _, row in vorabpauschale.iterrows():
-#             data.append([
-#                 f"{row['jahr']:.0f}",
-#                 f"{row['wert']:.8f}".replace(".", ",")
-#             ])
-
-#         table = Table(data, colWidths=[150,200])
-
-#         table.setStyle(TableStyle([
-#             ("ALIGN", (1,0), (-1,-1), "RIGHT"),   # ganze Betrag-Spalte rechts
-#             ("FONTNAME", (0,0), (-1,0), "Helvetica-Bold"),
-#             ("BOTTOMPADDING", (0,0), (-1,0), 8),
-#         ]))
-
-
-#         elements.append(table)
-
-#     doc = SimpleDocTemplate(buffer, pagesize=A4)
-
-#     doc.build(
-#         elements,
-#         onFirstPage=footer,
-#         onLaterPages=footer
-#     )
-
-
-#     buffer.seek(0)
-
-#     return buffer
-
-
+# logo einbauen

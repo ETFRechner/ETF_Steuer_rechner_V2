@@ -15,6 +15,7 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://etfsteuerrechner.de/">
     <meta property="og:image" content="https://etfsteuerrechner.de/static/preview1200x629.png">
+    <meta property="og:image:alt" content="ETFsteuerrechner.de Logo – Tool zur Berechnung der Steuer beim Verkauf von ETFs.">
 
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="ETF Steuer Rechner Deutschland">
@@ -29,7 +30,8 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/static/preview180x180.png">
     <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon"> 
-s
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+
     <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
 
     <link rel="stylesheet" href="/static/style.css">
@@ -40,6 +42,15 @@ s
 
 
 <body>
+
+<header class="site-header">
+    <div class="header-container">
+        <a href="/" class="logo-link">
+            <img src="/static/logo.svg" alt="ETF Steuer Rechner Deutschland Logo – Zur Startseite" class="site-logo">
+        </a>
+        <div></div> 
+    </div>
+</header>
 
 <main class="container">
 <section class="hero">
@@ -69,13 +80,13 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
 </section>
 
 <div class="tool">
-<h2>ETF Steuer Rechner</h2>
+<h2>ETF-Steuerrechner</h2>
 
 
     <div class="form-group">
         <label 
-        for="freibetrag">Verfügbarer Sparerpauschbetrag (€)
-        <span class="tooltip-icon" data-tooltip="Noch verfügbarer Sparerpauschbetrag für das aktuelle Kalenderjahr. Kapitalerträge bis zu diesem Betrag bleiben steuerfrei. In Deutschland beträgt der maximale Sparerpauschbetrag derzeit 1000€ pro Person, bzw. 2000€ pro Ehepaar. Um diesen Betrag zu nutzen müssen Sie ihn einmalig in ihrem Broker aktivieren. Wenn dies gemacht ist können Sie dort unter Steuern den übrigen Betrtag einsehen.">?</span>
+        for="freibetrag">Verfügbarer Sparer-Pauschbetrag (€)
+        <span class="tooltip-icon" data-tooltip="Noch verfügbarer Sparer-Pauschbetrag für das aktuelle Kalenderjahr. Kapitalerträge bis zu dieser Höhe bleiben steuerfrei. In Deutschland beträgt der maximale Sparer-Pauschbetrag derzeit 1.000 € pro Person bzw. 2.000 € für zusammenveranlagte Ehepartner. Um diesen Freibetrag zu nutzen, müssen Sie einen Freistellungsauftrag bei Ihrem Broker einrichten. Den verbleibenden Betrag können Sie dort in der Steuerübersicht einsehen.">?</span>
         </label>
         
         <input type="number" id="freibetrag" value="1000.00" step="0.01" min="0" max="2000.00" onchange="if(this.value !== '') { if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min; if(parseFloat(this.value) > parseFloat(this.max)) this.value = this.max; }">
@@ -83,52 +94,66 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
     <div class="form-group">
         <label 
         for="verlusttopf">Allgemeiner Verlusttopf (€)
-        <span class="tooltip-icon" data-tooltip="Der Allgemeine Verlusttopf wird durch Verluste durch aufgefüllt, die nicht in den Aktien-Verlusttopf fließen, dazu zählen auch Fonds. Sie können diesen Betrag in Ihrem Broker einsehen.">?</span>
+        <span class="tooltip-icon" data-tooltip="Der allgemeine Verlusttopf wird durch Verluste gefüllt, die nicht in den Aktien-Verlusttopf fließen – dazu zählen auch ETF- und Fondsverluste. Sie können den aktuellen Stand im Online-Banking Ihres Brokers einsehen.">?</span>
         </label>
         <input type="number" id="verlusttopf" value="0.00" step="0.01" min="0" onchange="if(this.value !== '') { if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min; }">
     </div>
     <div class="form-group">
         <label 
         for="kirchensteuer">Kirchensteuer
-        <span class="tooltip-icon" data-tooltip="Die Kirchensteuer wird in Deutschland auf die Kapitalertragssteuer erhoben. Wenn Sie kein Mitglied der Kirche sind, entfällt die Zahlung der Kirchensteuer.">?</span>
+        <span class="tooltip-icon" data-tooltip="Die Kirchensteuer wird als Zuschlag auf die Kapitalertragsteuer erhoben, sofern Sie Mitglied einer steuererhebenden Religionsgemeinschaft sind.">?</span>
         </label>
         <select id="kirchensteuer">
             <option value="keine">Keine Kirchensteuer</option>
-            <option value="8">8% (In Bayern / Baden-Württemberg)</option>
-            <option value="9">9% (In anderen Bundesländern)</option>
+            <option value="8">8 % (in Bayern / Baden-Württemberg)</option>
+            <option value="9">9 % (in allen übrigen Bundesländern)</option>
         </select>
     </div>
 
-    <div class="form-group">
-        <label for="teilfreistellung">Teilfreistellung des ETFs
-            <span class="tooltip-icon" data-tooltip="Die Teilfreistellung bezieht sich auf den Anteil der Erträge, der steuerfrei bleibt. Sie können diesen Wert Ihrem ETF entnehmen. Die größten ETF sind üblicherweise Aktien-ETF.">?</span>
+    <!-- <div class="form-group">
+        <label for="teilfreistellung">Teilfreistellung des ETF
+            <span class="tooltip-icon" data-tooltip="Die Teilfreistellung bestimmt den Prozentsatz der Erträge, der steuerfrei bleibt, um die Vorabsteuerung auf Fondsebene auszugleichen. Den genauen Wert finden Sie im Factsheet Ihres ETF.">?</span>
         </label>
         <select id="teilfreistellung">
-            <option value="0">Keine Teilfreistellung (z.B. Geldmarkt-/Anleihen-ETF, Aktien)</option>
-            <option value="15">Mischfonds (15% Teilfreistellung)</option>
-            <option value="30" selected>Aktien-ETF / -Fonds (30% Teilfreistellung)</option>
-            <option value="60">Inlands-Immobilienfonds (60% Teilfreistellung)</option>
-            <option value="80">Auslands-Immobilienfonds (80% Teilfreistellung)</option>
+            <option value="0">0 % – Keine Teilfreistellung (z. B. Geldmarkt- oder Anleihen-ETF, Aktien)</option>
+            <option value="15">15 % – Mischfonds (mind. 25 % Aktienanteil)</option>
+            <option value="30" selected>30 % – Aktien-ETF / -Fonds (mind. 51 % Aktienanteil)</option>
+            <option value="60">60 % – Inlands-Immobilienfonds (mind. 51 % Immobilienanteil)</option>
+            <option value="80">80 % – Auslands-Immobilienfonds (mind. 51 % ausländische Immobilien)</option>
+        </select>
+    </div> -->
+
+    <div class="form-group">
+        <label for="teilfreistellung">Teilfreistellung des ETF
+            <span class="tooltip-icon" data-tooltip="Die Teilfreistellung schützt einen Teil der Erträge vor der Steuer. Kriterien:&#10;• Mischfonds: mind. 25 % Aktienquote&#10;• Aktien-ETF: mind. 51 % Aktienquote&#10;• Immo-Inland: mind. 51 % deutsche Immobilien&#10;• Immo-Ausland: mind. 51 % ausländische Immobilien">?</span>
+        </label>
+        <select id="teilfreistellung">
+            <option value="0">0 % – Keine Freistellung</option>
+            <option value="15">15 % – Mischfonds</option>
+            <option value="30" selected>30 % – Aktien-ETF</option>
+            <option value="60">60 % – Immobilienfonds (Inland)</option>
+            <option value="80">80 % – Immobilienfonds (Ausland)</option>
         </select>
     </div>
+
 
     <div class="form-group">
         <label 
-            for="ertragsverwendung">Ertragsverwendung des ETFs
-            <span class="tooltip-icon" data-tooltip="Die Ertragsverwendung bestimmt, wie die Erträge des ETFs verarbeitet werden. Thesaurierende ETFs (acc.) legen die Erträge automatisch wieder an, während ausschüttende ETFs (dist.) die Erträge an die Anleger auszahlen. Diese Info können Sie in den Details des ETFs finden.">?</span>
+            for="ertragsverwendung">Ertragsverwendung des ETF
+            <span class="tooltip-icon" data-tooltip="Die Ertragsverwendung legt fest, was mit den Dividenden oder Zinsen geschieht. Thesaurierende ETF (acc.) legen Gewinne automatisch wieder an. Ausschüttende ETF (dist.) zahlen diese an Sie aus. Sie finden diese Angabe im Wertpapierprospekt oder Broker-Profil.">?</span>
         </label>
         <select id="ertragsverwendung" onchange="aktualisiereThesaurierungsAnsicht()">
-            <option value="thesaurierend">Thesaurierend (Erträge werden automatisch wiederangelegt)</option>
-            <option value="ausschüttend">Ausschüttend (Erträge werden ausgezahlt)</option>
+            <option value="thesaurierend">Thesaurierend – acc.</option>
+            <option value="ausschüttend">Ausschüttend – dist.</option>
         </select>
     </div>
 
     <div class="form-group">
         <label for="eingabe_option">Wie möchten Sie Ihre Kaufdaten eingeben?</label>
         <select id="eingabe_option" onchange="toggleEingabeOptionen()">
-            <option value="manuell" selected>Manuelle Eingabe oder CSV </option>
+            <option value="manuell" selected>Manuell oder per CSV-Datei</option>
             <option value="sparplan">Sparplan erfassen</option>
-            <option value="trade">CSV upload von Trade Republic</option>
+            <option value="trade">CSV-Upload für Trade Republic</option>
         </select>
     </div>
 
@@ -145,14 +170,14 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
         </div> -->
 
         <div class="form-group" style="position: relative;">
-            <label for="etf_suche_input">ETF suchen (Name, ISIN oder Ticker)
-                <span class="tooltip-icon" data-tooltip="Falls der Name Ihres ETF nicht gefunden wird, können Sie auch die ISIN als verlässliche Alternative verwenden.">?</span>
+            <label for="etf_suche_input">ETF suchen (optional: Name, ISIN oder Ticker)
+                <span class="tooltip-icon" data-tooltip="Geben Sie hier den Namen oder die ISIN ein, um Kursdaten automatisch zu laden. Wenn Sie das Feld leer lassen, können Sie alle Kauf- und Kursdaten gleich komplett manuell in die Tabelle eintragen.">?</span>
             </label>
-            <input type="text" id="etf_suche_input" placeholder="z.B. MSCI World..." oninput="liveSuche(this.value, 'manuell')" autocomplete="off">
+            <input type="text" id="etf_suche_input" placeholder="Suchen oder für Manuell leer lassen..." oninput="liveSuche(this.value, 'manuell')" autocomplete="off">
             <div id="such_ergebnisse"></div>
         
             <div id="etf_suche_warnung" class="message-box message-warning" style="display: none;">
-                ⚠️ Freitext erkannt: Es werden keine automatischen Kursdaten geladen. Die Berechnung läuft im manuellen Modus.
+                ⚠️ Kein Treffer in der Datenbank: Es können keine Live-Kurse geladen werden. Sie können alle Werte selbst eintragen.
             </div>
         </div>
 
@@ -164,7 +189,7 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
 
         <div class="form-group">
             <label for="verkaufskurs">Verkaufskurs pro Anteil (€)
-                <span class="tooltip-icon" data-tooltip="Der Verkaufskurs pro Anteil ist der Preis, zu dem Sie die Anteile verkaufen möchten.">?</span>
+                <span class="tooltip-icon" data-tooltip="Geben Sie hier den Kurs ein, zu dem der fiktive oder tatsächliche Verkauf stattfinden soll.">?</span>
                 <span id="kurs_lade_status" style="font-weight: normal; font-size: 0.9em;"></span>
             </label>
             <input type="number" id="verkaufskurs" value="100.00" step="0.01" min="0" onchange="if(this.value !== '') { if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min; }">
@@ -173,7 +198,7 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
         <div class="form-group" id="manuell_csv_upload_group">
             <label>
                 CSV-Kaufhistorie hochladen (optional)
-                <span class="tooltip-icon" data-tooltip="Laden Sie eine CSV-Datei mit Ihren Kaufdaten hoch, um diese automatisch in die Tabelle einzufügen. Sie können Ihre Kaufdaten aber auch manuell eingeben.">?</span>
+                <span class="tooltip-icon" data-tooltip="Laden Sie eine zuvor aus diesem Rechner exportierte CSV-Datei hoch, um Ihre gespeicherte Kaufhistorie direkt wiederherzustellen.">?</span>
             </label>
             <div id="dropzone" class="upload-dropzone" onclick="document.getElementById('csv_file').click()">
                 <div class="dropzone-content">
@@ -192,8 +217,8 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
             <thead>
                 <tr>
                     <th>Kaufdatum</th>
-                    <th>Anzahl Anteile</th>
-                    <th>Kaufpreis pro Anteil (€)</th>
+                    <th>Anteile</th>
+                    <th>Kaufkurs (€)</th>
                     <th></th>
                 </tr>
             </thead>
@@ -202,14 +227,14 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
         </table>
 
         <div id="warnung_unvollstaendig_manuell" class="message-box message-warning" style="display: none;">
-            ⚠️ **Hinweis:** Mindestens eine Zeile ist noch nicht vollständig ausgefüllt. Unvollständige Zeilen werden bei der Berechnung ignoriert!
+            ⚠️ Hinweis: Unvollständige Zeilen werden bei der Berechnung nicht berücksichtigt.
         </div>
 
 
         
         <div id="tabelle_aktionen_manuell" style="display: flex; gap: 10px; margin-top: 10px;">
             <button class="btn-add" onclick="fuegeZeileHinzu()">+ Zeile hinzufügen</button>
-            <button class="btn-add" onclick="downloadCSVFromTable()">📥 Tabelle als CSV herunterladen</button>
+            <button class="btn-add" onclick="downloadCSVFromTable()">📥 Als CSV exportieren</button>
 
             <button class="btn-add btn-danger" onclick="
                     if (confirm('Möchten Sie wirklich die gesamte Kaufhistorie dieser Tabelle unwiderruflich löschen?')) {
@@ -231,14 +256,14 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
         <hr>
 
         <div class="form-group">
-            <label for="bereits_verkauft_manuell">Bereits verkaufte Anteile (für FIFO-Ermittlung)
-                <span class="tooltip-icon" data-tooltip="Geben Sie die Anzahl der bereits verkaufte Anteile ein. Es gilt das First-In-First-Out-Prinzip...">?</span>
+            <label for="bereits_verkauft_manuell">Bereits verkaufte Anteile
+                <span class="tooltip-icon" data-tooltip="Geben Sie an, wie viele Anteile dieser Position Sie früher schon veräußert haben. Dies ist zwingend nötig, um die gesetzliche First-In-First-Out-Reihenfolge (FIFO) korrekt zu berechnen">?</span>
             </label>
-            <input type="number" id="bereits_verkauft_manuell" step="0.00001" min="0" value="0.0" placeholder="z.B. 5.0" onchange="/* deine bestehende maxAnteile-Logik */">
+            <input type="number" id="bereits_verkauft_manuell" step="0.00001" min="0" value="0.0" placeholder="z. B. 5,0" onchange="/* deine bestehende maxAnteile-Logik */">
         </div>
 
         <div class="form-group" style="margin-top: 15px;">
-            <label for="tagesgenau">Berechnungsgenauigkeit der Vorabpauschale für das Kaufjahr</label>
+            <label for="tagesgenau">Berechnungsbasis im Kaufjahr</label>
             <select id="tagesgenau">
                 <option value="true">Tagesgenaue Berechnung</option>
                 <option value="false" selected>Monatsgenaue Berechnung</option>
@@ -248,12 +273,12 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
         <div class="checkbox-group" id="vorabpauschale_haken_group" style="margin-top: 15px;">
             <input type="checkbox" id="haken_vorabpauschale" onchange="toggleVorabpauschale()">
             <label for="haken_vorabpauschale">Vorabpauschale manuell eingeben
-                <span class="tooltip-icon" data-tooltip="Die Vorabpauschale wird standardmäßig geschätzt. Aktivieren Sie dies, um exakte Werte einzutragen.">?</span>
+                <span class="tooltip-icon" data-tooltip="Der Rechner ermittelt die Vorabpauschale automatisch auf Basis des gesetzlichen Basiszinses. Aktivieren Sie diese Option, wenn Sie die real von Ihrem Broker abgerechneten Werte eintragen möchten.">?</span>
             </label>
         </div>
 
         <div id="bereich_vorabpauschale" style="display: none; margin-top: 25px; padding-top: 15px; border-top: 1px dashed #ccc;">
-            <h4>Vorabpauschale manuell eingeben</h4>
+            <h4>Historische Vorabpauschalen pro Jahr</h4>
             <table>
                 <thead>
                     <tr>
@@ -269,23 +294,23 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
 
         <hr>
 
-        <h3>Berechnungs-Ziel</h3>
+        <h3>Berechnungsziel</h3>
         <div class="form-group">
-            <label for="rechen_ziel">Was möchten Sie berechnen?</label>
+            <label for="rechen_ziel">Was möchten Sie bestimmen?</label>
             <select id="rechen_ziel" onchange="toggleRechenZielFelder()">
-                <option value="steuerfrei">Steuerfrei verkaufbare Anteile ermitteln</option>
-                <option value="wunschnetto">Anteile für gewünschten Netto-Betrag bestimmen</option>
-                <option value="steuer_berechnen">Steuer beim Verkauf einer bestimmten Anzahl Anteile berechnen</option>
+                <option value="steuerfrei">Steuerfrei verkaufbare Anteile</option>
+                <option value="wunschnetto">Anteile für gewünschten Nettobetrag</option>
+                <option value="steuer_berechnen">Steuer für eine feste Anzahl an Anteilen</option>
             </select>
         </div>
 
         <div class="form-group" id="feld_wunschnetto" style="display: none;">
-            <label for="wert_wunschnetto">Gewünschter Netto-Auszahlungsbetrag (€)</label>
+            <label for="wert_wunschnetto">Gewünschter Nettoauszahlungsbetrag (€)</label>
             <input type="number" id="wert_wunschnetto" value="1000.00" step="0.01" min="0">
         </div>
 
         <div class="form-group" id="feld_anteile" style="display: none;">
-            <label for="wert_anteile">Anzahl der zu verkaufenden Anteile</label>
+            <label for="wert_anteile">Zu verkaufende Anteile</label>
             <input type="number" id="wert_anteile" value="10.00000" step="0.00001" min="0">
         </div>
 
@@ -296,7 +321,7 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
 
 
     <div id="bereich_sparplan" style="display: none;">
-        <h3>Sparplan erfassen (über ETF Suche)</h3>
+        <h3>Sparplan erfassen</h3>
         
         <!-- <div class="form-group" style="position: relative;">
             <label for="etf_suche_input_sparplan">ETF suchen (Name, ISIN oder Ticker)
@@ -308,13 +333,13 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
 
         <div class="form-group" style="position: relative;">
             <label for="etf_suche_input_sparplan">ETF suchen (Name, ISIN oder Ticker)
-                <span class="tooltip-icon" data-tooltip="Falls der Name Ihres ETF nicht gefunden wird, können Sie auch die ISIN als verlässliche Alternative verwenden.">?</span>
+                <span class="tooltip-icon" data-tooltip="Geben Sie hier den Namen oder die ISIN ein, um historische Kursdaten für die Sparplangenerierung zu laden.">?</span>
             </label>
             <input type="text" id="etf_suche_input_sparplan" placeholder="z.B. MSCI World..." oninput="liveSuche(this.value, 'sparplan')" autocomplete="off">
             <div id="such_ergebnisse_sparplan"></div>
 
-            <div id="etf_suche_warnung_sparplan" class="message-box message-warning" style="display: none;">
-                ⚠️ Freitext erkannt: Es werden keine automatischen Kursdaten geladen. Die Berechnung läuft im manuellen Modus.
+            <div id="etf_suche_warnung_sparplan" class="message-box message-error" style="display: none;">
+                ⚠️ Kein Treffer in der Datenbank: Es können keine historischen Kurse geladen werden. 
             </div>
         </div>
 
@@ -327,7 +352,7 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
 
         <div class="form-group" style="margin-top: 15px;">
             <label for="verkaufskurs_sparplan">Verkaufskurs pro Anteil (€) 
-                <span class="tooltip-icon" data-tooltip="Geben Sie den Verkaufskurs pro Anteil in Euro ein.">?</span>
+                <span class="tooltip-icon" data-tooltip="Geben Sie hier den Kurs ein, zu dem der fiktive oder tatsächliche Verkauf stattfinden soll.">?</span>
                 <span id="kurs_lade_status_sparplan" style="font-weight: normal; font-size: 0.9em;"></span>
             </label>
             <input type="number" id="verkaufskurs_sparplan" value="100.00" step="0.01" min="0" onchange="if(this.value !== '') { if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min; }">
@@ -337,7 +362,7 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
 
 
         <div id="sparplan_parameter_fields">
-            <h4>Sparplan-Parameter hinzufügen</h4>
+            <h4>Sparplan-Details festlegen</h4>
 
             <div class="form-group">
                 <label for="sparplan_start">Startdatum
@@ -356,7 +381,7 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
 
             <div class="form-group">
                 <label for="sparplan_ende">Enddatum
-                    <span class="tooltip-icon" data-tooltip="Wann endete der Sparplan? Wenn er noch aktiv ist, wählen Sie heute aus.">?</span>
+                    <span class="tooltip-icon" data-tooltip="Wann endete der Sparplan? Wenn der Sparplan aktuell noch läuft, wählen Sie einfach das heutige Datum aus.">?</span>
                 </label>
                 <input type="date" id="sparplan_ende" onchange="
                     const heute = new Date().toISOString().split('T')[0];
@@ -382,25 +407,25 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
             </div>
 
             <div class="form-group">
-                <label for="sparplan_rate">Sparrate pro Monat (€)</label>
+                <label for="sparplan_rate">Monatliche Sparrate (€)</label>
                 <input type="number" id="sparplan_rate" value="100.00" step="10" min="0" onchange="if(this.value !== '') { if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min; }">
             </div>
 
             <button class="btn-add" style="width: 100%;" onclick="generiereSparplan()">
-                + Diese Sparplan-Käufe der Tabelle unten hinzufügen
+                Sparplan-Käufe generieren
             </button>
         </div>
 
             <button id="btn_toggle_tabelle_oben_sparplan" class="btn-toggle-table" onclick="toggleTabelleKlappenSparplan()" style="display: none;"></button>
 
         <div id="sparplan_tabellen_container" style="margin-top: 20px;">
-            <h4>Erfasste Kaufhistorie (Generierter Sparplan)</h4>
+            <h4>Generierte Kaufhistorie des Sparplans</h4>
             <table>
                 <thead>
                     <tr>
                         <th>Kaufdatum</th>
-                        <th>Anzahl Anteile</th>
-                        <th>Kaufpreis pro Anteil (€)</th>
+                        <th>Anteile</th>
+                        <th>Kaufkurs (€)</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -409,14 +434,14 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
             </table>
 
             <div id="warnung_unvollstaendig_sparplan" class="message-box message-warning" style="display: none;">
-                ⚠️ **Hinweis:** Mindestens eine Zeile ist noch nicht vollständig ausgefüllt. Unvollständige Zeilen werden bei der Berechnung ignoriert!
+                ⚠️ Hinweis: Unvollständige Zeilen werden bei der Berechnung nicht berücksichtigt.
             </div>
 
 
 
             <div id="tabelle_aktionen_sparplan" style="display: flex; gap: 10px; margin-top: 10px;">
                 <button class="btn-add" onclick="fuegeZeileHinzuSparplan()">+ Manuelle Zeile hinzufügen</button>
-                <button class="btn-add" onclick="downloadCSVFromTableSparplan()">📥 Tabelle als CSV herunterladen</button>
+                <button class="btn-add" onclick="downloadCSVFromTableSparplan()">📥 Als CSV exportieren</button>
                 <button class="btn-add btn-danger" onclick="
                     if (confirm('Möchten Sie wirklich die gesamte Kaufhistorie dieser Tabelle unwiderruflich löschen?')) {
                         document.getElementById('sparplan_tabelle_body').innerHTML = ''; 
@@ -439,10 +464,10 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
         <hr>
 
         <div class="form-group">
-            <label for="bereits_verkauft_sparplan">Bereits verkaufte Anteile (für FIFO-Ermittlung)
-                <span class="tooltip-icon" data-tooltip="Geben Sie die Anzahl der bereits verkauften Anteile ein...">?</span>
+            <label for="bereits_verkauft_sparplan">Bereits verkaufte Anteile
+                <span class="tooltip-icon" data-tooltip="Geben Sie an, wie viele Anteile dieser Position Sie früher schon veräußert haben. Dies ist zwingend nötig, um die gesetzliche First-In-First-Out-Reihenfolge (FIFO) korrekt zu berechnen.">?</span>
             </label>
-            <input type="number" id="bereits_verkauft_sparplan" step="0.00001" min="0" value="0.0" placeholder="z.B. 5.0" onchange="
+            <input type="number" id="bereits_verkauft_sparplan" step="0.00001" min="0" value="0.0" placeholder="z. B. 5.0" onchange="
                 if(this.value !== '') { 
                     if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min; 
                     let maxAnteile = 0;
@@ -458,7 +483,7 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
         </div>
 
         <div class="form-group" style="margin-top: 15px;">
-            <label for="tagesgenau_sparplan">Berechnungsgenauigkeit der Vorabpauschale für das Kaufjahr</label>
+            <label for="tagesgenau_sparplan">Berechnungsbasis im Kaufjahr</label>
             <select id="tagesgenau_sparplan">
                 <option value="true">Tagesgenaue Berechnung</option>
                 <option value="false" selected>Monatsgenaue Berechnung</option>
@@ -471,7 +496,7 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
         </div>
 
         <div id="bereich_vorabpauschale_sparplan" style="display: none; margin-top: 25px; padding-top: 15px; border-top: 1px dashed #ccc;">
-            <h4>Vorabpauschale für gewählten ETF manuell eingeben</h4>
+            <h4>Historische Vorabpauschalen pro Jahr</h4>
             <table>
                 <thead>
                     <tr>
@@ -486,23 +511,23 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
 
         <hr>
 
-        <h3>Berechnungs-Ziel (Sparplan)</h3>
+        <h3>Berechnungsziel</h3>
         <div class="form-group">
-            <label for="rechen_ziel_sparplan">Was möchten Sie berechnen?</label>
+            <label for="rechen_ziel_sparplan">Was möchten Sie bestimmen?</label>
             <select id="rechen_ziel_sparplan" onchange="toggleRechenZielFelderSparplan()">
-                <option value="steuerfrei">Steuerfrei verkaufbare Anteile ermitteln</option>
-                <option value="wunschnetto">Anteile für gewünschten Netto-Betrag bestimmen</option>
-                <option value="steuer_berechnen">Steuer beim Verkauf einer bestimmten Anzahl Anteile berechnen</option>
+                <option value="steuerfrei">Steuerfrei verkaufbare Anteile</option>
+                <option value="wunschnetto">Anteile für gewünschten Nettobetrag</option>
+                <option value="steuer_berechnen">Steuer für eine feste Anzahl an Anteilen</option>
             </select>
         </div>
 
         <div class="form-group" id="feld_wunschnetto_sparplan" style="display: none;">
-            <label for="wert_wunschnetto_sparplan">Gewünschter Netto-Auszahlungsbetrag (€)</label>
+            <label for="wert_wunschnetto_sparplan">Gewünschter Nettoauszahlungsbetrag (€)</label>
             <input type="number" id="wert_wunschnetto_sparplan" value="1000.00" step="0.01" min="0">
         </div>
 
         <div class="form-group" id="feld_anteile_sparplan" style="display: none;">
-            <label for="wert_anteile_sparplan">Anzahl der zu verkaufenden Anteile</label>
+            <label for="wert_anteile_sparplan">Zu verkaufende Anteile</label>
             <input type="number" id="wert_anteile_sparplan" value="10.00000" step="0.00001" min="0">
         </div>
 
@@ -514,8 +539,8 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
 
 
     <div id="bereich_csv" style="display: none;">
-        <h3>Trade Republic CSV Import</h3>
-        <p style="font-size: 0.9em;">Laden Sie hier Ihren Depotauszug/Umsatzexport als CSV hoch.</p>
+        <h3>Trade Republic CSV-Import</h3>
+        <p style="font-size: 0.9em;">Laden Sie hier Ihren Depotauszug oder Umsatzexport als CSV-Datei hoch.</p>
 
 
         <div class="form-group">
@@ -536,7 +561,7 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
 
 
         <div class="form-group" id="tr_etf_auswahl_container">
-            <label for="tr_etf_dropdown" >In der Datei gefundene ETFs/Aktien:</label>
+            <label for="tr_etf_dropdown" >In der Datei gefundene ETF oder Aktien:</label>
             <select id="tr_etf_dropdown" onchange="waehleTradeRepublicETF()">
                 </select>
             <p style="font-size: 0.85em; margin-top: 5px;">Wählen Sie ein Wertpapier aus, um dessen Kaufhistorie zu laden.</p>
@@ -545,7 +570,7 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
         <div id="tr_tabelle_container" style="display: none; margin-top: 20px;">
     
             <div class="form-group">
-                <label for="verkaufskurs_tr">Verkaufskurs pro Anteil für dieses Wertpapier (€)</label>
+                <label for="verkaufskurs_tr">Verkaufskurs pro Anteil (€)</label>
                 <input type="number" id="verkaufskurs_tr" value="100.00" step="0.01" min="0" onchange="if(this.value !== '') { if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min; }">
             </div>
 
@@ -556,8 +581,8 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
                 <thead>
                     <tr>
                         <th>Kaufdatum</th>
-                        <th>Anzahl Anteile</th>
-                        <th>Kaufpreis pro Anteil (€)</th>
+                        <th>Anteile</th>
+                        <th>Kaufkurs (€)</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -571,8 +596,8 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
 
             <div class="form-group" style="margin-top: 15px;">
                 <label 
-                for="tagesgenau_tr">Berechnungsgenauigkeit der Vorabpauschale für das Kaufjahr
-                <span class="tooltip-icon" data-tooltip="Wählen Sie aus, ob die Vorabpauschale tagesgenau oder monatsgenau berechnet werden soll. Dies kann zwischen verschiedenen Brokern variieren, amcht aber nur einen kleinen UNterschied bei der Vorabpauschale des Kaufjahres.">?</span>
+                for="tagesgenau_tr">Berechnungsbasis im Kaufjahr
+                <span class="tooltip-icon" data-tooltip="Bestimmt, ob die Vorabpauschale im Jahr des Kaufs exakt tagesgenau oder pauschal monatsgenau berechnet wird.">?</span>
             </label>
                 <select id="tagesgenau_tr">
                     <option value="true">Tagesgenaue Berechnung</option>
@@ -585,14 +610,14 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
             <div class="checkbox-group" style="margin-top: 15px; margin-bottom: 10px;">
                 <input type="checkbox" id="haken_vorabpauschale_tr" onchange="toggleVorabpauschaleTR()">
                 <label 
-                for="haken_vorabpauschale_tr">Vorabpauschale manuell für die Vorjahre eingeben
-                <span class="tooltip-icon" data-tooltip="Die Vorabpauschale wird in diesem Rechner über Mittelwerte der Kurse an Jahresbeginn geschätzt. Für eine genauere Ergebnisse können Sie die Werte manuell eingeben.">?</span>
+                for="haken_vorabpauschale_tr">Vorabpauschale für die Vorjahre manuell eingeben
+                <span class="tooltip-icon" data-tooltip="Die Vorabpauschale wird standardmäßig anhand historischer Basiszinssätze ermittelt. Für absolut exakte Ergebnisse können Sie die realen Werte Ihres Brokers eintragen.">?</span>
                 </label>
             </div>
 
             <div id="bereich_vorabpauschale_tr" class="box" style="display: none; margin-top: 15px;">
-                <h4>Vorabpauschalenhistorie (Trade Republic)</h4>
-                <p style="font-size: 0.9em;">Geben Sie hier die Vorabpauschale pro Anteil für das jeweilige Kalenderjahr ein. <span class="tooltip-icon" data-tooltip="Geben Sie hier die Vorabpauschale pro Anteil für das jeweilige Kalenderjahr ein. Sie können die Werte auf den Ertragserrechnungen Ihres Brokers sehen, die Sie üblicherweise zum Jahresbeginn erhalten.">?</span></p>
+                <h4>Historische Vorabpauschalen</h4>
+                <p style="font-size: 0.9em;">Tragen Sie die Werte pro Anteil für die unten stehenden Jahre ein.<span class="tooltip-icon" data-tooltip="Die exakten Beträge pro Anteil entnehmen Sie den Abrechnungen oder der Jahressteuerbescheinigung von Trade Republic (jeweils im ersten Quartal des Folgejahres).">?</span></p>
                 <table style="width: 100%; margin-top: 10px;">
                     <thead>
                         <tr>
@@ -608,29 +633,29 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
 
             <hr>
 
-            <h3>4. Berechnungs-Ziel (Trade Republic)</h3>
+            <h3>Berechnungsziel</h3>
 
             <div class="form-group">
-                <label for="rechen_ziel_tr">Was möchten Sie berechnen?</label>
+                <label for="rechen_ziel_tr">Was möchten Sie bestimmen?</label>
                 <select id="rechen_ziel_tr" onchange="toggleRechenZielFelderTR()">
-                    <option value="steuerfrei">Steuerfrei verkaufbare Anteile ermitteln</option>
-                    <option value="wunschnetto">Anteile für gewünschten Netto-Betrag bestimmen</option>
-                    <option value="steuer_berechnen">Steuer beim Verkauf einer bestimmten Anzahl Anteile berechnen</option>
+                    <option value="steuerfrei">Steuerfrei verkaufbare Anteile</option>
+                    <option value="wunschnetto">Anteile für gewünschten Nettobetrag</option>
+                    <option value="steuer_berechnen">Steuer für eine feste Anzahl an Anteilen</option>
                 </select>
             </div>
 
             <div class="form-group" id="feld_wunschnetto_tr" style="display: none;">
                 <label 
-                for="wert_wunschnetto_tr">Gewünschter Netto-Auszahlungsbetrag (€)
-                <span class="tooltip-icon" data-tooltip="Basierend auf dem gewünschten Netto-Auszahlungsbetrag wird berechnet, wie viele Anteile verkauft werden müssen.">?</span>
+                for="wert_wunschnetto_tr">Gewünschter Nettoauszahlungsbetrag (€)
+                <span class="tooltip-icon" data-tooltip="Ermittelt die exakte Stückzahl, die Sie veräußern müssen, um nach Abzug aller Steuern genau diesen Betrag auf Ihr Konto zu bekommen.">?</span>
                 </label>
                 <input type="number" id="wert_wunschnetto_tr" value="1000.00" step="0.01" min="0" onchange="if(this.value !== '') { if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min; }">
             </div>
 
             <div class="form-group" id="feld_anteile_tr" style="display: none;">
                 <label 
-                for="wert_anteile_tr">Anzahl der zu verkaufenden Anteile
-                <span class="tooltip-icon" data-tooltip="Geben Sie hier die Anzahl der zu verkaufenden Anteile ein.">?</span>
+                for="wert_anteile_tr">Zu verkaufende Anteile
+                <span class="tooltip-icon" data-tooltip="Geben Sie die genaue Menge an Anteilen an, für die Sie die voraussichtliche Steuerlast berechnen möchten.">?</span>
                 </label>
                 <input type="number" id="wert_anteile_tr" value="10.00000" step="0.00001" min="0" onchange="if(this.value !== '') { if(parseFloat(this.value) < parseFloat(this.min)) this.value = this.min; }">
             </div>
@@ -682,7 +707,7 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
                 <thead>
                     <tr>
                         <th>Jahr</th>
-                        <th style="text-align: right;">Betrag pro Anteil (€)</th>
+                        <th style="text-align: right;">Vorabpauschale pro Anteil (€)</th>
                     </tr>
                 </thead>
                 <tbody id="vorab_ergebnis_tabelle_body">
@@ -692,7 +717,7 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
 
         <div style="text-align: right; margin-top: 30px;">
             <button id="btn_pdf_download" onclick="downloadeErgebnisPDF()">
-                📄 PDF-Report herunterladen
+                📄 PDF-Berechnung herunterladen
             </button>
         </div>
     </div>

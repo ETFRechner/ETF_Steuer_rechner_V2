@@ -19,6 +19,37 @@ p {
   padding: 40px 20px;
 }
 
+.site-header {
+    width: 100%;
+    background-color: transparent; 
+    padding: 20px 0 0 0; /* Oben etwas Abstand, unten steuert das margin */
+    margin-bottom: 10px; /* Drückt den nachfolgenden Content sanft nach unten */
+}
+
+/* Container, der sich an deine Seitenbreite anpasst */
+.header-container {
+    max-width: 1000px; /* Exakt an .container angepasst für perfekte Symmetrie */
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between; 
+    align-items: center;
+}
+
+/* Die Klickfläche um das Logo */
+.logo-link {
+    display: inline-block;
+    line-height: 0; /* Verhindert unschöne Abstände unter dem Bild */
+}
+
+/* Das Logo selbst begrenzen */
+.site-logo {
+    width: auto;
+    height: 40px; /* Kontrolliert die Höhe. 40px ist ideal für Desktop & Mobil */
+    max-width: 250px; /* Verhindert, dass es zu breit gezogen wird */
+    display: block;
+}
+
 /* ==========================================================================
    2. SEKTIONEN & BLÖCKE (Hero, Tool, FAQ)
    ========================================================================== */
@@ -232,7 +263,7 @@ select:focus {
   padding-left: 15px;
 }
 
-/* Tooltips */
+
 .tooltip-icon {
   display: inline-flex;
   align-items: center;
@@ -256,7 +287,7 @@ select:focus {
   bottom: 130%;
   left: 50%;
   transform: translateX(-50%);
-  width: 220px;
+  width: 260px;
   padding: 8px 12px;
   background-color: #1e293b;
   color: #ffffff;
@@ -559,11 +590,38 @@ button, .btn-add, .btn-delete {
     max-width: 100%;
     max-height: 85vh;
   }
-
-  /* Tooltip Aktivierung per Touch */
-  .tooltip-icon:active::after, .tooltip-icon:active::before {
-    opacity: 1;
+  
+  .form-group label {
+    position: relative; /* Das Label wird jetzt der absolute Anker für den Tooltip */
+    display: block;
   }
+
+  .tooltip-icon {
+    position: static; /* Hebt die Desktop-Verankerung auf dem kleinen Icon auf */
+  }
+
+  .tooltip-icon::after {
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 110% !important;
+    margin: 0 auto !important; /* Zentriert den Tooltip perfekt über der gesamten Label-Breite */
+    transform: none !important;
+    width: auto !important;
+    max-width: 100% !important; /* Nutzt maximal die Breite des Formularfeldes */
+    box-sizing: border-box;
+  }
+
+  /* Den kleinen Pfeil blenden wir mobil aus, da er nicht mehr sauber auf das Icon zeigen kann */
+  .tooltip-icon::before {
+    display: none !important;
+  }
+
+  /* Tooltip Aktivierung per Touch/Hover im mobilen Zustand */
+  .tooltip-icon:hover::after,
+  .tooltip-icon:active::after {
+    opacity: 1 !important;
+  }
+  
 
   /* Flexible Buttons */
   div[style*="display: flex; gap: 10px;"] {
@@ -692,6 +750,10 @@ button, .btn-add, .btn-delete {
     z-index: 999;
   }
   .mobile-tool-button.visible { display: block; }
+
+  .header-container {
+    padding: 10px 15px 0 15px !important;
+  }
 }
 
 
