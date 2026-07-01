@@ -37,13 +37,38 @@ async def get_robots():
     return FileResponse("robots.txt", media_type="text/plain")
 
 
+@app.api_route("/api/health", methods=["GET", "HEAD"])
+async def health_check():
+    """
+    Minimaler Health-Check-Endpunkt für UptimeRobot.
+    Reagiert extrem schnell, verbraucht kaum Ressourcen und hält die Render-Instanz aktiv.
+    """
+    return JSONResponse(content={"status": "ok"}, status_code=200)
+
+@app.api_route("/", methods=["GET", "HEAD"], response_class=HTMLResponse)
+async def read_root(request: Request):
+    if request.method == "HEAD":
+        return HTMLResponse(content="", status_code=200)
+    return templates.TemplateResponse(request, name="index.html")
+
+
+# @app.route("/", methods=["GET", "HEAD"], response_class=HTMLResponse)
+# async def read_root(request: Request):
+#     if request.method == "HEAD":
+#         return HTMLResponse(content="", status_code=200)
+#     return templates.TemplateResponse(request, name="index.html")
+
+# @app.route("/api/health", methods=["GET", "HEAD"])
+# async def health_check():
+#     """
+#     Minimaler Health-Check-Endpunkt für UptimeRobot.
+#     Reagiert extrem schnell, verbraucht kaum Ressourcen und hält die Render-Instanz aktiv.
+#     """
+#     return JSONResponse(content={"status": "ok"}, status_code=200)
+
 # @app.get("/", response_class=HTMLResponse)
 # async def read_root(request: Request):
-#     return templates.TemplateResponse(request, {"request": request, "name": "index.html"})
-
-@app.get("/", response_class=HTMLResponse)
-async def read_root(request: Request):
-    return templates.TemplateResponse(request, name="index.html")
+#     return templates.TemplateResponse(request, name="index.html")
 
 @app.post("/api/upload-csv")
 async def upload_csv(file: UploadFile = File(...)):
