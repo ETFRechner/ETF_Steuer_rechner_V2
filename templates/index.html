@@ -6,19 +6,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>ETF Steuer Rechner – ETF Steuer beim Verkauf berechnen (Deutschland)</title>
-    <meta name="description" content="Kostenloser ETF Steuer Rechner für Deutschland. Berechnen Sie die Steuer beim ETF-Verkauf, wie viele ETF-Anteile steuerfrei verkauft werden können und wie viele Anteile Sie für einen gewünschten Nettoerlös verkaufen müssen.">
+    <title>ETF-Steuerrechner – Steuer beim ETF-Verkauf berechnen (Deutschland)</title>
+    <meta name="description" content="Der ETF-Steuerrechner ist das ideale Werkzeug für Anleger, die ihren jährlichen Freibetrag perfekt ausnutzen oder gezielt Liquidität mit minimaler Steuerbelastung generieren möchten.">
     <meta name="robots" content="index, follow">
 
-    <meta property="og:title" content="ETF Steuer Rechner Deutschland">
-    <meta property="og:description" content="Berechnen Sie, wie viele ETF-Anteile Sie steuerfrei verkaufen können oder wie viele Anteile Sie für einen bestimmten Nettoerlös verkaufen müssen.">
+    <meta property="og:title" content="ETF-Steuerrechner Deutschland">
+    <meta property="og:description" content="Jetzt berechnen, wie viele ETF-Anteile Sie steuerfrei verkaufen können oder wie viele Anteile Sie für Ihren gewünschten Nettoerlös benötigen.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://etfsteuerrechner.de/">
     <meta property="og:image" content="https://etfsteuerrechner.de/static/preview1200x629.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="629">
+    <meta property="og:image:type" content="image/png">
     <meta property="og:image:alt" content="ETFsteuerrechner.de Logo – Tool zur Berechnung der Steuer beim Verkauf von ETFs.">
 
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="ETF Steuer Rechner Deutschland">
+    <meta name="twitter:title" content="ETF-Steuerrechner Deutschland">
     <meta name="twitter:description" content="Kostenloser Rechner für ETF-Steuern in Deutschland.">
     <meta name="twitter:image" content="https://etfsteuerrechner.de/static/preview1200x629.png">
 
@@ -26,13 +29,16 @@
 
     <link rel="canonical" href="https://etfsteuerrechner.de/">
     
-    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="/static/preview180x180.png">
-    <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon"> 
-    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://etfsteuerrechner.de/static/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://etfsteuerrechner.de/static/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://etfsteuerrechner.de/static/preview180x180.png">
+    <!-- <link rel="shortcut icon" href="https://etfsteuerrechner.de/static/favicon.ico" type="image/x-icon">  -->
+    <link rel="icon" type="image/svg+xml" href="https://etfsteuerrechner.de/static/favicon.svg">
 
-    <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
+    
+
+    <!-- <script src="https://unpkg.com/htmx.org@1.9.12" defer></script> -->
+    <script src="/static/htmx.min.js" defer></script>
 
     <link rel="stylesheet" href="/static/style.css">
     <script src="static/app.js" defer></script>
@@ -43,19 +49,11 @@
 
 <body>
 
-<!-- <header class="site-header">
-    <div class="header-container">
-        <a href="/" class="logo-link">
-            <img src="/static/logo.svg" alt="ETF Steuer Rechner Deutschland Logo – Zur Startseite" class="site-logo">
-        </a>
-        <div></div> 
-    </div>
-</header> -->
 
 <div class="header-container">
         <a href="/" class="logo-link">
             <img src="/static/logo.svg" 
-                 alt="ETF Steuer Rechner Deutschland Logo – Zur Startseite" 
+                 alt="Logo von ETF-Steuerrechner.de" 
                  class="site-logo" 
                  style="max-width: 300px; height: auto; display: block;">
         </a>
@@ -65,28 +63,25 @@
 
 <main class="container">
 <section class="hero">
-  <h1>ETF Steuer Rechner (Deutschland)</h1>
+  <h1>ETF-Steuerrechner (Deutschland)</h1>
 <p>
-Kostenloser Rechner zur Berechnung der Steuer beim Verkauf von ETFs in Deutschland.
+Ermitteln Sie kostenlos die anfallende Steuer beim Verkauf Ihrer ETF in Deutschland.
 </p>
 <hr>
-<h2>ETF Steuer beim ETF-Verkauf berechnen (Deutschland)</h2>
+<h2>Kapitalertragsteuer beim ETF-Verkauf ermitteln</h2>
 <p>
-Mit diesem <strong>ETF Steuer Rechner für Deutschland</strong> können Sie berechnen, 
-welche Steuer beim Verkauf Ihrer ETF-Anteile anfällt. 
-Der Rechner berücksichtigt wichtige steuerliche Regeln wie FIFO, Teilfreistellung, 
-Vorabpauschale, Verlusttopf und den Sparerpauschbetrag.
+Mit diesem ETF-Steuerrechner ermitteln Sie schnell die Steuerlast beim Verkauf Ihrer Anteile. Das Tool berücksichtigt automatisch alle aktuellen steuerlichen Vorgaben wie FIFO-Methode, Teilfreistellung, Vorabpauschale, Verlusttöpfe und den Sparerpauschbetrag.
 </p>
 <p>
-Der Rechner hilft Ihnen dabei:
+Der Rechner unterstützt Sie bei folgenden Fragen:
 </p>
 <ul>
-<li>zu berechnen, <strong>wie viele ETF-Anteile Sie steuerfrei verkaufen können, um den Sparerpauschbetrag optimal zu nutzen</strong></li>
-<li>herauszufinden, <strong>wie viele Anteile Sie verkaufen müssen, um einen bestimmten Nettobetrag zu erhalten</strong></li>
-<li>die <strong>voraussichtliche Steuer beim Verkauf von ETFs</strong> zu berechnen</li>
+<li>Wie viele ETF-Anteile kann ich steuerfrei verkaufen, um meinen Sparerpauschbetrag optimal auszuschöpfen?</li>
+<li>Wie viele Anteile muss ich verkaufen, um einen exakten Wunsch-Nettobetrag auf dem Konto zu erhalten?</li>
+<li>Wie hoch ist die voraussichtliche Steuerlast bei meinem geplanten ETF-Verkauf?</li>
 </ul>
 <p>
-Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpauschbetrag optimal nutzen</strong> oder einen ETF-Verkauf planen um einen bestimmten Nettobetrag zu erhalten.
+Der ETF-Steuerrechner ist das ideale Werkzeug für Anleger, die ihren jährlichen Freibetrag perfekt ausnutzen oder gezielt Liquidität mit minimaler Steuerbelastung generieren möchten.
 </p>
 </section>
 
@@ -738,15 +733,15 @@ Der ETF Rechner eignet sich besonders für Anleger, die ihren <strong>Sparerpaus
 
 
 <div class="disclaimer">
-Hinweis: Die bereitgestellten Berechnungen dienen ausschließlich der unverbindlichen Information und stellen keine steuerliche Beratung dar. Trotz sorgfältiger Erstellung wird keine Gewähr für die Richtigkeit, Vollständigkeit oder Aktualität der Ergebnisse übernommen. Für verbindliche Auskünfte wenden Sie sich bitte an einen Steuerberater oder das zuständige Finanzamt.
+Wichtiger Hinweis: Die Berechnungen dieses Tools dienen ausschließlich Ihrer unverbindlichen Information und ersetzen keine steuerliche Beratung. Ich übernehme trotz sorgfältiger Programmierung keine Gewähr für die Richtigkeit oder Aktualität der Ergebnisse. Für verbindliche Auskünfte wenden Sie sich bitte an einen Steuerberater oder Ihr Finanzamt.
 </div>
 
 <section class="hero">
 
-<h2>Welche Steuerregeln berücksichtigt der ETF Steuer Rechner?</h2>
+<h2>Welche Steuerregeln berücksichtigt der ETF-Steuerrechner?</h2>
 
 <p>
-Der ETF Steuer Rechner berücksichtigt wichtige steuerliche Regeln für ETFs in Deutschland:
+Der ETF-Steuerrechner kalkuliert mit den zentralen gesetzlichen Vorgaben für Fonds-Investments in Deutschland:
 </p>
 
 <ul>
@@ -758,41 +753,39 @@ Der ETF Steuer Rechner berücksichtigt wichtige steuerliche Regeln für ETFs in 
 </ul>
 
 <p>
-Damit erhalten Sie eine möglichst realistische Schätzung der Steuer beim Verkauf Ihrer ETF-Anteile.
+o erhalten Sie eine präzise und realistische Orientierung für Ihren geplanten Verkauf.
 </p>
 
 <hr>
 
-<h2>Welche Faktoren berücksichtigt der ETF Steuer Rechner nicht?</h2>
+<h2>Wo liegen die Grenzen des ETF-Steuerrechners?</h2>
 
-<p>
+<!-- <p>
 Der ETF Steuer Rechner berücksichtigt die wichtigsten steuerlichen Regeln für ETFs in Deutschland. 
 Einige kleinere Faktoren können jedoch nicht exakt abgebildet werden. Dazu gehören zum Beispiel:
-</p>
+</p> -->
 
 <ul>
 
 <li>
-<strong>Verkaufsgebühren oder Orderkosten Ihres Brokers.</strong>
-Diese reduzieren in der Praxis den tatsächlichen Nettoerlös, werden aber in diesem Rechner nicht berücksichtigt.
+<strong>Verkaufsgebühren Ihres Brokers:</strong>
+Diese mindern im realen Depot Ihren Nettoerlös, fließen hier jedoch nicht in die Berechnung ein.
 </li>
 
 <li>
-<strong>Berechnung der Vorabpauschale.</strong>
-Einige Banken berechnen die Vorabpauschale tagesgenau, andere monatsgenau. 
-In diesem Tool erfolgt die Berechnung auf Monatsbasis.
-Zudem wird angenommen, dass bei ausschüttenden ETFs keine Vorabpauschale anfällt. 
+<strong>Vorabpauschale bei ausschüttenden ETF:</strong>
+Es wird angenommen, dass bei ausschüttenden ETFs keine Vorabpauschale anfällt. 
 Technisch kann in seltenen Fällen dennoch eine Vorabpauschale entstehen, wenn die Ausschüttungen kleiner als der berechnete Basisertrag sind.
 </li>
 
 <li>
-<strong>Rundungsregeln und Kursquellen.</strong>
+<strong>Rundungsregeln und Kursquellen:</strong>
 Banken können leicht unterschiedliche Rundungsregeln oder Kursquellen verwenden, wodurch kleine Unterschiede entstehen können.
 </li>
 
 <li>
-<strong>Zukünftige Änderungen der Steuerregeln.</strong>
-Die Berechnung basiert auf dem aktuellen Stand der deutschen Steuergesetzgebung (Stand: Juni 2026).
+<strong>Steuerrecht von 2026:</strong>
+Zukünftige Gesetzesänderungen werden nicht einkalkuliert. Alle Berechnungen werden strikt auf Basis der Rechtslage vom Juni 2026 durchgeführt.
 </li>
 
 </ul>
@@ -803,7 +796,7 @@ Insgesamt kann es daher zu kleinen Abweichungen zwischen der Berechnung dieses T
 
 <hr>
 
-<h2>Beispielrechnung für den ETF Steuer Rechner</h2>
+<h2>Beispielrechnung für den ETF-Steuerrechner</h2>
 
 <p>
 Angenommen, Sie besitzen ETF-Anteile mit einem Gewinn von 1.700&nbsp;€ 
@@ -812,34 +805,30 @@ und haben noch den vollen Sparerpauschbetrag von 1.000&nbsp;€ verfügbar.
 Der Rechner zeigt Ihnen, wie viele Anteile Sie verkaufen können,
 ohne Abgeltungssteuer zu zahlen.
 
-Alternativ können Sie berechnen, wie viele Anteile Sie verkaufen müssen,
-um einen bestimmten Nettoerlös zu erhalten. 
-
-Wenn Sie zum Beispiel 2.000&nbsp;€ netto aus einem ETF-Verkauf erhalten möchten,
-berechnet der Rechner automatisch, wie viele Anteile Sie dafür verkaufen müssen.
+Planen Sie stattdessen fest mit einem Zielbetrag von beispielsweise 2.000&nbsp;€ Nettoerlös auf Ihrem Bankkonto? 
+Dann ermittelt das System exakt die dafür notwendige Verkaufsmenge."
 </p>
 
 <p>
-So können Sie leicht prüfen, wie Sie Ihren <strong>Sparerpauschbetrag optimal ausnutzen</strong>, ohne unnötig Steuern zu zahlen.
+So sichern Sie sich die maximale Steuerersparnis und holen das Beste aus Ihrem Freibetrag heraus.
 </p>
 
 <hr>
 
-<h2>Warum diesen ETF Steuer Rechner nutzen?</h2>
+<h2>Warum diesen ETF-Steuerrechner nutzen?</h2>
 
 <ul>
-<li>Berücksichtigt wichtige deutsche Steuerregeln für ETFs (FIFO, Teilfreistellung, Vorabpauschale)</li>
-<li>Kostenlos und ohne Registrierung nutzbar</li>
-<li>Keine Speicherung persönlicher Finanzdaten</li>
-<li>Berechnung direkt im Browser ohne Upload persönlicher Depotdaten</li>
+<li>Vollständige Abdeckung der deutschen Steuerpraxis (FIFO, Teilfreistellung & Vorabpauschale)</li>
+<li>100 % kostenlos und ohne Anmeldung sofort einsatzbereit</li>
+<li>Maximale Privatsphäre: Keine Speicherung Ihrer sensiblen Depot- und Finanzdaten</li>
 </ul>
 
 <hr>
 
-<h2>Für wen ist dieser ETF Steuer Rechner geeignet?</h2>
+<h2>Für wen ist dieser ETF-Steuerrechner geeignet?</h2>
 
 <p>
-Der Rechner eignet sich für Anleger in Deutschland, die ihre ETF-Steuer beim Verkauf abschätzen möchten oder ihren Sparerpauschbetrag optimal nutzen wollen.
+Dieser Rechner wurde speziell für Privatanleger in Deutschland entwickelt, die strategische Teilverkäufe planen, Steuern minimieren oder ihren jährlichen Freibetrag punktgenau ausschöpfen möchten.
 </p>
 
 <hr>
@@ -859,14 +848,14 @@ Die auf dieser Website bereitgestellten Steuerberechnungen dienen ausschließlic
 
 <section class="faq">
 
-<h2>FAQ: ETF Steuer und ETF-Verkauf in Deutschland</h2>
+<h2>FAQ: ETF-Steuer und ETF-Verkauf in Deutschland</h2>
 
 <hr>
 
 <details>
-<summary>Wie hoch ist die Steuer beim Verkauf von ETFs in Deutschland?</summary>
+<summary>Wie hoch ist die Steuer beim Verkauf von ETF in Deutschland?</summary>
 <p>
-Der Steuersatz beträgt 25&nbsp;% zuzüglich Solidaritätszuschlag und gegebenenfalls Kirchensteuer. Durch die Teilfreistellung bei Aktien-ETFs sind jedoch 30&nbsp;% der Gewinne steuerfrei, sodass effektiv nur 70&nbsp;% des Gewinns versteuert werden müssen.
+Grundsätzlich fällt die gesetzliche Abgeltungssteuer von 25 % an, zuzüglich Solidaritätszuschlag (5,5 % der Steuer) und eventuell Kirchensteuer. Bei einem klassischen Aktien-ETF greift jedoch eine Teilfreistellung von 30 %. Das bedeutet: Sie versteuern nur 70 % Ihres Gewinns, was den effektiven Steuersatz spürbar senkt.
 </p>
 </details>
 
@@ -1001,13 +990,19 @@ Nein. Alle Berechnungen erfolgen direkt im Browser beziehungsweise innerhalb des
 
 <p>© 2026 ETF Steuer Rechner – Alle Berechnungen ohne Gewähr. Keine steuerliche Beratung.</p>
 
-
 <p>
+    <a href="/impressum">Impressum</a> |
+    <a href="/datenschutz">Datenschutz</a>
+</p>
+
+</footer>
+
+<!-- <p>
 <a href="#" onclick="openModal('impressumModal')">Impressum</a> |
 <a href="#" onclick="openModal('datenschutzModal')">Datenschutz</a>
 </p>
 
-</footer>
+</footer> -->
 
 <div id="impressumModal" class="modal">
   <div class="modal-content">
@@ -1107,23 +1102,12 @@ Nein. Alle Berechnungen erfolgen direkt im Browser beziehungsweise innerhalb des
         <strong>Wichtig:</strong> Alle eingegebenen Werte werden ausschließlich flüchtig im Arbeitsspeicher verarbeitet, um das mathematische Ergebnis zu ermitteln. Es findet zu keinem Zeitpunkt eine dauerhafte Speicherung, Protokollierung oder Auswertung Ihrer eingegebenen Finanzdaten statt.
         </p>
 
-        <h3>5. Einbindung externer Skripte (HTMX via CDN)</h3>
-        <p>
-        Für die interaktiven Funktionen des Rechners nutzt diese Website die JavaScript-Bibliothek HTMX. Diese wird über ein sogenanntes Content Delivery Network (CDN) des Anbieters <strong>unpkg.com</strong> (betrieben von npm, Inc. / GitHub / Microsoft) geladen.
-        </p>
-        <p>
-        Beim Laden der Website ruft Ihr Browser das Skript direkt von den Servern des CDN-Anbieters ab. Hierbei wird Ihre IP-Adresse an den Anbieter übermittelt. Dies ist technisch notwendig, damit die Datei an Ihren Browser ausgeliefert werden kann.
-        </p>
-        <p>
-        <strong>Rechtsgrundlage:</strong> Die Einbindung erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an einer performanten und modernen Bereitstellung meines Web-Tools).
-        </p>
-        
-        <h3>6. Cookies</h3>
+        <h3>5. Cookies</h3>
         <p>
         Diese Website verwendet selbst keine Cookies zur Analyse, Werbung oder zum Tracking von Nutzern. Technische Funktionen werden serverseitig und über flüchtige HTTP-Anfragen gelöst.
         </p>
         
-        <h3>7. Ihre Rechte als betroffene Person</h3>
+        <h3>6. Ihre Rechte als betroffene Person</h3>
         <p>
         Sie haben im Rahmen der gesetzlichen Bestimmungen der DSGVO jederzeit folgende Rechte bezüglich Ihrer personenbezogenen Daten:
         </p>
@@ -1140,12 +1124,12 @@ Nein. Alle Berechnungen erfolgen direkt im Browser beziehungsweise innerhalb des
         Da diese Website über die flüchtigen Server-Logfiles hinaus keine Daten (wie Namen, Adressen oder Profile) speichert, liegen mir keine Daten vor, die einer bestimmten Person zugeordnet werden können. 
         </p>
         
-        <h3>8. Beschwerderecht bei der Aufsichtsbehörde</h3>
+        <h3>7. Beschwerderecht bei der Aufsichtsbehörde</h3>
         <p>
         Sie haben gemäß Art. 77 DSGVO das Recht, sich bei einer Datenschutz-Aufsichtsbehörde zu beschweren, wenn Sie der Ansicht sind, dass die Verarbeitung Ihrer personenbezogenen Daten gegen das Datenschutzrecht verstößt.
         </p>
         
-        <h3>9. Änderungen dieser Datenschutzerklärung</h3>
+        <h3>8. Änderungen dieser Datenschutzerklärung</h3>
         <p>
         Diese Datenschutzerklärung kann von Zeit zu Zeit angepasst werden, um sie an veränderte rechtliche Vorgaben oder technische Neuerungen anzupassen. Es gilt die jeweils auf der Website bereitgestellte Fassung.
         </p>

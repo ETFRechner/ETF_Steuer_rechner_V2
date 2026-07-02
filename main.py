@@ -27,6 +27,24 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 
+@app.get("/datenschutz")
+async def datenschutz(request: Request):
+    return templates.TemplateResponse(
+        request=request, 
+        name="datenschutz.html"
+    )
+
+@app.get("/impressum")
+async def impressum(request: Request):
+    return templates.TemplateResponse(
+        request=request, 
+        name="impressum.html"
+    )
+
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    return FileResponse("static/favicon.ico")
+
 @app.get("/sitemap.xml", include_in_schema=False)
 async def get_sitemap():
     return FileResponse("sitemap.xml", media_type="application/xml")
